@@ -9,7 +9,7 @@ This document describes how Gracera's two-sided matching works end-to-end, from 
 Matching runs in three stages:
 
 1. **Pre-filter (Elasticsearch):** Fast, rule-based hard filtering to reduce the candidate pool
-2. **Vector supplement (Pinecone / Weaviate):** Semantic similarity to surface non-obvious matches Elasticsearch misses
+2. **Vector supplement (pgvector):** Semantic similarity to surface non-obvious matches Elasticsearch misses
 3. **Semantic scoring (Claude AI):** LLM-based deep evaluation of each candidate pair
 
 This three-stage design keeps costs and latency in check: Elasticsearch narrows thousands of profiles to ~200 candidates, vector search adds up to 50 more semantically similar candidates, and Claude scores all candidates precisely.
@@ -46,15 +46,34 @@ Elasticsearch returns candidates sorted by soft-filter boost score. Top 200 (con
 
 ---
 
-## 2b. Stage 1b — Vector Supplement (Pinecone / Weaviate)
+## 2b. Stage 1b — Vector Supplement (pgvector)
 
-For each trigger profile, a vector embedding is generated from the `ideal_customer_description` (supplier) or `ideal_supplier_description` (buyer). This embedding is queried against the vector index of all active profiles on the opposite side.
+For each trigger profile, a vector embedding is generated from the `ideal_customer_description` (supplier) or `ideal_supplier_description` (buyer). This embedding is queried against the pgvector HNSW index of all active profiles on the opposite side.
 
 **Why this stage matters:** Elasticsearch uses keyword and filter logic. It will not match a supplier who describes their product as "precision die-cast aluminum enclosures" with a buyer sourcing "custom metal housings for industrial electronics" — even though these are the same thing. Vector similarity catches this semantic overlap.
 
 The vector search returns up to 50 additional candidates not already in the Elasticsearch set. Both sets are merged (deduped) before passing to Stage 2.
 
-**Embedding model:** Claude API embeddings or OpenAI `text-embedding-3-large`. Profile embeddings are pre-computed and stored; re-computed on profile update.
+**Implementation:**
+
+```sql
+-- Top-50 semantically similar supplier profiles for a given buyer embedding
+SELECT id, company_name, (embedding <=> $1) AS distance
+FROM supplier_profiles
+WHERE profile_status = 'active'
+  AND id != ANY($2)          -- exclude Elasticsearch candidates already found
+ORDER BY embedding <=> $1
+LIMIT 50;
+```
+
+- Operator `<=>` = cosine distance (lower = more similar)
+- HNSW index on `embedding` column: `CREATE INDEX ON supplier_profiles USING hnsw (embedding vector_cosine_ops)`
+- Runs on a dedicated PostgreSQL read replica to isolate HNSW index memory from the transactional write DB
+- Index parameters: `m = 16`, `ef_construction = 64` (tunable; higher values improve recall at cost of build time and memory)
+
+**Embedding model:** OpenAI `text-embedding-3-large` (1536 dimensions) or Claude API embeddings. Profile embeddings are pre-computed on profile save and stored in the `embedding vector(1536)` column; re-computed on any material change to profile text fields.
+
+**Migration path:** If vector search latency degrades beyond acceptable thresholds at 1M+ active profiles, the switch to a dedicated vector DB (Pinecone) requires only swapping the query client — embedding generation and the candidate merge logic are unchanged.
 
 ---
 

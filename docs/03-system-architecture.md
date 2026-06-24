@@ -26,8 +26,8 @@ Gracera is a web-based B2B trade intelligence platform with a multi-tier archite
 ┌──────▼──────────▼──────────────────▼───────────────────▼───────┐
 │                        Data Layer                               │
 │  PostgreSQL (profiles, users, deals, matches)                   │
+│  pgvector extension (vector embeddings — HNSW index)           │
 │  Elasticsearch (full-text search, faceted filters)             │
-│  Pinecone / Weaviate (vector embeddings for semantic matching)  │
 │  Redis (session cache, real-time match queue)                  │
 │  Object Storage / S3 (documents, images, catalogs)            │
 └─────────────────────────────────────────────────────────────────┘
@@ -43,7 +43,7 @@ Gracera is a web-based B2B trade intelligence platform with a multi-tier archite
 | API Gateway | Node.js + Express | TypeScript, matches frontend; shared types across stack |
 | Profile Service | Node.js / Python | RAG ingestion pipeline, AI field extraction |
 | Search Service | Elasticsearch | Rich faceted search, multi-language tokenizers |
-| Vector Search | Pinecone or Weaviate | Semantic similarity for non-obvious cross-category matches |
+| Vector Search | pgvector (PostgreSQL extension) | Semantic similarity via HNSW index; runs inside the existing Postgres instance on a dedicated read replica — no separate service |
 | AI Matching Agent | Python + Claude API (Anthropic) | LLM-based matching, rationale generation, coaching |
 | RAG Engine | LangChain + Claude API | Document ingestion, embedding, retrieval-augmented profile generation |
 | Primary DB | PostgreSQL | Relational — users, deals, profiles, matches |
@@ -91,9 +91,9 @@ Five distinct agents, each with a specific responsibility. See [AI Agent Design]
 
 ### 3.5 RAG Engine
 - Document ingestion: PDF, CSV, DOCX, images (OCR), plain text
-- Embedding generation using Claude API (or OpenAI embeddings)
-- Vector storage in Pinecone/Weaviate
-- Retrieval pipeline: query → vector search → context assembly → Claude generation
+- Embedding generation using Claude API (or OpenAI `text-embedding-3-large`)
+- Vector storage in pgvector — `vector(1536)` column on `supplier_profiles` and `sourcing_requests`; HNSW index built on first write, incrementally updated
+- Retrieval pipeline: query → pgvector cosine similarity search → context assembly → Claude generation
 - Used by: Profile auto-population, Business Intelligence Agent, Sourcing Query Tool
 
 ### 3.6 Messaging Service
@@ -136,7 +136,7 @@ Profile Service saves profile → publishes event to Redis stream
 Matching Agent consumes event
   → Reads supplier profile from DB
   → Queries Elasticsearch for candidate buyer profiles (hard filters)
-  → Queries Pinecone for semantically similar buyers (vector supplement)
+  → Queries pgvector (read replica) for semantically similar buyers (vector supplement)
   → Calls Claude API: score and rank candidates across 6 dimensions
   → Generates match rationale per pair (in buyer's preferred language)
          │
@@ -217,7 +217,7 @@ For off-platform candidates:
 - Profile Service and AI Agents are stateless → horizontal scaling
 - Elasticsearch cluster scales read replicas for search load
 - Redis stream for AI match jobs enables backpressure and retry
-- Pinecone is fully managed → no vector DB ops overhead
+- pgvector runs on a **dedicated PostgreSQL read replica** to isolate HNSW index memory pressure from the transactional write DB. At 100K × 1536-dim vectors, the HNSW index consumes ~7.5GB RAM — sized separately from the primary instance. If vector search latency degrades beyond acceptable thresholds at 1M+ profiles, the migration path to a dedicated vector DB (Pinecone) is straightforward: same embedding model, same query interface concept.
 - Multi-region deployments for US and Asia-Pacific latency targets (< 200ms p95)
 
 ---

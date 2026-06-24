@@ -83,6 +83,7 @@ Core entity relationships for the Gracera Marketplace platform.
 | `availability_status` | enum | available, limited, fully_booked |
 | `next_available_date` | date | nullable; set when fully_booked |
 | `availability_updated_at` | timestamp | resets to limited if not updated within 14 days |
+| `embedding` | vector(1536) | pgvector — cosine similarity index (HNSW); computed from `ideal_customer_description` + product line descriptions; recomputed on material profile change |
 | `created_at` | timestamp | |
 | `updated_at` | timestamp | |
 
@@ -160,6 +161,7 @@ Core entity relationships for the Gracera Marketplace platform.
 | `expires_at` | date | |
 | `status` | enum | open, paused, closed, fulfilled |
 | `completeness_score` | float | |
+| `embedding` | vector(1536) | pgvector — computed from `ideal_supplier_description`; used in Stage 1b vector search |
 | `created_at` | timestamp | |
 | `updated_at` | timestamp | |
 
