@@ -141,10 +141,28 @@ Requests below 50% completeness are flagged with a prompt to add more detail bef
 | **Basic** | Email verified | Can browse; cannot message suppliers |
 | **Verified Business** | Business registration checked | Full messaging access |
 | **Active Buyer** | At least 1 completed deal on platform | Trusted Buyer badge; bumped in supplier match results |
+| **Trusted Buyer** | 3+ completed deals, on-time payment rate > 90% | Full payment track record shown to suppliers; priority introduction queue |
 
 ---
 
-## 5. Privacy — Contact Information Visibility
+## 5. Platform Payment Track Record
+
+Once a buyer completes at least one deal on-platform, Gracera generates a **Payment Track Record** visible to suppliers at the introduction stage — after the supplier views the buyer's public profile and before they accept or decline.
+
+| Signal | Description |
+|--------|-------------|
+| `on_time_payment_rate` | % of deals where final payment was confirmed within agreed payment terms |
+| `avg_days_to_payment` | Average days from "Goods received" milestone to "Final payment sent" milestone |
+| `completed_deals_count` | Total deals closed on-platform |
+| `payment_disputes_count` | Number of payment-related disputes filed against this buyer |
+
+Buyers with fewer than 3 completed deals display a **"New Buyer"** badge rather than metrics. The Payment Track Record creates a strong incentive for buyers to pay on time — and gives suppliers a meaningful signal when evaluating an introduction.
+
+**Optional credit bureau integration:** Buyers can consent to a lookup via Dun & Bradstreet or Creditsafe, which adds a **"Business Credit: Verified"** badge. Opt-in only; requires buyer consent and is processed by the third party.
+
+---
+
+## 6. Privacy — Contact Information Visibility
 
 Buyer contact details (email, phone) are **never shown** in public profiles or search results. They are only revealed to a matched supplier after both parties accept the introduction.
 

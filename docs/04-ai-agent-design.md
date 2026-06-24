@@ -1,24 +1,34 @@
 # AI Agent Design
 
-The AI Matching Agent is the core differentiator of Gracera. It reads structured profile data from both sides of the marketplace and produces ranked, explained match recommendations.
+Gracera runs five distinct AI agents. The Matching Agent is the core differentiator. The Prospecting, Business Intelligence, Negotiation Coach, and AEO agents extend the platform's intelligence layer across the full user lifecycle.
 
 ---
 
-## 1. Agent Responsibilities
+## 1. Agent Overview
+
+| Agent | When It Runs | Who Benefits | Primary Output |
+|-------|-------------|-------------|----------------|
+| **Matching Agent** | Profile publish/update, new sourcing request | Both sides | Ranked match list with rationale |
+| **Prospecting Agent** | Buyer posts sourcing request | Platform (growth) | Off-platform supplier invitation list |
+| **Business Intelligence Agent** | Profile saved, weekly cron | Individual user | Insights brief, benchmarks, growth strategy |
+| **Negotiation Coach Agent** | Quote submitted or counter-offered | Individual deal party | Private deal coaching (not shared) |
+| **AEO Agent** | Profile verified, nightly cron | Platform (SEO/AEO) | Structured Q&A schema for AI citation |
+
+---
+
+## 2. Matching Agent
+
+### 2.1 Responsibilities
 
 | Responsibility | Description |
 |---------------|-------------|
-| **Candidate retrieval** | Pull candidate profiles from Elasticsearch using structured filters |
+| **Candidate retrieval** | Pull candidate profiles from Elasticsearch + Pinecone using structured filters and vector similarity |
 | **Semantic scoring** | Use Claude LLM to evaluate deep compatibility beyond keyword overlap |
-| **Match rationale** | Generate a human-readable explanation of why each match was made |
+| **Match rationale** | Generate a human-readable explanation of why each match was made, in the viewer's preferred language |
 | **Ranking** | Produce an ordered shortlist for each user |
 | **Intent monitoring** | Re-run matching when profile data changes or new signals arrive |
 
----
-
-## 2. Trigger Events
-
-The AI Agent is invoked by the following events:
+### 2.2 Trigger Events
 
 | Event | Action |
 |-------|--------|
@@ -26,11 +36,9 @@ The AI Agent is invoked by the following events:
 | Buyer publishes / updates sourcing request | Find matching suppliers |
 | New buyer signs up | Proactively match against existing supplier catalog |
 | New supplier signs up | Proactively match against open buyer sourcing requests |
-| User explicitly requests a re-match ("Find me new matches") | Re-run matching for that user |
+| User explicitly requests a re-match | Re-run matching for that user |
 
----
-
-## 3. Matching Pipeline
+### 2.3 Matching Pipeline
 
 ```
 Step 1: Pre-filter (Elasticsearch)
@@ -38,33 +46,40 @@ Step 1: Pre-filter (Elasticsearch)
   - Soft filters: MOQ range, lead time, certification requirements
   - Output: candidate set (up to 200 profiles per trigger)
 
+Step 1b: Vector Supplement (Pinecone)
+  - Semantic similarity search on profile embeddings
+  - Surfaces non-obvious cross-category matches
+    (e.g. "industrial kitchen equipment" matching "food processing facility")
+  - Adds up to 50 additional candidates not caught by Elasticsearch hard filters
+
 Step 2: Semantic scoring (Claude API)
   - Input: supplier profile + buyer profile (structured JSON)
   - Prompt: asks Claude to evaluate compatibility across 6 dimensions
   - Output: score (0–100) + rationale per dimension
+  - Prompt caching: supplier profile portion cached to reduce cost when scoring
+    same supplier against many buyers
 
 Step 3: Re-ranking
   - Weighted final score combining:
-    • Semantic score (60%)
+    • Semantic score (55%)
     • Profile completeness bonus (15%)
-    • Recency / activity score (10%)
     • Verification bonus (15%)
-  - Top 10 matches surfaced per user
+    • Activity / recency score (10%)  ← includes social proof signals
+    • Feedback adjustment (5%)        ← per-user learned weights
+  - Top 10 matches surfaced per user per matching run
 
 Step 4: Deduplication & suppression
   - Remove matches already accepted or rejected by the user
   - Suppress matches the user has already messaged
+  - Remove blocked pairs
 
 Step 5: Delivery
-  - Write ranked results to match_results table
+  - Write ranked results to matches table
   - Publish notification event
+  - Match rationale generated in viewer's preferred language
 ```
 
----
-
-## 4. Scoring Dimensions
-
-The Claude prompt evaluates 6 dimensions for each supplier–buyer pair:
+### 2.4 Scoring Dimensions
 
 | Dimension | What is evaluated | Weight |
 |-----------|------------------|--------|
@@ -73,14 +88,21 @@ The Claude prompt evaluates 6 dimensions for each supplier–buyer pair:
 | **Scale compatibility** | Does buyer volume match supplier's MOQ and capacity? | 20% |
 | **Certification / compliance match** | Does supplier hold certifications the buyer requires? | 15% |
 | **Target customer fit** | Does the buyer type match the supplier's stated ideal customer? | 10% |
-| **Communication / language** | Can both parties communicate effectively (language, timezone)? | 10% |
+| **Communication / language** | Can both parties communicate effectively? | 10% |
 
----
+### 2.5 Activity Signal Inputs (Recency Score)
 
-## 5. Claude API Integration
+The recency component incorporates:
+- Days since last profile update (decays logarithmically)
+- Social proof signals: LinkedIn posts, certification announcements pulled via OAuth
+- Platform activity: logins, message responses, deal progress
+- Broadcast campaign engagement (supplier who just announced new product gets a recency boost)
+
+### 2.6 Claude API Integration
 
 ```python
 import anthropic
+import json
 
 client = anthropic.Anthropic()
 
@@ -109,68 +131,241 @@ Return a JSON object with this structure:
 }}
 
 Only return valid JSON. No commentary outside the JSON object.
+Respond in {language}.
 """
 
-def score_match(supplier: dict, buyer: dict) -> dict:
+def score_match(supplier: dict, buyer: dict, language: str = "English") -> dict:
     response = client.messages.create(
         model="claude-sonnet-4-6",
         max_tokens=1024,
         system="You are a B2B trade matching expert. Return only valid JSON.",
-        messages=[
-            {
-                "role": "user",
-                "content": MATCH_PROMPT.format(
-                    supplier_json=json.dumps(supplier, indent=2),
-                    buyer_json=json.dumps(buyer, indent=2),
-                )
-            }
-        ]
+        messages=[{
+            "role": "user",
+            "content": MATCH_PROMPT.format(
+                supplier_json=json.dumps(supplier, indent=2),
+                buyer_json=json.dumps(buyer, indent=2),
+                language=language,
+            )
+        }]
     )
     return json.loads(response.content[0].text)
 ```
 
-**Prompt caching:** The supplier profile portion of the prompt is cached using Anthropic's prompt caching feature to reduce latency and cost when scoring the same supplier against many buyers.
+**Prompt caching:** The supplier profile portion is cached using Anthropic's prompt caching feature to reduce latency and cost when scoring the same supplier against many buyers.
 
----
+### 2.7 Match Rationale — User-Facing Output
 
-## 6. Match Rationale — User-Facing Output
-
-Each match card shown to users includes:
-- Match score (displayed as a quality indicator: Strong / Good / Potential)
-- Summary sentence generated by Claude
+Each match card includes:
+- Match score (Strong / Good / Potential based on thresholds)
+- Summary sentence generated by Claude (in viewer's language)
 - Up to 3 highlighted matching dimensions
 - "Why this match?" expandable panel with dimension-level detail
 
-Example match card (supplier view):
-```
-[Strong Match] Pacific Rim Importers — Seattle, WA
-"Pacific Rim is sourcing Korean food ingredients in exactly your volume range
- and holds all the FDA import compliance you already meet. They're actively
- looking for a direct supplier with your product line."
+### 2.8 Feedback Loop
 
-Category: Korean sauces and condiments   Volume: 500–2,000 cases/month
-Certifications required: FDA, FSSC 22000 ✓
-```
-
----
-
-## 7. Feedback Loop
-
-User actions feed back into match quality:
-- **Accept introduction:** positive signal for this pairing type
-- **Reject introduction:** negative signal; flag reason (volume mismatch, wrong category, etc.)
-- **Deal closed:** strongest positive signal; both profiles gain credibility score
-- **Report as spam/irrelevant:** penalizes profile quality score of the flagged party
-
-Feedback is stored and used to re-weight matching parameters per-user over time.
+| Action | Signal | Effect |
+|--------|--------|--------|
+| Accept introduction | Strong positive | Upweight similar profile characteristics |
+| Reject — "wrong category" | Negative — category | Strengthen category filter for this user |
+| Reject — "wrong volume" | Negative — scale | Strengthen MOQ/volume filter |
+| Reject — "already know them" | Neutral | Suppress pair; no weight change |
+| Deal closed | Very strong positive | Upweight all characteristics of this pair |
+| Report as spam | Very strong negative | Lower platform-wide score of flagged profile |
 
 ---
 
-## 8. Agent Limitations (v1)
+## 3. Prospecting Agent
 
-- Agent does not browse the web or access external databases
+### 3.1 Purpose
+
+When a buyer posts a sourcing request, the Prospecting Agent identifies matching suppliers who are **not yet on the platform** and triggers personalized outbound invitation emails. This drives the "buyer-led supplier invitation" acquisition channel — the highest-converting acquisition path because the supplier receives a concrete opportunity, not a generic pitch.
+
+### 3.2 Data Sources
+
+| Source | Type | Data Accessed |
+|--------|------|---------------|
+| Gracera Elasticsearch | On-platform | Unclaimed placeholder profiles |
+| Trade show exhibitor databases | Public | Company name, category, country, website |
+| LinkedIn Company Search | Public API | Company size, industry, contact info |
+| Alibaba / Global Sources | Public crawl | Supplier name, category, country |
+| ThomasNet, Kompass | Public directories | Industrial supplier data |
+| Trade association member lists | Partnership | Category-specific verified lists |
+
+### 3.3 Pipeline
+
+```
+Sourcing request posted
+         │
+         ▼
+Prospecting Agent:
+  → Pulls hard filter criteria from sourcing request
+    (category, geography, certifications, MOQ range)
+  → Queries public data sources for matching companies
+  → Deduplicates against existing registered suppliers
+  → Scores candidates by profile completeness potential
+  → Generates personalized invitation email per candidate:
+    "A [buyer_industry] procurement team is looking for [product].
+     They posted a sourcing request matching your profile. Join free."
+         │
+         ▼
+Email sent via SendGrid
+Unclaimed profile created (placeholder) if company not yet in DB
+Click-through lands on claim-your-profile flow
+```
+
+### 3.4 Guardrails
+
+- Maximum 3 invitation emails per supplier domain per 30 days
+- Only sends to publicly listed business contact emails (not scraped personal emails)
+- Unsubscribe honored immediately
+- CAN-SPAM and GDPR compliant
+
+---
+
+## 4. Business Intelligence Agent
+
+### 4.1 Purpose
+
+After a user completes their profile, and then weekly thereafter, the Business Intelligence Agent generates an **Intelligence Brief** — a private, personalized report covering profile gaps, category benchmarks, and strategic recommendations. For suppliers this includes an export market entry plan; for buyers, a sourcing diversification strategy.
+
+### 4.2 Intelligence Brief — Supplier Output
+
+```json
+{
+  "profile_health": {
+    "completeness": 72,
+    "top_gaps": [
+      "Ideal customer description is under 50 words — add detail to improve match quality",
+      "No certifications uploaded — RoHS and ISO 9001 are required by 68% of buyers in your category"
+    ]
+  },
+  "category_benchmarks": {
+    "your_moq": 1000,
+    "category_average_moq": 500,
+    "note": "Your MOQ is 2x the category average. Consider adding a trial order tier."
+  },
+  "certification_roi": [
+    { "certification": "RoHS", "additional_matches": 340 },
+    { "certification": "CE", "additional_matches": 210 }
+  ],
+  "growth_strategy": {
+    "recommended_markets": ["United States", "Germany", "Australia"],
+    "rationale": "...",
+    "suggested_buyer_types": ["OEM Manufacturer", "Distributor"],
+    "next_certification_to_pursue": "ISO 14001"
+  }
+}
+```
+
+### 4.3 Intelligence Brief — Buyer Output
+
+```json
+{
+  "sourcing_request_health": {
+    "completeness": 58,
+    "top_gaps": [
+      "Ideal supplier description is vague — specify preferred production region and audit requirements",
+      "No certification requirements listed — adding ISO 9001 would narrow to higher-quality suppliers"
+    ]
+  },
+  "market_intelligence": {
+    "category": "Korean hot sauce",
+    "average_moq": "400 cases/month",
+    "average_lead_time": "28 days",
+    "top_supplier_countries": ["South Korea", "China", "Vietnam"],
+    "common_certifications": ["FSSC 22000", "HACCP", "FDA registration"]
+  },
+  "diversification_strategy": {
+    "current_single_supplier_risk": "high",
+    "recommended_backup_regions": ["Vietnam", "Thailand"],
+    "rationale": "..."
+  }
+}
+```
+
+### 4.4 Claude Prompt Structure
+
+The agent uses a structured prompt with:
+- User's full profile data (supplier or buyer)
+- Anonymized category benchmarks from platform data
+- A request for both diagnostic findings and forward-looking recommendations
+
+---
+
+## 5. Negotiation Coach Agent
+
+### 5.1 Purpose
+
+During the quote and counter-offer stage, the Negotiation Coach gives each party **private, non-shared** coaching. Neither party sees the other's coaching. This shortens the counter-offer loop, reduces dead deals from price miscommunication, and keeps both parties on-platform.
+
+### 5.2 Inputs
+
+- Current deal context (product, quantity, stage)
+- The submitted quote or counter-offer
+- Anonymized platform benchmarks for this category:
+  - Typical acceptance range (% variance from buyer's target price)
+  - Average number of counter-offer rounds before acceptance
+  - Average lead time flexibility in this category
+
+### 5.3 Output Examples
+
+**Supplier coaching (after submitting quote):**
+> "Buyers in this category typically accept quotes within 8–12% of their target price. Your quote is 18% above the range where most deals in this category close. Consider reducing your unit price or offering a graduated volume discount. Buyers in this category also frequently ask about a trial order at a lower MOQ — proactively offering one can unlock deals that would otherwise stall."
+
+**Buyer coaching (after receiving quote):**
+> "This supplier's lead time of 35 days is 7 days above the category average but within normal range. Suppliers in this category typically have 10–15 days of flexibility when asked. Payment terms are your strongest negotiating lever — offering TT in advance instead of Net 30 often unlocks a 3–5% discount in this category."
+
+### 5.4 Privacy Guarantee
+
+The Negotiation Coach output is:
+- Stored per-user, not per-deal (inaccessible to the other party)
+- Never included in deal audit logs
+- Clearly labeled "Private to you" in the UI
+- Not used in matching or scoring
+
+---
+
+## 6. AEO Agent (Answer Engine Optimization)
+
+### 6.1 Purpose
+
+The AEO Agent ensures every Gracera supplier profile page is structured to be **cited by AI assistants** (ChatGPT, Perplexity, Google AI Overviews, Claude) when buyers ask sourcing questions. It runs on profile verification and on a nightly cron for all active profiles.
+
+### 6.2 What It Generates
+
+For each verified supplier profile, the agent generates:
+
+1. **Q&A schema pairs** — factual, specific, AI-citable:
+   ```json
+   { "question": "What is the minimum order quantity for Acme PCB?",
+     "answer": "Acme PCB Assembly has a minimum order quantity of 500 units per run." }
+   { "question": "Is Acme PCB ISO 9001 certified?",
+     "answer": "Yes. Acme PCB holds ISO 9001:2015 certification issued by TÜV Rheinland, valid through 2027." }
+   { "question": "Does Acme PCB ship to North America?",
+     "answer": "Yes. Acme PCB ships to the United States, Canada, and Mexico via FOB Shenzhen." }
+   ```
+
+2. **Profile summary paragraph** — one factual paragraph for AI citation:
+   > "Acme PCB Assembly is a Shenzhen-based manufacturer of PCB assemblies and electronic enclosures. MOQ: 500 units. ISO 9001:2015 and RoHS certified. Lead time: 28 days. Accepts OEM and private label orders. Ships to North America and Europe. Annual capacity: 2M units."
+
+3. **JSON-LD structured data blocks** — `FAQPage`, `Product`, `Organization`, `BreadcrumbList` — injected into the page's `<head>`
+
+### 6.3 Quality Rules
+
+- No marketing language ("high quality", "competitive prices") — factual data only
+- Every claim must be sourced from the verified profile (hallucination prevention)
+- Q&A pairs are regenerated when profile data changes
+- Minimum specificity threshold: if a field is missing, the Q&A for that field is omitted rather than estimated
+
+---
+
+## 7. Agent Limitations (v1)
+
+- Matching Agent does not browse the web or access external databases
 - All scoring is based on user-provided profile data only
-- Agent does not initiate contact on behalf of users — it surfaces introductions; users decide to connect
+- Agents do not initiate contact on behalf of users — they surface introductions; users decide
+- Negotiation Coach is advisory only; it does not send messages or make commitments
+- Prospecting Agent sends invitations to publicly listed business emails only
 - Real-time matching (< 5 seconds) is targeted for Phase 2; Phase 1 uses batch (daily digest)
 
 ---

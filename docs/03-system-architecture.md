@@ -4,30 +4,32 @@
 
 ## 1. Architecture Overview
 
-Gracera is a web-based B2B marketplace with a multi-tier architecture:
+Gracera is a web-based B2B trade intelligence platform with a multi-tier architecture:
 
 ```
 ┌─────────────────────────────────────────────────────────────────┐
 │                        Client Layer                             │
 │   Web App (React / Next.js)   |   Mobile Web (responsive)       │
+│   Public SEO Pages            |   Free Sourcing Query Tool      │
 └───────────────────┬─────────────────────────────────────────────┘
-                    │ HTTPS / REST + WebSocket
+                    │ HTTPS / REST
 ┌───────────────────▼─────────────────────────────────────────────┐
-│                      API Gateway (Node.js / FastAPI)            │
+│                      API Gateway (Node.js)                      │
 │   Auth  |  Rate Limiting  |  Request Routing  |  Versioning     │
 └──────┬──────────┬──────────────────┬───────────────────┬────────┘
        │          │                  │                   │
 ┌──────▼──┐  ┌────▼────┐  ┌─────────▼──────┐   ┌───────▼───────┐
-│ User    │  │ Profile │  │  Search &      │   │  AI Matching  │
-│ Service │  │ Service │  │  Discovery Svc │   │  Agent        │
+│ User    │  │ Profile │  │  Search &      │   │  AI Agent     │
+│ Service │  │ Service │  │  Discovery Svc │   │  Cluster      │
 └──────┬──┘  └────┬────┘  └─────────┬──────┘   └───────┬───────┘
        │          │                  │                   │
 ┌──────▼──────────▼──────────────────▼───────────────────▼───────┐
 │                        Data Layer                               │
-│  PostgreSQL (profiles, users, deals)                            │
+│  PostgreSQL (profiles, users, deals, matches)                   │
 │  Elasticsearch (full-text search, faceted filters)             │
+│  Pinecone / Weaviate (vector embeddings for semantic matching)  │
 │  Redis (session cache, real-time match queue)                  │
-│  Object Storage / S3 (documents, images)                       │
+│  Object Storage / S3 (documents, images, catalogs)            │
 └─────────────────────────────────────────────────────────────────┘
 ```
 
@@ -37,16 +39,18 @@ Gracera is a web-based B2B marketplace with a multi-tier architecture:
 
 | Layer | Technology | Rationale |
 |-------|-----------|-----------|
-| Frontend | Next.js (React) | SSR for SEO, shared component library |
-| API Gateway | Node.js + Express or FastAPI (Python) | TBD based on team preference |
-| Profile Service | Python / FastAPI | Heavy data processing, AI pipeline integration |
+| Frontend | Next.js (React) | SSR for SEO, shared component library, programmatic page generation |
+| API Gateway | Node.js + Express | TypeScript, matches frontend; shared types across stack |
+| Profile Service | Node.js / Python | RAG ingestion pipeline, AI field extraction |
 | Search Service | Elasticsearch | Rich faceted search, multi-language tokenizers |
-| AI Agent | Python + Claude API (Anthropic) | LLM-based matching, rationale generation |
-| Primary DB | PostgreSQL | Relational — users, deals, profiles |
-| Cache | Redis | Session store, match queue, real-time events |
-| Object Storage | AWS S3 (or compatible) | Certifications, product images, deal docs |
-| Email | SendGrid | Transactional email, match digest |
-| Auth | Auth0 or Supabase Auth | OAuth2, JWT, SSO support |
+| Vector Search | Pinecone or Weaviate | Semantic similarity for non-obvious cross-category matches |
+| AI Matching Agent | Python + Claude API (Anthropic) | LLM-based matching, rationale generation, coaching |
+| RAG Engine | LangChain + Claude API | Document ingestion, embedding, retrieval-augmented profile generation |
+| Primary DB | PostgreSQL | Relational — users, deals, profiles, matches |
+| Cache | Redis | Session store, match queue, FX rate cache, real-time events |
+| Object Storage | AWS S3 (or compatible) | Certifications, product images, deal docs, uploaded catalogs |
+| Email | SendGrid | Transactional email, match digest, supplier invitations |
+| Auth | JWT (jose) + OAuth2 | 15-min access tokens, 30-day refresh, Google/LinkedIn SSO |
 | Hosting | AWS / GCP | Multi-region for international latency |
 | CI/CD | GitHub Actions | Automated testing and deployment |
 
@@ -55,66 +59,133 @@ Gracera is a web-based B2B marketplace with a multi-tier architecture:
 ## 3. Key Services
 
 ### 3.1 User Service
-- Registration, login, and session management
-- Role management: Supplier, Buyer, Admin
-- Business verification (email + business registration)
-- Account settings and notification preferences
+- Registration, login, session management
+- Role management: Supplier, Buyer, Both, Admin
+- Business verification (email, business registration number)
+- MFA (TOTP), account lockout, session invalidation on password change
 
 ### 3.2 Profile Service
 - Supplier profile CRUD (see [Supplier Profile Spec](05-supplier-profile-spec.md))
 - Buyer profile / sourcing request CRUD (see [Buyer Profile Spec](06-buyer-profile-spec.md))
+- **RAG Auto-Population:** Accepts uploaded files (PDF catalogs, brochures, price sheets). Extracts structured fields (categories, MOQ, certifications, target markets) using Claude API and populates profile fields automatically
 - Profile completeness scoring (drives match quality)
 - Versioning and change history
 
 ### 3.3 Search & Discovery Service
 - Elasticsearch index for supplier and buyer profiles
 - Full-text search with language-aware tokenization
-- Faceted filtering: category, geography, certifications, MOQ, etc.
-- Keyword suggestion and autocomplete
+- Faceted filtering: category, geography, certifications, MOQ, HS code, incoterms, etc.
+- **Programmatic SEO pages:** Auto-generated public pages (e.g. "Korean food ingredient suppliers — FDA certified") with schema.org Q&A, Product, and Business structured data, optimized for both traditional search and AI assistant citation (AEO)
+- **Free Sourcing Query Tool:** Public-facing no-login interface powered by the matching API; contact-gated to drive account creation
 
-### 3.4 AI Matching Agent
-- Triggered by: profile publish, profile update, new sourcing request
-- Reads structured profile data from Profile Service
-- Calls Claude API to generate semantic match scores and rationale
-- Writes ranked match results to Redis queue; consumed by notification service
-- See [AI Agent Design](04-ai-agent-design.md) for full spec
+### 3.4 AI Agent Cluster
+Five distinct agents, each with a specific responsibility. See [AI Agent Design](04-ai-agent-design.md) for full spec.
 
-### 3.5 Messaging Service
+| Agent | Trigger | Output |
+|-------|---------|--------|
+| **Matching Agent** | Profile publish/update, new sourcing request | Ranked match list with rationale |
+| **Prospecting Agent** | Buyer posts sourcing request | Off-platform supplier candidates for outbound invitation |
+| **Business Intelligence Agent** | Profile saved, weekly cron | Insights brief, benchmarks, growth strategy |
+| **Negotiation Coach Agent** | Quote submitted or countered | Private coaching for each deal party |
+| **AEO Agent** | Profile verified, schema cron | Q&A schema markup, factual profile summary for AI citation |
+
+### 3.5 RAG Engine
+- Document ingestion: PDF, CSV, DOCX, images (OCR), plain text
+- Embedding generation using Claude API (or OpenAI embeddings)
+- Vector storage in Pinecone/Weaviate
+- Retrieval pipeline: query → vector search → context assembly → Claude generation
+- Used by: Profile auto-population, Business Intelligence Agent, Sourcing Query Tool
+
+### 3.6 Messaging Service
 - Secure in-platform inbox between matched parties
-- Thread management per match introduction
-- File attachment support (docs, samples, specs)
+- Thread management per deal
+- File attachment support
 - Real-time delivery via WebSocket
 
-### 3.6 Deal Service
-- RFQ creation and response tracking
-- Quote builder with line items and terms
-- Deal room: shared thread, status, and document store
-- Deal stage state machine (see [Deal Workflow](08-deal-workflow.md))
+### 3.7 Deal Service
+- Sample Order Fast Track: lightweight path for sample requests (no RFQ/quote required)
+- RFQ creation with category templates (20+ verticals)
+- Quote builder with line items and counter-offer loops
+- Deal Room: shared thread, document store, milestone checklist
+- AI Negotiation Coach integration (private, not shared between parties)
+- Deal state machine (see [Deal Workflow](08-deal-workflow.md))
+
+### 3.8 Partner Integration Service
+- Trade Finance Referral: post-deal API handoff to factoring partner
+- Gracera Verified Logistics: real-time freight quote API from partner forwarders
+- ERP Integrations: REST API for Coupa, Odoo, and SAP Ariba (Phase 4)
+- Social OAuth: LinkedIn, trade association SSO for social proof signals
+
+### 3.9 Subscription & Billing Service
+- Tiered plans (Free / Pro / Enterprise)
+- Online payment (Stripe) and offline payment (wire transfer, admin confirmation queue)
+- PDF invoice generation
+- Subscription renewal, downgrade/upgrade flows
 
 ---
 
 ## 4. Data Flow — AI Match Trigger
 
 ```
-Supplier publishes profile
+Supplier publishes / updates profile
          │
          ▼
 Profile Service saves profile → publishes event to Redis stream
          │
          ▼
-AI Matching Agent consumes event
+Matching Agent consumes event
   → Reads supplier profile from DB
-  → Queries Elasticsearch for candidate buyer profiles
-  → Calls Claude API: score and rank candidates
-  → Generates match rationale per pair
+  → Queries Elasticsearch for candidate buyer profiles (hard filters)
+  → Queries Pinecone for semantically similar buyers (vector supplement)
+  → Calls Claude API: score and rank candidates across 6 dimensions
+  → Generates match rationale per pair (in buyer's preferred language)
          │
          ▼
-Results written to match_results table in PostgreSQL
+Results written to matches table in PostgreSQL
          │
          ▼
 Notification Service reads new matches
-  → Sends in-app notification to supplier ("3 new buyer matches")
+  → Sends in-app notification
   → Sends email digest (daily or real-time, per user prefs)
+```
+
+## 4b. Data Flow — RAG Profile Auto-Population
+
+```
+Supplier uploads catalog PDF (or brochure, price sheet)
+         │
+         ▼
+Profile Service → S3 storage → RAG Engine ingestion queue
+         │
+         ▼
+RAG Engine:
+  → OCR if image-based
+  → Chunking and embedding
+  → Retrieval: "What are the product categories, MOQ, certifications?"
+  → Claude API generates structured field extraction
+         │
+         ▼
+Extracted fields pre-fill the supplier profile form
+  → Supplier reviews and confirms (not auto-saved without review)
+  → Completeness score updated
+```
+
+## 4c. Data Flow — Buyer-Led Supplier Invitation
+
+```
+Buyer posts sourcing request
+         │
+         ▼
+Prospecting Agent runs:
+  → Pulls candidate suppliers from: Elasticsearch (on-platform), public trade directories (off-platform)
+  → Filters for category, geography, certification match
+  → Ranks by match potential
+         │
+         ▼
+For off-platform candidates:
+  → Generates personalized invitation email:
+    "A [industry] procurement team is sourcing [product]. An RFQ may be waiting."
+  → Email sent; click creates unclaimed profile or registration flow
 ```
 
 ---
@@ -123,17 +194,30 @@ Notification Service reads new matches
 
 - All traffic over TLS 1.3
 - JWT-based auth with short expiry + refresh tokens
-- Row-level security in PostgreSQL (users only see their own data by default)
+- Row-level security in PostgreSQL (tenantId isolation)
 - Profile contact details hidden until both parties accept introduction
+- Buyer price targets encrypted at rest; never exposed via API
+- Field-level AES-256-GCM encryption for sensitive fields
 - See [Security & Trust](12-security-and-trust.md)
 
 ---
 
-## 6. Scalability Considerations
+## 6. SEO & AEO Architecture
 
-- Profile Service and AI Agent are stateless → horizontal scaling
+- **Programmatic SEO:** Next.js `generateStaticParams` generates 50,000+ public pages at build time (product × country × certification combinations)
+- **Schema.org markup:** Every supplier profile page includes JSON-LD for `Organization`, `Product`, `FAQPage` (Q&A pairs about MOQ, certifications, lead times), and `BreadcrumbList`
+- **AEO Agent:** Runs on profile verification; generates factual Q&A pairs from profile data and writes them to the page's structured data. Kept factually specific ("MOQ: 500 units. ISO 9001 since 2018.") — not marketing language
+- **Sitemap & indexing:** Dynamic sitemap refreshed daily; pages submitted to Google Search Console and Bing Webmaster Tools
+- **Content freshness:** Profile update timestamps surfaced in structured data (AI systems favor recently updated pages)
+
+---
+
+## 7. Scalability Considerations
+
+- Profile Service and AI Agents are stateless → horizontal scaling
 - Elasticsearch cluster scales read replicas for search load
 - Redis stream for AI match jobs enables backpressure and retry
+- Pinecone is fully managed → no vector DB ops overhead
 - Multi-region deployments for US and Asia-Pacific latency targets (< 200ms p95)
 
 ---

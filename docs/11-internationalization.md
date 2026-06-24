@@ -127,7 +127,49 @@ The platform maintains a lightweight compliance database:
 
 ---
 
-## 4. Time Zones
+## 4. Trade Policy & Tariff Alert System
+
+Changes to tariffs, import restrictions, and trade policy can invalidate a deal that was economically viable when the RFQ was issued. The Trade Policy Alert system monitors regulatory changes relevant to each user's active categories and country pairs and surfaces them proactively.
+
+### 4.1 What Is Monitored
+
+| Source | Frequency | Coverage |
+|--------|-----------|----------|
+| USITC Tariff Schedule (HTS) | Weekly | US import duties by HS code |
+| EU TARIC database | Weekly | EU import duties and restrictions |
+| WTO notifications | As published | New trade measures by WTO members |
+| OFAC/EU/UN sanctions lists | Daily | Sanctioned entity and country pair updates |
+| Country-specific customs portals | Weekly | Key markets: CN, JP, KR, IN, BR, MX |
+
+### 4.2 Alert Delivery
+
+Alerts are filtered per user based on:
+- Categories in their active sourcing requests or supplier product lines
+- Country pairs involved in their active deals or matches
+
+| Channel | Default |
+|---------|---------|
+| In-platform notification | All users |
+| Email digest (weekly) | Pro and Enterprise tiers |
+| Real-time alert (critical changes) | Enterprise tier |
+
+### 4.3 Alert Format
+
+Each alert includes:
+- Summary of the change (plain language, in user's preferred language)
+- Which of the user's active deals or matches are potentially affected
+- Link to the official source
+- "Check your deals" CTA — links to affected deals in the Deal Room
+
+> Note: Trade policy alerts are informational guidance only. Users remain responsible for their own import/export compliance. For complex regulatory questions, Gracera recommends consulting a licensed customs broker.
+
+### 4.4 Intelligence Report Integration
+
+Aggregated trade policy alerts and their deal-impact statistics are included in the **Trade Flow Report** (see [Monetization §6](15-monetization.md)). Enterprise subscribers receive full alert history and a "Policy Impact Score" per category.
+
+---
+
+## 5. Time Zones
 
 - All timestamps stored and transmitted as UTC (ISO 8601)
 - User local timezone detected via browser `Intl.DateTimeFormat().resolvedOptions().timeZone`

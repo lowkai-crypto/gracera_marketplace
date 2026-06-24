@@ -34,6 +34,13 @@ Verification is how both parties signal trustworthiness. Three levels:
 - User uploads certification documents
 - Platform validates: issuing body, expiry date, certificate number format
 - Physical documents checked by trust team for Premium level
+- Where the issuing body provides a verification API (SGS, Bureau Veritas, TÜV, BSI, NSF, QIMA), the certificate is digitally verified and marked with a "Digitally Verified" badge — stronger than trust-team review
+
+**Certification Expiry Management:**
+- Automated alerts sent at 90, 60, and 30 days before each certificate's `expiry_date`
+- Certificates not renewed by their expiry date are automatically marked "Expired", removed from matching filters that require them, and flagged on the public profile
+- Buyers who accepted introductions from a supplier based on a certification that has since expired are notified within 24 hours of the expiry
+- Suppliers can re-upload a renewed certificate document at any time to restore their status
 
 ### KYB (Know Your Business) — Premium
 - Video call with Gracera trust team
@@ -82,6 +89,18 @@ Verification is how both parties signal trustworthiness. Three levels:
 - Suppliers cannot claim certifications without uploading documents
 - "Notable customers" field is not verified; shown with a "Self-reported" label
 - Misrepresentation reported by another user triggers a trust review
+
+### Document Authenticity Verification
+
+Submitted certification documents go through a two-pass authenticity check before the "Certified" badge is awarded:
+
+| Pass | Method | Result |
+|------|--------|--------|
+| Issuer API | Platform queries the issuing body's digital verification endpoint | "Digitally Verified" badge — strongest signal |
+| AI pre-screening | Layout analysis, font consistency, metadata checks, cross-reference against known certificate formats | Flags suspected forgeries for manual escalation |
+| Trust team review | Manual review for issuers without public APIs, and any document flagged by AI pre-screening | "Trust Team Verified" badge |
+
+AI-generated or manipulated certificates are an increasing fraud vector in B2B trade. The AI pre-screening layer reduces trust team workload by catching obvious forgeries early, while issuer API verification provides cryptographic certainty for participating bodies.
 
 ---
 
@@ -137,6 +156,28 @@ The platform flags deal-level fraud patterns:
 | Low | < 7 days | UI misrepresentation, minor privacy issue |
 
 Security disclosures: security@gracera.com (PGP key published on website).
+
+---
+
+## 9. Dispute Resolution Policy
+
+See [Deal Workflow §7](08-deal-workflow.md#7-dispute-resolution) for the full dispute process, filing flow, and escalation path.
+
+**Trust team scope:** The Gracera trust team reviews evidence submitted by both parties and issues a non-binding recommendation within 5 business days. The trust team can:
+- Set a supplier's profile to "Under Review" (removes match visibility while investigation is active)
+- Suspend accounts pending investigation
+- Export a deal record package (messages, documents, milestone history) for use in external arbitration
+
+**Account consequences:**
+
+| Finding | Consequence |
+|---------|-------------|
+| Bad-faith dispute (fabricated evidence) | Account suspended; match visibility removed |
+| Verified non-delivery by supplier | Profile flagged; visible to buyers receiving future matches |
+| Repeated payment refusal by buyer | Buyer account escalated; match score penalized |
+| Unresolved dispute after 60 days | "Active Dispute" badge visible to counterparties |
+
+**Gracera's limits:** Gracera is a neutral facilitator, not an arbitrator. The platform does not guarantee deal outcomes, refunds, or specific remedies. Unresolved disputes are referred to appropriate international arbitration bodies (ICC, CIETAC, SIAC) based on the parties' countries. Users transact with full knowledge of this policy, disclosed in the Terms of Service at signup.
 
 ---
 

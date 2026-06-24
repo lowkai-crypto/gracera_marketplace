@@ -80,6 +80,9 @@ Core entity relationships for the Gracera Marketplace platform.
 | `verification_level` | enum | basic, verified, certified, premium |
 | `completeness_score` | float | 0.0–1.0 |
 | `profile_status` | enum | draft, active, paused, deleted |
+| `availability_status` | enum | available, limited, fully_booked |
+| `next_available_date` | date | nullable; set when fully_booked |
+| `availability_updated_at` | timestamp | resets to limited if not updated within 14 days |
 | `created_at` | timestamp | |
 | `updated_at` | timestamp | |
 
@@ -125,6 +128,10 @@ Core entity relationships for the Gracera Marketplace platform.
 | `verification_level` | enum | |
 | `completeness_score` | float | |
 | `profile_status` | enum | |
+| `on_time_payment_rate` | float | nullable; computed from deal history |
+| `avg_days_to_payment` | float | nullable; computed from deal history |
+| `completed_deals_count` | integer | default 0 |
+| `payment_disputes_count` | integer | default 0 |
 | `created_at` | timestamp | |
 | `updated_at` | timestamp | |
 
@@ -269,6 +276,68 @@ Core entity relationships for the Gracera Marketplace platform.
 | `expiry_date` | date | |
 | `document_url` | string | S3 URL |
 | `verified` | boolean | manually verified by admin |
+| `authenticity_status` | enum | uploaded, digitally_verified, trust_team_verified |
+| `verified_by` | enum | issuer_api, trust_team, unverified |
+| `expiry_notified_at` | jsonb | {d90: timestamp, d60: timestamp, d30: timestamp} |
+
+---
+
+### disputes
+
+| Column | Type | Notes |
+|--------|------|-------|
+| `id` | UUID PK | |
+| `deal_id` | UUID FK | |
+| `filed_by_user_id` | UUID FK | |
+| `category` | enum | non_delivery, wrong_specification, quality_issue, payment_refused, certification_mismatch, other |
+| `description` | text | |
+| `evidence_urls` | jsonb | [{filename, url}] |
+| `status` | enum | filed, under_review, resolved, referred |
+| `trust_team_recommendation` | text | nullable |
+| `resolution_notes` | text | nullable |
+| `created_at` | timestamp | |
+| `resolved_at` | timestamp | nullable |
+
+---
+
+### group_rfqs
+
+| Column | Type | Notes |
+|--------|------|-------|
+| `id` | UUID PK | |
+| `lead_buyer_profile_id` | UUID FK | |
+| `supplier_profile_id` | UUID FK | |
+| `status` | enum | forming, rfq_issued, quote_accepted, deal_room, closed, cancelled |
+| `combined_quantity` | integer | sum of all co-buyer allocations |
+| `created_at` | timestamp | |
+
+### group_rfq_members
+
+| Column | Type | Notes |
+|--------|------|-------|
+| `id` | UUID PK | |
+| `group_rfq_id` | UUID FK | |
+| `buyer_profile_id` | UUID FK | |
+| `allocation_quantity` | integer | |
+| `is_lead` | boolean | |
+| `confirmed_at` | timestamp | nullable |
+| `withdrawn_at` | timestamp | nullable |
+
+---
+
+### deal_contracts
+
+| Column | Type | Notes |
+|--------|------|-------|
+| `id` | UUID PK | |
+| `deal_id` | UUID FK | |
+| `template_type` | enum | purchase_order, distribution_agreement, nda, sample_agreement |
+| `status` | enum | draft, sent, signed, voided |
+| `esignature_provider` | enum | docusign, hellosign |
+| `provider_envelope_id` | string | external reference |
+| `document_url` | string | S3 URL of signed PDF |
+| `created_at` | timestamp | |
+| `signed_at` | timestamp | nullable |
 
 ---
 
@@ -284,6 +353,61 @@ Core entity relationships for the Gracera Marketplace platform.
 | `body` | text | |
 | `created_at` | timestamp | |
 | `visible` | boolean | hidden until both parties submit |
+
+---
+
+## 3. Dual-Role Accounts
+
+When `users.role = 'both'`, the user holds two independent profiles under one login: a `supplier_profile` and a `buyer_profile`. Each is created, managed, verified, and matched independently.
+
+### 3.1 Context Switcher
+
+The platform maintains an `active_context` per session, stored server-side and toggled via a persistent control in the top navigation:
+
+| `active_context` | Dashboard shown | Actions available |
+|-----------------|-----------------|-------------------|
+| `supplier` | Supplier matches, introductions, deals as supplier, profile analytics | Respond to introductions, manage product lines, issue broadcasts, use Growth Strategy Engine |
+| `buyer` | Buyer matches, sourcing requests, deals as buyer, price compass | Post sourcing requests, accept introductions as buyer, issue RFQs, use Negotiation Coach as buyer |
+
+Switching context does not interrupt active deals — each context's deals continue independently. A user in a Deal Room as a supplier sees that deal under the supplier context; their buyer-context deals are accessible by switching.
+
+### 3.2 Registration Flow
+
+A user can become dual-role in two ways:
+
+1. **At signup:** Select "I'm both a supplier and a buyer" → the onboarding wizard runs the supplier profile builder first, then the buyer profile builder. Each builder can be skipped and completed later.
+2. **Role upgrade:** A user registered as supplier or buyer can add the second role via Settings → "Add [buyer/supplier] profile." The existing profile is unchanged; a new profile is created.
+
+### 3.3 Matching Engine Behavior
+
+The matching engine treats each profile in complete isolation:
+- A match run for the **supplier profile** uses only `supplier_profile` data; the user's `buyer_profile` is not considered.
+- A match run for a **sourcing request** uses only `buyer_profile` and `sourcing_request` data; the user's `supplier_profile` is not considered.
+
+**Self-match suppression:** If the engine would surface a user's own `supplier_profile` as a match for their own `buyer_profile` sourcing request (valid edge case for distributors who buy and sell in the same category), that pair is automatically suppressed and logged.
+
+### 3.4 Deals
+
+A dual-role user may simultaneously hold active deals in both contexts:
+- Deals as a **supplier**: responding to buyer RFQs, managing Deal Room as the selling party
+- Deals as a **buyer**: issuing RFQs to other suppliers, managing Deal Room as the buying party
+
+Each deal is associated with exactly one role at creation — that role cannot be changed mid-deal. The Negotiation Coach coaching is context-specific (supplier coaching for supplier deals, buyer coaching for buyer deals).
+
+### 3.5 Notifications
+
+All notifications arrive in a unified inbox, each tagged with the context they belong to:
+
+```
+[Supplier] New match: TechCorp is sourcing aluminum enclosures
+[Buyer] Quote received from ShinwaChem on your sourcing request
+```
+
+The inbox can be filtered by context (All / Supplier / Buyer).
+
+### 3.6 Subscriptions
+
+Subscriptions are managed per role independently. A dual-role user holds two subscription records — one governing supplier features, one governing buyer features. A **Dual-Role Bundle** discount of 15% applies when subscribing to Pro on both sides simultaneously. Enterprise dual-role pricing is negotiated.
 
 ---
 
