@@ -29,7 +29,7 @@ Gracera is a web-based B2B trade intelligence platform with a multi-tier archite
 │  pgvector extension (vector embeddings — HNSW index)           │
 │  Elasticsearch (full-text search, faceted filters)             │
 │  Redis (session cache, real-time match queue)                  │
-│  MinIO (object storage — S3-compatible; self-hosted via Coolify) │
+│  Oracle Cloud Object Storage (S3-compatible API; managed)       │
 └─────────────────────────────────────────────────────────────────┘
 ```
 
@@ -48,10 +48,10 @@ Gracera is a web-based B2B trade intelligence platform with a multi-tier archite
 | RAG Engine | LangChain + Claude API | Document ingestion, embedding, retrieval-augmented profile generation |
 | Primary DB | PostgreSQL | Relational — users, deals, profiles, matches |
 | Cache | Redis | Session store, match queue, FX rate cache, real-time events |
-| Object Storage | MinIO (S3-compatible, self-hosted via Coolify) | Certifications, product images, deal docs, uploaded catalogs; S3-compatible API — migrating to AWS S3 at scale requires only swapping endpoint URL and credentials |
+| Object Storage | Oracle Cloud Object Storage | Certifications, product images, deal docs, uploaded catalogs; S3-compatible API (same SDKs as AWS S3) — Always Free 20 GB; no self-hosted service required |
 | Email | SendGrid | Transactional email, match digest, supplier invitations |
 | Auth | JWT (jose) + OAuth2 | 15-min access tokens, 30-day refresh, Google/LinkedIn SSO |
-| Hosting | AWS / GCP | Multi-region for international latency |
+| Hosting | Coolify on Oracle Cloud Free Tier (A1 ARM — 4 OCPU, 24 GB RAM) | Always Free compute; Coolify manages deployments, Traefik reverse proxy, and SSL; expand to paid OCI regions for multi-region latency targets |
 | CI/CD | GitHub Actions | Automated testing and deployment |
 
 ---
@@ -155,7 +155,7 @@ Notification Service reads new matches
 Supplier uploads catalog PDF (or brochure, price sheet)
          │
          ▼
-Profile Service → MinIO storage → RAG Engine ingestion queue
+Profile Service → Oracle Cloud Object Storage → RAG Engine ingestion queue
          │
          ▼
 RAG Engine:
@@ -218,7 +218,8 @@ For off-platform candidates:
 - Elasticsearch cluster scales read replicas for search load
 - Redis stream for AI match jobs enables backpressure and retry
 - pgvector runs on a **dedicated PostgreSQL read replica** to isolate HNSW index memory pressure from the transactional write DB. At 100K × 1536-dim vectors, the HNSW index consumes ~7.5GB RAM — sized separately from the primary instance. If vector search latency degrades beyond acceptable thresholds at 1M+ profiles, the migration path to a dedicated vector DB (Pinecone) is straightforward: same embedding model, same query interface concept.
-- Multi-region deployments for US and Asia-Pacific latency targets (< 200ms p95)
+- Phase 1–3: single Oracle Cloud Free Tier A1 instance (4 OCPU, 24 GB RAM) is sufficient for early-stage load; scale vertically to paid OCI compute as traffic grows
+- Multi-region deployments (US + Asia-Pacific, < 200ms p95) via additional OCI regions in Phase 4+
 
 ---
 
