@@ -43,6 +43,7 @@ How Gracera generates revenue across subscriptions, transactions, referrals, and
 | Alliance Pack membership | — | 1 pack | Unlimited |
 | Gracera Intelligence Reports | — | — | ✓ |
 | AI Negotiation Coach | — | ✓ | ✓ |
+| AI-Brain (Business Advisor) | — | ✓ | ✓ |
 | API access | — | — | ✓ |
 | Priority in match ranking | — | — | ✓ |
 
@@ -56,6 +57,7 @@ How Gracera generates revenue across subscriptions, transactions, referrals, and
 | Sample Order Fast Track | ✓ | ✓ | ✓ |
 | AI Price Compass | — | ✓ | ✓ |
 | AI Negotiation Coach | — | ✓ | ✓ |
+| AI-Brain (Business Advisor) | — | ✓ | ✓ |
 | Downstream customer segmentation | — | ✓ | ✓ |
 | Sourcing Diversification Strategy | — | ✓ | ✓ |
 | Gracera Intelligence Reports | — | — | ✓ |

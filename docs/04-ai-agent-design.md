@@ -1,6 +1,6 @@
 # AI Agent Design
 
-Gracera runs five distinct AI agents. The Matching Agent is the core differentiator. The Prospecting, Business Intelligence, Negotiation Coach, and AEO agents extend the platform's intelligence layer across the full user lifecycle.
+Gracera runs six distinct AI agents. The Matching Agent is the core differentiator. The Prospecting, Business Intelligence, Negotiation Coach, AEO, and AI-Brain agents extend the platform's intelligence layer across the full user lifecycle.
 
 ---
 
@@ -13,6 +13,7 @@ Gracera runs five distinct AI agents. The Matching Agent is the core differentia
 | **Business Intelligence Agent** | Profile saved, weekly cron | Individual user | Insights brief, benchmarks, growth strategy |
 | **Negotiation Coach Agent** | Quote submitted or counter-offered | Individual deal party | Private deal coaching (not shared) |
 | **AEO Agent** | Profile verified, nightly cron | Platform (SEO/AEO) | Structured Q&A schema for AI citation |
+| **AI-Brain Agent** | User-initiated (always-on chat) | Individual user | Conversational business advice synthesized across profile, deals, matches, and benchmarks |
 
 ---
 
@@ -22,7 +23,7 @@ Gracera runs five distinct AI agents. The Matching Agent is the core differentia
 
 | Responsibility | Description |
 |---------------|-------------|
-| **Candidate retrieval** | Pull candidate profiles from Elasticsearch + Pinecone using structured filters and vector similarity |
+| **Candidate retrieval** | Pull candidate profiles from Elasticsearch + pgvector using structured filters and vector similarity |
 | **Semantic scoring** | Use Claude LLM to evaluate deep compatibility beyond keyword overlap |
 | **Match rationale** | Generate a human-readable explanation of why each match was made, in the viewer's preferred language |
 | **Ranking** | Produce an ordered shortlist for each user |
@@ -46,7 +47,7 @@ Step 1: Pre-filter (Elasticsearch)
   - Soft filters: MOQ range, lead time, certification requirements
   - Output: candidate set (up to 200 profiles per trigger)
 
-Step 1b: Vector Supplement (Pinecone)
+Step 1b: Vector Supplement (pgvector)
   - Semantic similarity search on profile embeddings
   - Surfaces non-obvious cross-category matches
     (e.g. "industrial kitchen equipment" matching "food processing facility")
@@ -359,7 +360,106 @@ For each verified supplier profile, the agent generates:
 
 ---
 
-## 7. Agent Limitations (v1)
+## 7. AI-Brain Agent (Business Advisor)
+
+### 7.1 Purpose
+
+The AI-Brain is a persistent, conversational AI advisor available to every Pro and Enterprise user. Unlike the Business Intelligence Agent (periodic cron-based briefings) and Negotiation Coach (triggered per deal), the AI-Brain is always-on and user-initiated — a natural-language interface the user can query at any time about their business on the platform.
+
+It synthesizes context across the user's full profile, match history, active deals, deal history, and category benchmarks into a single coherent advisor. The existing agents are event-triggered outputs; the AI-Brain is the conversational layer that ties them together.
+
+### 7.2 Context Assembled Per Session
+
+| Context Block | Source | Cached? |
+|--------------|--------|---------|
+| User profile (supplier and/or buyer) | profiles DB | Yes — cached per session |
+| Match history (last 90 days, accepted/rejected with reasons) | matches table | Yes — refreshed daily |
+| Active deals summary (stage, last activity, outstanding actions) | deals table | No — fetched live |
+| Deal history summary (win rate, avg deal size, cycle time) | deals aggregate | Yes — refreshed daily |
+| Category benchmarks (MOQ averages, price ranges, deal velocity) | anonymized platform data | Yes — refreshed weekly |
+| Upcoming certification expiries | certifications table | Yes — refreshed daily |
+| Trade policy alerts (user's active categories + country pairs) | alerts feed | No — fetched live |
+
+### 7.3 Example Queries
+
+**Supplier:**
+- *"Why am I not getting matched with buyers in Germany?"* → cross-references profile geography settings, missing EU certifications, language flags, and German buyer concentration in the category
+- *"What should I prioritize to double my matches this month?"* → ranks profile gaps by expected match lift
+- *"How does my pricing compare to others in my category?"* → pulls category benchmark data
+
+**Buyer:**
+- *"Should I accept this counter-offer from ShinwaChem?"* → pulls deal context, category price benchmarks, supplier deal history, and provides coaching
+- *"I need a backup supplier for this category — what should I look for?"* → sourcing diversification advice using category benchmark data
+- *"How long does it typically take to close a deal in this category?"* → category deal velocity benchmarks
+
+### 7.4 How It Differs From Existing Agents
+
+| | Business Intelligence Agent | Negotiation Coach | AI-Brain |
+|-|----------------------------|-------------------|---------|
+| Trigger | Weekly cron / profile save | Quote submitted | User-initiated, always-on |
+| Interface | Structured brief (read-only) | Per-deal coaching card | Conversational chat |
+| Scope | Profile + category benchmarks | Single deal | All profile + all deals + benchmarks |
+| Memory | Stateless per run | Stateless per run | Session history; full context synthesized |
+
+The Business Intelligence Agent and Negotiation Coach continue to run independently. Their outputs are available as context the AI-Brain can reference when the user asks about a specific brief or deal.
+
+### 7.5 Claude API Integration
+
+```python
+import anthropic
+
+client = anthropic.Anthropic()
+
+BRAIN_SYSTEM = """
+You are the Gracera Business Advisor — a private AI advisor for {user_name}.
+You have full context of their business on the Gracera marketplace.
+
+Profile context:
+{profile_context}
+
+Match history summary:
+{match_summary}
+
+Active deals:
+{active_deals}
+
+Category benchmarks:
+{benchmarks}
+
+Upcoming certification expiries:
+{cert_expiries}
+
+Rules:
+- Speak as a trusted advisor, not a search engine. Give direct recommendations.
+- Base every claim on the provided context. Do not hallucinate benchmarks or data.
+- Never reveal another user's private data. Benchmarks are always anonymized aggregates.
+- Respond in {language}.
+"""
+
+def ai_brain_chat(user_context: dict, conversation_history: list, user_message: str) -> str:
+    messages = conversation_history + [{"role": "user", "content": user_message}]
+    response = client.messages.create(
+        model="claude-sonnet-4-6",
+        max_tokens=1024,
+        system=BRAIN_SYSTEM.format(**user_context),
+        messages=messages,
+    )
+    return response.content[0].text
+```
+
+**Prompt caching:** The `BRAIN_SYSTEM` block (profile, match summary, benchmarks) is stable within a session and cached using Anthropic prompt caching — only the conversation turns incur per-token cost on each message.
+
+### 7.6 Privacy & Cost Controls
+
+- Context is assembled per-user; no other user's private data is ever included
+- Benchmarks are anonymized aggregates — no individual competitor deal data is exposed
+- Conversation history stored encrypted; users can clear it at any time
+- Available on **Pro and Enterprise tiers only**
+- Long sessions are summarized before continuing to bound token usage
+
+---
+
+## 8. Agent Limitations (v1)
 
 - Matching Agent does not browse the web or access external databases
 - All scoring is based on user-provided profile data only

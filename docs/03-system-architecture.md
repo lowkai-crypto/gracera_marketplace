@@ -88,6 +88,7 @@ Five distinct agents, each with a specific responsibility. See [AI Agent Design]
 | **Business Intelligence Agent** | Profile saved, weekly cron | Insights brief, benchmarks, growth strategy |
 | **Negotiation Coach Agent** | Quote submitted or countered | Private coaching for each deal party |
 | **AEO Agent** | Profile verified, schema cron | Q&A schema markup, factual profile summary for AI citation |
+| **AI-Brain Agent** | User-initiated (always-on chat) | Conversational business advice synthesized across profile, deals, matches, and category benchmarks |
 
 ### 3.5 RAG Engine
 - Document ingestion: PDF, CSV, DOCX, images (OCR), plain text

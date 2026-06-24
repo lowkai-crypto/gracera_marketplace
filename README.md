@@ -45,6 +45,7 @@ Gracera is a two-sided marketplace that removes the friction from B2B sourcing a
 - **Dispute Resolution** — Structured filing flow, 48-hour cooling-off, Gracera trust team mediation, and international arbitration referral
 
 ### Intelligence & Trust
+- **AI-Brain (Business Advisor)** — Always-on conversational advisor with full context of profile, match history, active deals, and category benchmarks; answers questions like "why am I not matching with German buyers?" or "should I accept this counter-offer?" — Pro/Enterprise only
 - **AI Negotiation Coach** — Private, per-party deal coaching during quote and counter-offer; never shared between parties
 - **AI Price Compass** — Market rate estimates before negotiating, drawn from platform deal data
 - **Gracera Intelligence Reports** — Anonymized category market data (MOQ averages, price ranges, lead times, trade flows) sold as standalone reports and included in Enterprise tiers

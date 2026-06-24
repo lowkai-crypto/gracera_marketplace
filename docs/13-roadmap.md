@@ -117,7 +117,7 @@
 - [ ] **Dispute resolution** — filing flow, 48h cooling-off, trust team mediation, arbitration referral *(new)*
 - [ ] **Buyer payment track record** — on-time payment rate and avg days-to-payment, computed and shown to suppliers at introduction stage *(new)*
 
-### Milestone 3.2 — Deal Room (Month 8–9)
+### Milestone 3.2 — Deal Room & AI-Brain (Month 8–9)
 - [ ] Deal Room UI with shared document store *(core)*
 - [ ] Milestone checklist (both parties confirm) *(core)*
 - [ ] Trade document templates (pro-forma invoice, packing list, PO) *(core)*
@@ -127,6 +127,7 @@
 - [ ] **Buyer protection / payment security referral** — milestone-linked escrow partner at Deal Room entry *(new)*
 - [ ] **Repeat order flow** — "Reorder" button on closed deals; standing order reminder for recurring buyers *(new)*
 - [ ] **Human translator network (Phase 3 scope)** — in-Deal Room booking UX; translator vetting pipeline (language proficiency test + vertical knowledge test + NDA + references); first 3 language pairs at launch: EN↔ZH, EN↔KO, EN↔AR; session mechanics (translator joins thread as distinct participant; auto-revoke on session end); post-session rating system. Phase 3 exit target: 20+ vetted translators across 3 language pairs. *(new)*
+- [ ] **AI-Brain (Business Advisor)** — persistent, conversational AI advisor with full context of profile, match history, active deals, deal history, and category benchmarks; available to Pro/Enterprise users; prompt-cached context block for cost efficiency *(new)*
 - [ ] **Trade Finance Referral** — "Get Paid Now" factoring at Deal Room entry *(new)*
 - [ ] **Gracera Verified Logistics** — freight quotes + landed cost estimate at Deal Room entry *(new)*
 
