@@ -29,7 +29,7 @@ Gracera is a web-based B2B trade intelligence platform with a multi-tier archite
 │  pgvector extension (vector embeddings — HNSW index)           │
 │  Elasticsearch (full-text search, faceted filters)             │
 │  Redis (session cache, real-time match queue)                  │
-│  Object Storage / S3 (documents, images, catalogs)            │
+│  MinIO (object storage — S3-compatible; self-hosted via Coolify) │
 └─────────────────────────────────────────────────────────────────┘
 ```
 
@@ -48,7 +48,7 @@ Gracera is a web-based B2B trade intelligence platform with a multi-tier archite
 | RAG Engine | LangChain + Claude API | Document ingestion, embedding, retrieval-augmented profile generation |
 | Primary DB | PostgreSQL | Relational — users, deals, profiles, matches |
 | Cache | Redis | Session store, match queue, FX rate cache, real-time events |
-| Object Storage | AWS S3 (or compatible) | Certifications, product images, deal docs, uploaded catalogs |
+| Object Storage | MinIO (S3-compatible, self-hosted via Coolify) | Certifications, product images, deal docs, uploaded catalogs; S3-compatible API — migrating to AWS S3 at scale requires only swapping endpoint URL and credentials |
 | Email | SendGrid | Transactional email, match digest, supplier invitations |
 | Auth | JWT (jose) + OAuth2 | 15-min access tokens, 30-day refresh, Google/LinkedIn SSO |
 | Hosting | AWS / GCP | Multi-region for international latency |
@@ -155,7 +155,7 @@ Notification Service reads new matches
 Supplier uploads catalog PDF (or brochure, price sheet)
          │
          ▼
-Profile Service → S3 storage → RAG Engine ingestion queue
+Profile Service → MinIO storage → RAG Engine ingestion queue
          │
          ▼
 RAG Engine:

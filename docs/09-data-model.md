@@ -276,7 +276,7 @@ Core entity relationships for the Gracera Marketplace platform.
 | `issuing_body` | string | |
 | `certificate_number` | string | |
 | `expiry_date` | date | |
-| `document_url` | string | S3 URL |
+| `document_url` | string | MinIO URL (S3-compatible) |
 | `verified` | boolean | manually verified by admin |
 | `authenticity_status` | enum | uploaded, digitally_verified, trust_team_verified |
 | `verified_by` | enum | issuer_api, trust_team, unverified |
@@ -337,7 +337,7 @@ Core entity relationships for the Gracera Marketplace platform.
 | `status` | enum | draft, sent, signed, voided |
 | `esignature_provider` | enum | docusign, hellosign |
 | `provider_envelope_id` | string | external reference |
-| `document_url` | string | S3 URL of signed PDF |
+| `document_url` | string | MinIO URL (S3-compatible) of signed PDF |
 | `created_at` | timestamp | |
 | `signed_at` | timestamp | nullable |
 
