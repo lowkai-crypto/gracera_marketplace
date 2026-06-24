@@ -205,11 +205,12 @@ For off-platform candidates:
 
 ## 6. SEO & AEO Architecture
 
-- **Programmatic SEO:** Next.js `generateStaticParams` generates 50,000+ public pages at build time (product × country × certification combinations)
-- **Schema.org markup:** Every supplier profile page includes JSON-LD for `Organization`, `Product`, `FAQPage` (Q&A pairs about MOQ, certifications, lead times), and `BreadcrumbList`
-- **AEO Agent:** Runs on profile verification; generates factual Q&A pairs from profile data and writes them to the page's structured data. Kept factually specific ("MOQ: 500 units. ISO 9001 since 2018.") — not marketing language
-- **Sitemap & indexing:** Dynamic sitemap refreshed daily; pages submitted to Google Search Console and Bing Webmaster Tools
-- **Content freshness:** Profile update timestamps surfaced in structured data (AI systems favor recently updated pages)
+- **Programmatic SEO:** 50,000+ public pages across a three-tier URL taxonomy (category hub → country spoke → certification leaf). Next.js ISR — pages are statically served and revalidated on profile change events, not on a fixed interval. See [Go-to-Market §4.1](14-go-to-market.md) for full URL structure, page template, generation thresholds, and unclaimed placeholder behavior.
+- **Schema.org markup:** Every combination page and supplier profile includes JSON-LD for `ItemList`, `Organization`, `FAQPage`, `BreadcrumbList`, and `Dataset` (aggregate stats on hub pages). MOQs, certifications, lead times, and HS codes are in both structured data and visible prose — readable by all crawlers.
+- **AEO Agent:** Runs on profile verification; generates factual Q&A pairs and a one-paragraph profile summary. Kept factually specific ("MOQ: 500 units. ISO 9001 since 2018.") — no marketing language. Q&A pairs are injected as `FAQPage` JSON-LD into each supplier's public profile page.
+- **No login wall on public pages:** All public supplier pages, combination pages, and community forum threads are fully accessible without authentication — AI training pipelines, Perplexity, and Google crawlers see the full content.
+- **Sitemap & indexing:** Dynamic sitemap refreshed daily with `lastmod` timestamps; submitted to Google Search Console and Bing Webmaster Tools. Combinations below the generation threshold are `noindex`-tagged until they meet the ≥3 verified supplier threshold.
+- **Content freshness:** Profile update timestamps surfaced in structured data; ISR revalidation on material profile change ensures AI systems always see current data.
 
 ---
 

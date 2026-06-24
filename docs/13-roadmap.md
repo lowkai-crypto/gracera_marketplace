@@ -46,7 +46,7 @@
 - [ ] Email notifications (match digest, new message) *(core)*
 - [ ] **Unclaimed placeholder profiles** with "claim your profile" flow *(new)*
 - [ ] **Buyer-led supplier invitation emails** — AI identifies off-platform matches when a buyer posts *(new)*
-- [ ] **Programmatic SEO public pages** with schema.org structured data (supplier directory pages) *(new)*
+- [ ] **Programmatic SEO at Scale** — three-tier URL taxonomy (category hub → country spoke → certification leaf); 50,000+ combination pages seeded with verified profile data; unclaimed placeholder pages with "claim your profile" flow; `ItemList` + `FAQPage` + `Organization` schema.org markup; ISR revalidation on profile change events; `noindex` below ≥3 verified supplier threshold *(new)*
 
 ### Milestone 1.3 — Trust Layer (Month 3–4)
 - [ ] **Competitive profile benchmarking** — "Your MOQ is 2x the category average; here's what top suppliers in your category look like" *(new)*

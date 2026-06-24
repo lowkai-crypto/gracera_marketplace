@@ -78,23 +78,113 @@ Each vertical has dominant associations and publications members trust. These ar
 
 ## 4. Pull Strategies (They Come to Gracera)
 
-### 4.1 Programmatic SEO at Scale *(Phase 1)*
+### 4.1 Programmatic SEO at Scale *(Phase 1–2)*
 
-Auto-generate thousands of public landing pages targeting long-tail sourcing queries:
-- "[Product] Suppliers in [Country]"
-- "FDA-certified [Category] Manufacturers"
-- "ISO 9001 [Product] Factory — MOQ under [N] units"
-- "Korean food ingredient suppliers — FSSC 22000 certified"
+Auto-generate thousands of public landing pages targeting long-tail sourcing queries. Each page is seeded with real data from verified profiles. Unverified suppliers appear as unclaimed placeholders they can claim. The same structured, factual content that ranks on Google is also what AI crawlers ingest — making every page a dual-channel asset for both organic search and AI citation.
 
-Each page is seeded with real data from verified profiles. Suppliers not yet on the platform appear as unclaimed placeholders, which trigger the "claim your profile" acquisition flow.
+**Scale target:** 50,000+ pages across category × country × certification combinations.
 
-**Scale target:** 50,000+ pages across categories, countries, and certification combinations.
+#### URL Taxonomy
 
-**Technical requirements:**
-- Next.js `generateStaticParams` for static generation at build time
-- Schema.org JSON-LD: `Organization`, `Product`, `FAQPage`, `BreadcrumbList`
-- Dynamic sitemap refreshed daily and submitted to search consoles
-- Pages updated whenever profile data changes (content freshness signal)
+A three-tier hub-and-spoke architecture distributes crawl budget and builds internal link equity:
+
+| Tier | URL pattern | Example | Pages |
+|------|-------------|---------|-------|
+| Hub | `/suppliers/[category]` | `/suppliers/food-ingredients` | ~50 (one per category) |
+| Spoke | `/suppliers/[category]/[country]` | `/suppliers/food-ingredients/south-korea` | ~5,000 |
+| Leaf | `/suppliers/[category]/[country]/[certification]` | `/suppliers/food-ingredients/south-korea/fda-certified` | ~50,000+ |
+| Product variant | `/suppliers/[product-slug]/[country]` | `/suppliers/hot-sauce-manufacturer/china` | ~10,000 |
+| Individual profile | `/supplier/[company-slug]` | `/supplier/acme-foods-korea` | 1 per supplier |
+
+Hub pages link to all spoke pages in their category. Spoke pages link to all leaf pages and back to the hub. Leaf pages link to the spoke and to the individual supplier profiles they feature.
+
+#### Page Content Template
+
+Every combination page follows the same template, populated with real supplier data:
+
+```
+H1:  [N] Verified [Product] Suppliers in [Country] ([Year])
+     e.g. "14 Verified Food Ingredient Suppliers in South Korea (2026)"
+
+Meta: "[N] verified [product] suppliers in [country]. Compare MOQs,
+      certifications, and lead times. Free to contact on Gracera."
+
+Intro paragraph (AI-generated, factual, ~80 words):
+  "South Korea has [N] active food ingredient suppliers on Gracera,
+   covering kimchi paste, gochugaru, and fermented soy products.
+   Average MOQ is 400 units. [X] hold FSSC 22000 certification;
+   [Y] are FDA-registered for US export. Average lead time: 28 days.
+   [Z] suppliers accept sample orders. Updated [date]."
+
+Supplier cards (verified profiles first):
+  [Company name] · [City, Country] · MOQ: N · Certs: ISO, FDA
+  [Match score indicator if logged in] · [Contact / View Profile]
+
+Unclaimed placeholders (below verified suppliers):
+  [Company name] · [City, Country] · [Category]
+  "This supplier hasn't claimed their profile yet. Know this company?
+   Share this page, or [Claim this profile →]"
+
+FAQ section (H2):
+  "What is the typical MOQ for food ingredient suppliers in South Korea?"
+  "Which certifications do South Korean food suppliers typically hold?"
+  "What are average lead times for food ingredients from South Korea?"
+  (Answers are auto-generated from aggregate profile data on the page)
+
+Related pages (internal links):
+  → Food Ingredient Suppliers in China
+  → FSSC 22000 Certified Food Suppliers in South Korea
+  → Food Ingredient Suppliers in South Korea — HACCP Certified
+```
+
+#### Generation & Freshness Strategy
+
+| Trigger | Action |
+|---------|--------|
+| New supplier verified in combination X | Generate or revalidate page for X via ISR |
+| Supplier updates profile (material change) | Revalidate that supplier's combination pages within 1 hour |
+| Supplier pauses or deletes profile | Remove from page; revalidate; if page drops below threshold, set to noindex |
+| Nightly cron | Refresh AI-generated intro paragraphs and FAQ answers for pages where underlying data changed |
+| New combination reaches ≥3 verified suppliers | Auto-generate the combination page |
+
+**Threshold rule:** Only index combinations with ≥3 active verified suppliers OR ≥1 verified + ≥2 unclaimed placeholders. Below this threshold, the page is generated but `noindex`-tagged — avoids thin-content penalties while preserving the URL for when the threshold is met.
+
+**Implementation:** Next.js Incremental Static Regeneration (ISR) with `revalidate` triggered by profile events, not fixed-interval polling. Static at rest, refreshed on demand.
+
+#### Schema.org Markup Per Page
+
+| Schema type | Applied to | Content |
+|-------------|-----------|---------|
+| `ItemList` | Supplier list | Each supplier as a `ListItem` with `Organization` nested |
+| `Organization` | Each supplier card | Name, address, certification, URL, MOQ as `additionalProperty` |
+| `FAQPage` | FAQ section | Q&A pairs auto-generated from aggregate profile data |
+| `BreadcrumbList` | All pages | Category → Country → Certification hierarchy |
+| `Dataset` | Hub pages | Aggregate stats (avg MOQ, lead time, cert prevalence) as structured data |
+
+#### Unclaimed Placeholder Source & Behavior
+
+Unclaimed placeholders are sourced from:
+- Trade show exhibitor lists (public, ingested per event)
+- Alibaba / Global Sources public supplier listings
+- ThomasNet / Kompass / GlobalSpec (industrial)
+- LinkedIn Company Search (by industry + country)
+
+Placeholder page behavior:
+- Displays company name, country, category, and approximate size (no contact details)
+- Carries a "Claim this profile" CTA visible to any visitor
+- When a supplier claims the profile: existing placeholder URL becomes the live profile page (no redirect needed — same URL, now with full data and `index` tag)
+- When a buyer views an unclaimed profile: the supplier receives a "3 buyers viewed your unclaimed profile" email notification — the highest-converting acquisition trigger
+
+#### AI Crawler Optimization
+
+Beyond schema.org, the pages are optimized for AI training pipelines and answer engines:
+
+- No login wall on any public page — AI crawlers and Perplexity see the full content
+- Supplier data rendered in visible HTML text, not JavaScript-only — readable by all crawlers
+- Intro paragraph opens with the factual answer to the implied query — AI systems prefer pages that answer immediately
+- MOQs, certifications, lead times, and HS codes are in machine-readable structured data AND in visible prose
+- Sitemap includes `lastmod` timestamps — AI systems (and Google) weight freshness
+- Combination pages cross-link to the relevant community forum thread for that category — signals topical authority
 
 ### 4.2 "Claim Your Profile" Freemium Flow *(Phase 1)*
 
