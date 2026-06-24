@@ -419,6 +419,7 @@ From first awareness to activated platform user:
 - Remaining vertical content hubs
 - First ERP integration (Odoo or mid-market procurement tool)
 - SAP Ariba / Coupa partnership (long sales cycle, start early)
+- Trade show digital presence: QR code at booth / badge → Gracera free sourcing query tool with event-specific landing page; captures buyer intent at peak sourcing motivation
 - Gracera Intelligence Reports as content marketing anchor and premium product
 - White-label Gracera for trade associations ("Powered by Gracera")
 
