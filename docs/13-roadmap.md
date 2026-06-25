@@ -32,6 +32,7 @@
 - [ ] Supplier profile builder (all fields from spec) *(core)*
 - [ ] **RAG profile auto-population** — upload catalog PDF → AI fills profile fields *(skystar)*
 - [ ] Buyer profile builder + sourcing request *(core)*
+- [ ] **Decision-maker contact role** — structured `contact_role` enum on both supplier and buyer profiles; multi-contact support (up to 3 additional contacts with `commercial` / `technical` / `finance` routing types); contact details revealed post-introduction *(new)*
 - [ ] Business registration verification (email + manual review) *(core)*
 - [ ] Basic keyword + filter search (Elasticsearch) *(core)*
 - [ ] Category taxonomy finalized *(core)*
@@ -75,6 +76,7 @@
 - [ ] "Why this match?" expandable rationale UI *(core)*
 - [ ] User feedback on matches (reject with reason category) *(core)*
 - [ ] **Social proof integration** — LinkedIn/trade social signals feed match recency score *(skystar)*
+- [ ] **LinkedIn role verification** — LinkedIn OAuth pulls verified job title onto supplier and buyer profiles; displayed as "LinkedIn verified" on match cards *(new)*
 - [ ] **AEO Agent** — Q&A schema markup on all verified supplier profile pages *(new)*
 - [ ] **Supplier availability signals** — `Available / Limited / Fully Booked` on profiles; weekly re-prompt; used in matching soft filter *(new)*
 - [ ] **Certification expiry monitoring** — automated alerts at 90/60/30 days; auto-exclude expired certs from matching *(new)*
@@ -127,6 +129,7 @@
 - [ ] **Buyer protection / payment security referral** — milestone-linked escrow partner at Deal Room entry *(new)*
 - [ ] **Repeat order flow** — "Reorder" button on closed deals; standing order reminder for recurring buyers *(new)*
 - [ ] **Human translator network (Phase 3 scope)** — in-Deal Room booking UX; translator vetting pipeline (language proficiency test + vertical knowledge test + NDA + references); first 3 language pairs at launch: EN↔ZH, EN↔KO, EN↔AR; session mechanics (translator joins thread as distinct participant; auto-revoke on session end); post-session rating system. Phase 3 exit target: 20+ vetted translators across 3 language pairs. *(new)*
+- [ ] **Decision-maker coaching card** — AI-Brain surfaces a private first-message coaching card per new match: who the user is likely reaching, their authority level (derived from `contact_role` + `company_size` + LinkedIn verified title), what to lead with, and whether to ask an escalation question; RFQ auto-routing to commercial / technical contacts *(new)*
 - [ ] **AI-Brain (Business Advisor)** — persistent, conversational AI advisor with full context of profile, match history, active deals, deal history, and category benchmarks; available to Pro/Enterprise users; prompt-cached context block for cost efficiency *(new)*
 - [ ] **AI Growth Advisor** — structured mode within AI-Brain; 10-question intake assessment → personalized AI adoption roadmap across 4 domains (Marketing & Visibility, Sales & Customer Reach, Operations, Product Development); every recommendation grounded in the user's actual Gracera deal data and category benchmarks; roadmap regenerated quarterly and on significant deal pattern changes *(new)*
 - [ ] **Trade Finance Referral** — "Get Paid Now" factoring at Deal Room entry *(new)*
