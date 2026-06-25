@@ -158,6 +158,8 @@ Buyer creates a structured Request for Quotation. **Category templates** pre-fil
 **Multi-Supplier RFQ:**
 Buyers may send the same RFQ to up to 5 matched suppliers simultaneously. Each supplier receives and responds independently — quotes are visible only to the buyer, never to competing suppliers. When multiple quotes arrive, the buyer sees a **side-by-side quote comparison view** (price, lead time, payment terms, Negotiation Coach recommendation per quote). The buyer selects a winning quote; non-selected suppliers receive an automated polite decline. All non-selected quotes remain private.
 
+**Decision-maker routing:** When an RFQ arrives, the platform routes the notification to the supplier contact whose `routing_types` includes `commercial`. If no commercial contact is registered, it goes to the primary contact. A system note is prepended: *"This RFQ has been routed to [Name] ([role]) as your designated commercial contact."* If the RFQ contains certification or specification requirements, a parallel notification is also sent to the `technical` contact if one is registered.
+
 Supplier is notified of the RFQ. Supplier can:
 - Submit a Quote → Stage 3
 - Request clarification (in message thread)

@@ -543,6 +543,35 @@ The roadmap is regenerated when:
 - The user marks an action as completed — the next-priority action is surfaced
 - New category benchmark data changes the relative ranking of recommendations
 
+### 7.8 First-Message & Decision-Maker Intelligence
+
+Before a user sends their first message to a new match, the AI-Brain surfaces a **Decision-Maker Coaching Card** — a private, one-time prompt that tells them who they're likely reaching and how to approach the conversation.
+
+#### Decision-Maker Heuristics
+
+The coaching card is assembled from three signals: `primary_contact_role`, `company_size`, and `linkedin_verified_title` (if available).
+
+| Company size | Likely authority level | AI-Brain coaching |
+|-------------|----------------------|-------------------|
+| Micro (<10) | Owner — full pricing and terms authority | "You're likely speaking directly to the decision-maker. Be specific, move fast, and propose a concrete next step in your first message." |
+| Small (10–49) | Owner or Sales/Procurement Manager — high authority | "This contact likely has strong authority. Lead with your most relevant certification and a clear value statement." |
+| Medium (50–249) | Procurement Manager / Category Manager — moderate authority | "This company probably has a dedicated procurement function. Confirm early: 'Are you the right person for sourcing decisions on [category]?' to avoid weeks of misrouting." |
+| Large (250+) | Coordinator or Category Manager — may need escalation | "Large organization. The registered contact may not be the final decision-maker. Ask for the Category Manager for [product] early, and be prepared to send a one-page supplier summary for internal circulation." |
+
+#### Supplier Coaching Example
+
+> *"You're connecting with the Procurement Manager at a 120-person electronics distributor in Germany (Medium). They are LinkedIn verified as 'Senior Procurement Manager — Consumer Electronics.' Lead with your RoHS and CE certifications — those are the top two filters for German electronics buyers. Ask in your second message whether they'd like a technical spec sheet for internal review, which typically involves their engineering team."*
+
+#### Buyer Coaching Example
+
+> *"You're connecting with the Export Sales Director at a family-owned food ingredient factory in South Korea (Small, 38 employees). This contact has full authority on pricing and lead times. The owner may not be reachable directly, but the Export Sales Director can commit. Reference their FSSC 22000 certification to show you've reviewed their profile."*
+
+#### Routing Awareness
+
+If the matched company has registered additional contacts (`company_contacts` table), the AI-Brain surfaces this:
+
+> *"This supplier has a dedicated Quality/Compliance contact registered. If your RFQ includes certification requirements, consider addressing your technical questions to [Name] ([role]) directly — their contact details will be visible after introduction acceptance."*
+
 ---
 
 ## 8. Agent Limitations (v1)

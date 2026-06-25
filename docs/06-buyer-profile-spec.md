@@ -40,13 +40,28 @@ Buyers maintain a company profile (persistent) and can create multiple sourcing 
 
 ### 1.3 Contact
 
-| Field | Type | Required |
-|-------|------|----------|
-| `primary_contact_name` | string | Yes |
-| `primary_contact_title` | string | Yes |
-| `primary_contact_email` | email | Yes |
-| `primary_contact_phone` | string | No |
-| `preferred_contact_method` | enum | No |
+| Field | Type | Required | Notes |
+|-------|------|----------|-------|
+| `primary_contact_name` | string | Yes | |
+| `primary_contact_role` | enum | Yes | `owner_founder`, `cpo`, `procurement_manager`, `category_manager`, `supply_chain_director`, `operations_manager`, `other` |
+| `primary_contact_email` | email | Yes | Hidden until introduction accepted |
+| `primary_contact_phone` | string | No | Hidden until introduction accepted |
+| `preferred_contact_method` | enum | No | |
+| `linkedin_url` | URL | No | Used to pull verified job title via LinkedIn OAuth |
+| `linkedin_verified_title` | string | System | Job title pulled from LinkedIn — displayed as "LinkedIn verified" on match card |
+
+**Why `primary_contact_role` matters:** Suppliers can see whether they're reaching the CPO with full authority or a coordinator before crafting their opening message. The AI-Brain uses this alongside `company_size` to coach suppliers on the right approach.
+
+### 1.4 Additional Contacts
+
+Buyer companies can register up to 2 additional contacts beyond the primary:
+
+| Routing type | Who to register | When used |
+|-------------|----------------|----------|
+| `technical` | Technical lead / QA contact | Supplier has spec or certification questions |
+| `finance` | Finance / AP contact | Supplier has invoice or payment term questions |
+
+Additional contacts are revealed to a matched supplier after the introduction is accepted.
 
 ---
 

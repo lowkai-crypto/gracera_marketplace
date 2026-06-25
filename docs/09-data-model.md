@@ -80,6 +80,8 @@ Core entity relationships for the Gracera Marketplace platform.
 | `verification_level` | enum | basic, verified, certified, premium |
 | `completeness_score` | float | 0.0–1.0 |
 | `profile_status` | enum | draft, active, paused, deleted |
+| `primary_contact_role` | enum | owner_ceo, export_sales_director, sales_manager, quality_compliance, operations_manager, other |
+| `linkedin_verified_title` | string | nullable; job title pulled from LinkedIn OAuth |
 | `availability_status` | enum | available, limited, fully_booked |
 | `next_available_date` | date | nullable; set when fully_booked |
 | `availability_updated_at` | timestamp | resets to limited if not updated within 14 days |
@@ -129,6 +131,8 @@ Core entity relationships for the Gracera Marketplace platform.
 | `verification_level` | enum | |
 | `completeness_score` | float | |
 | `profile_status` | enum | |
+| `primary_contact_role` | enum | owner_founder, cpo, procurement_manager, category_manager, supply_chain_director, operations_manager, other |
+| `linkedin_verified_title` | string | nullable; job title pulled from LinkedIn OAuth |
 | `on_time_payment_rate` | float | nullable; computed from deal history |
 | `avg_days_to_payment` | float | nullable; computed from deal history |
 | `completed_deals_count` | integer | default 0 |
@@ -340,6 +344,27 @@ Core entity relationships for the Gracera Marketplace platform.
 | `document_url` | string | Oracle Cloud Object Storage URL (S3-compatible) of signed PDF |
 | `created_at` | timestamp | |
 | `signed_at` | timestamp | nullable |
+
+---
+
+### company_contacts
+
+Secondary contacts registered under a supplier or buyer profile. Used for routing RFQs, technical questions, and finance queries to the right person.
+
+| Column | Type | Notes |
+|--------|------|-------|
+| `id` | UUID PK | |
+| `profile_id` | UUID | FK to `supplier_profiles.id` or `buyer_profiles.id` |
+| `profile_type` | enum | supplier, buyer |
+| `name` | string | |
+| `contact_role` | enum | owner_ceo, export_sales_director, sales_manager, quality_compliance, procurement_manager, category_manager, supply_chain_director, finance, other |
+| `email` | email | Hidden until introduction accepted |
+| `phone` | string | nullable |
+| `linkedin_url` | string | nullable |
+| `linkedin_verified_title` | string | nullable |
+| `routing_types` | text[] | commercial, technical, finance — determines which inbound messages are routed here |
+| `is_primary` | boolean | true for the main registered contact |
+| `created_at` | timestamp | |
 
 ---
 

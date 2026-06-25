@@ -138,11 +138,29 @@ Where the issuing body provides a public verification API (SGS, Bureau Veritas, 
 | Field | Type | Required | Notes |
 |-------|------|----------|-------|
 | `primary_contact_name` | string | Yes | |
-| `primary_contact_title` | string | Yes | |
+| `primary_contact_role` | enum | Yes | `owner_ceo`, `export_sales_director`, `sales_manager`, `quality_compliance`, `operations_manager`, `other` |
 | `primary_contact_email` | email | Yes | Hidden from public until match accepted |
 | `primary_contact_phone` | string | No | Hidden until match accepted |
 | `preferred_contact_method` | enum | No | Email, Phone, WhatsApp, WeChat, Platform Message |
 | `response_time_hours` | integer | No | Committed response time to inquiries |
+| `linkedin_url` | URL | No | Used to pull verified job title via LinkedIn OAuth |
+| `linkedin_verified_title` | string | System | Job title pulled from LinkedIn — displayed as "LinkedIn verified" on profile |
+
+**Why `contact_role` matters:** Buyers can see whether they're reaching an owner with full authority, a sales manager, or a quality contact before they write their first message. The AI-Brain uses this to coach buyers on how to approach the conversation.
+
+### 1.8 Additional Contacts
+
+Companies can register up to 3 additional contacts beyond the primary, each assigned a routing type:
+
+| Routing type | Who to register | When they receive messages |
+|-------------|----------------|--------------------------|
+| `commercial` | Sales Manager / Export Director | RFQs, quote requests, pricing discussions |
+| `technical` | Quality / Compliance Manager | Certification questions, spec clarifications, audit requests |
+| `finance` | Finance / Accounts contact | Payment terms, invoice queries |
+
+When an inbound RFQ or message arrives, the platform routes it to the contact whose `routing_types` matches the message type. If no specialist contact is registered, all messages go to the primary contact.
+
+Additional contacts are visible on the profile after a match is accepted — buyers can see who to address for commercial vs. technical questions.
 
 ---
 
