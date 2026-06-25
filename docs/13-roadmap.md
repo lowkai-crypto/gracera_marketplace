@@ -128,6 +128,7 @@
 - [ ] **Repeat order flow** — "Reorder" button on closed deals; standing order reminder for recurring buyers *(new)*
 - [ ] **Human translator network (Phase 3 scope)** — in-Deal Room booking UX; translator vetting pipeline (language proficiency test + vertical knowledge test + NDA + references); first 3 language pairs at launch: EN↔ZH, EN↔KO, EN↔AR; session mechanics (translator joins thread as distinct participant; auto-revoke on session end); post-session rating system. Phase 3 exit target: 20+ vetted translators across 3 language pairs. *(new)*
 - [ ] **AI-Brain (Business Advisor)** — persistent, conversational AI advisor with full context of profile, match history, active deals, deal history, and category benchmarks; available to Pro/Enterprise users; prompt-cached context block for cost efficiency *(new)*
+- [ ] **AI Growth Advisor** — structured mode within AI-Brain; 10-question intake assessment → personalized AI adoption roadmap across 4 domains (Marketing & Visibility, Sales & Customer Reach, Operations, Product Development); every recommendation grounded in the user's actual Gracera deal data and category benchmarks; roadmap regenerated quarterly and on significant deal pattern changes *(new)*
 - [ ] **Trade Finance Referral** — "Get Paid Now" factoring at Deal Room entry *(new)*
 - [ ] **Gracera Verified Logistics** — freight quotes + landed cost estimate at Deal Room entry *(new)*
 

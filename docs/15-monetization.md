@@ -44,6 +44,7 @@ How Gracera generates revenue across subscriptions, transactions, referrals, and
 | Gracera Intelligence Reports | — | — | ✓ |
 | AI Negotiation Coach | — | ✓ | ✓ |
 | AI-Brain (Business Advisor) | — | ✓ | ✓ |
+| AI Growth Advisor (adoption roadmap) | — | ✓ | ✓ |
 | API access | — | — | ✓ |
 | Priority in match ranking | — | — | ✓ |
 
@@ -58,6 +59,7 @@ How Gracera generates revenue across subscriptions, transactions, referrals, and
 | AI Price Compass | — | ✓ | ✓ |
 | AI Negotiation Coach | — | ✓ | ✓ |
 | AI-Brain (Business Advisor) | — | ✓ | ✓ |
+| AI Growth Advisor (adoption roadmap) | — | ✓ | ✓ |
 | Downstream customer segmentation | — | ✓ | ✓ |
 | Sourcing Diversification Strategy | — | ✓ | ✓ |
 | Gracera Intelligence Reports | — | — | ✓ |

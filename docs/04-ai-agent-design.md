@@ -457,6 +457,92 @@ def ai_brain_chat(user_context: dict, conversation_history: list, user_message: 
 - Available on **Pro and Enterprise tiers only**
 - Long sessions are summarized before continuing to bound token usage
 
+### 7.7 AI Growth Advisor Mode
+
+A structured mode within the AI-Brain that generates a personalized, prioritized AI adoption roadmap for each business. Unlike the open-ended conversational interface, the AI Growth Advisor is goal-directed: it starts with a short intake assessment, then produces a domain-by-domain action plan grounded in the user's actual Gracera data — deal outcomes, match patterns, certification gaps, and category benchmarks.
+
+**The core differentiation:** Generic AI advice ("use ChatGPT for marketing") is available anywhere. Gracera's advice is grounded in data no external consultant has — why this specific business is losing deals, which certifications unlock which buyer segments in their category, where their pricing and lead time sits vs. competitors, and which markets have growing demand for their exact product.
+
+#### Intake Assessment
+
+Triggered on first use and refreshed annually. 10 questions covering:
+
+| # | Question | Purpose |
+|---|---------|---------|
+| 1 | Current AI tools in use | Calibrate maturity baseline |
+| 2 | Biggest business pain point | Focus roadmap on highest-leverage domain |
+| 3 | Primary target markets (geography + buyer type) | Localize recommendations |
+| 4 | Top goal this year | Rank actions by alignment to goal |
+| 5 | Current sales and marketing channels | Identify gaps vs. what's working in their category |
+| 6 | Self-reported quote win rate | Cross-reference against platform deal data |
+| 7 | Biggest bottleneck in the sales process | Finding leads / Qualifying / Pricing / Negotiation / Follow-up |
+| 8 | Main source of competitive differentiation | Price / Quality / Certifications / Speed / Customization |
+| 9 | Team size | Scale recommendations to operational capacity |
+| 10 | Willingness to adopt new tools | Low / Medium / High — filters tool recommendations |
+
+#### Four-Domain Roadmap
+
+Each domain produces 2–3 actions ranked by expected impact. Every action includes a specific AI tool recommendation and an expected outcome grounded in platform data.
+
+**Domain 1 — Marketing & Visibility**
+- Profile AEO optimization: restructure profile text so AI assistants (Perplexity, Google AI Overviews) cite the supplier when buyers ask sourcing questions in their category
+- Content localization: which languages to translate product content into, based on where buyer demand for their category is growing
+- Programmatic SEO alignment: ensure profile data is complete enough to feed Gracera's combination pages for their top category + country + certification combination
+
+**Domain 2 — Sales & Customer Reach**
+- Buyer segment prioritization: which buyer types and geographies have the highest acceptance rates for this supplier's profile characteristics
+- Certification ROI: ranked list of certifications by expected match lift, drawn from platform benchmark data
+- Market expansion: which new geographies show growing demand for their product category, based on sourcing request trends
+
+**Domain 3 — Operations & Delivery**
+- Quote response time: comparison vs. category average; faster response correlates with higher acceptance rates
+- AI tool recommendations for operational friction: auto-translation of incoming RFQs, AI-assisted quote generation, availability status automation
+- Capacity signaling: how to use `availability_status` to boost recency score during peak demand periods
+
+**Domain 4 — Product & Service Development**
+- MOQ and lead time gaps: where this supplier's terms diverge from what buyers in their category are requesting
+- Certification gaps: certifications required by buyers they're currently not matching with
+- Emerging buyer requirements: new filters and requirements appearing in sourcing requests in their category over the last 90 days
+
+#### Roadmap Output Format
+
+```json
+{
+  "business_context": {
+    "category": "Food Ingredients",
+    "primary_market": "South Korea → United States",
+    "ai_maturity": "basic",
+    "top_pain_point": "finding_customers",
+    "top_goal": "new_market_entry"
+  },
+  "roadmap": {
+    "marketing": [
+      {
+        "priority": 1,
+        "action": "Add FSSC 22000 prominently to your profile headline and all product descriptions",
+        "why": "68% of US food buyers filter for FSSC 22000 — you hold this cert but it is not featured in your profile text",
+        "tool": "Gracera profile editor",
+        "impact": "Estimated +47 additional US buyer matches",
+        "effort": "low"
+      }
+    ],
+    "sales": [],
+    "operations": [],
+    "product": []
+  },
+  "next_review": "2026-09-25"
+}
+```
+
+#### Update Triggers
+
+The roadmap is regenerated when:
+- Quarterly review cycle completes
+- A material profile change occurs (new certification, new product line, new geography)
+- A significant deal rejection pattern emerges (same reason 3+ times in 30 days)
+- The user marks an action as completed — the next-priority action is surfaced
+- New category benchmark data changes the relative ranking of recommendations
+
 ---
 
 ## 8. Agent Limitations (v1)
