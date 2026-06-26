@@ -88,6 +88,7 @@ Gracera is a two-sided marketplace that removes the friction from B2B sourcing a
 | [Monetization](docs/15-monetization.md) | Subscription tiers, transaction fees, referral commissions, intelligence reports, white-glove onboarding, group buy fee, human translator margin |
 | [Category Taxonomy](docs/16-category-taxonomy.md) | Full 15-vertical B2B category tree with HS code alignment, priority vertical designations, and taxonomy governance rules |
 | [Use Cases](docs/17-use-cases.md) | 12 end-to-end scenarios (1 supplier + 1 buyer per priority vertical); structured for QA and Playwright test automation |
+| [QA & Test Plan](docs/18-qa-test-plan.md) | Testing strategy, Playwright E2E structure, fixture patterns, SLA assertions, CI/CD pipeline, and bug severity definitions |
 
 ---
 
