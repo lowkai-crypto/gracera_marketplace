@@ -400,7 +400,107 @@ From first awareness to activated platform user:
 
 ---
 
-## 8. Sequenced Priorities
+## 8. Phase 0 — Cold Start (Months −2 to 0)
+
+The strategies in §3–5 describe what works at scale. Before any of them function, the platform must survive the zero-to-one problem: no suppliers means no value for buyers; no buyers means no reason for suppliers to join.
+
+**The core principle: don't launch empty.** Two structural moves make this possible before a single user registers.
+
+### 8.1 Placeholder Profile Seeding
+
+Before public launch, ingest 500–1,000 supplier profiles from public directories and create unclaimed placeholder pages:
+
+| Source | Data available |
+|--------|---------------|
+| Alibaba / Global Sources | Company name, category, country, product lines |
+| ThomasNet / Kompass | Industrial suppliers — company, capabilities, certifications |
+| Trade show exhibitor lists | Company name, category, country, contact email (public) |
+| LinkedIn Company Search | Company size, industry, location |
+
+These pages are live, indexed, and browsable from day one. Buyers who arrive via SEO see a realistic catalog. Suppliers who find their own unclaimed profile are motivated to claim and complete it. The platform has density before it has users.
+
+### 8.2 Founding Supplier Program
+
+Recruit 30–50 suppliers per vertical across 3 target verticals (150 total) via direct founder outreach before public launch. This is manual, personal outreach — not automated.
+
+**Offer:**
+- Free Pro tier for 12 months
+- Permanent **"Founding Supplier"** badge on profile (social proof that compounds)
+- Priority placement in early matches
+- Direct input into the product roadmap
+- White-glove profile build included (specialist builds the profile with them — no form to fill)
+
+**Why exclusivity matters:** Frame it as hand-picking, not open registration. *"We're selecting the first 50 verified food ingredient suppliers on Gracera. Applications close [date]."* Scarcity converts where generic invitations don't.
+
+**Channels for founding supplier outreach:**
+
+| Channel | Approach |
+|---------|---------|
+| Direct email | Founder personally emails 200–300 target suppliers; references their specific product and a real buyer need |
+| Trade association endorsement | 1–2 associations per vertical send a member newsletter feature: "Gracera is launching — founding spots limited" |
+| Trade shows | Attend 1 show per vertical; QR code → white-glove onboarding session booked on-site |
+| LinkedIn | Founder connects with export managers and sales directors at target suppliers; personal message referencing their product category |
+
+**Advancement criterion:** 100+ verified supplier profiles at ≥80% completeness before proceeding to soft launch.
+
+### 8.3 Founding Buyer Program
+
+Recruit 50–100 procurement managers via warm outreach before or at soft launch.
+
+**Offer:**
+- Free Pro tier for 6 months
+- Dedicated onboarding support
+- First access to the verified founding supplier catalog
+- Guaranteed response SLA from matched suppliers (founding suppliers are briefed to respond within 48h)
+
+**Channels:**
+- LinkedIn outreach targeting Procurement Managers and Category Managers at mid-size companies in the 3 target verticals
+- Trade association buyer-side members
+- Founder's personal network in procurement
+
+**Ask:** Post your first sourcing request. That's it. The platform does the rest.
+
+### 8.4 Ignition Sequence
+
+```
+Phase 0 — Pre-launch (Months −2 to 0)
+  → Seed 500–1,000 placeholder profiles
+  → Recruit and white-glove onboard 150 founding suppliers
+  → Launch programmatic SEO pages (indexed, sparse data, real supplier pages)
+  → Recruit 50–100 founding buyers (warm outreach, not open registration)
+  ─────────────────────────────────────────────────────────────
+  Gate: 100+ verified suppliers at ≥80% completeness
+
+Phase 0.5 — Soft launch (Month 1)
+  → Open platform to founding buyers only
+  → First sourcing requests posted → Prospecting Agent fires
+  → Off-platform supplier invitations go out ("live RFQ waiting")
+  → "Claim your profile" notifications fire as buyers browse placeholders
+  → First matches made; first introductions accepted
+  ─────────────────────────────────────────────────────────────
+  Gate: 20+ introductions accepted; 5+ deals entered messaging stage
+
+Phase 1 — Public launch (Month 2–3)
+  → Open registration to all
+  → Founding Supplier and Founding Buyer social proof visible on platform
+  → SEO pages now populated with real verified data; organic traffic arrives
+  → Every new buyer triggers Prospecting Agent for more supplier invitations
+  → Flywheel running: buyer demand → supplier invitations → more supply → more matches
+```
+
+### 8.5 Cold Start Anti-Patterns
+
+| Anti-pattern | Why it fails |
+|-------------|-------------|
+| Launch both sides simultaneously with no pre-seeding | Empty platform on both sides — no one sees value, both sides leave |
+| Open registration before reaching the supplier threshold | Buyers arrive, find no matches, churn immediately and never return |
+| Generic "join our platform" outreach without a specific hook | Response rates near zero — suppliers need a concrete opportunity, not a vague pitch |
+| Paid acquisition before organic/referral flywheel is running | Expensive CPAs with no retention; users acquired before the product delivers value will churn |
+| Launching all 6 verticals at once | Too thin across too many categories; concentrate on 3 verticals until density is real |
+
+---
+
+## 9. Sequenced Priorities
 
 ### Phase 1 (Build Now)
 - Buyer-led supplier invitation emails

@@ -22,6 +22,36 @@
 
 ---
 
+## Phase 0 — Cold Start (Months −2 to 0)
+
+**Goal:** Reach the supplier density threshold before opening public registration. Launch with a platform that already works, not an empty directory.
+
+### Milestone 0.1 — Placeholder Seeding & SEO Foundation (Month −2)
+- [ ] Ingest 500–1,000 unclaimed supplier placeholder profiles from public directories (Alibaba, ThomasNet, trade show exhibitor lists) *(new)*
+- [ ] Launch programmatic SEO pages from placeholder data — get indexed before real profiles are live *(new)*
+- [ ] "Claim your profile" notification flow live and tested *(new)*
+
+### Milestone 0.2 — Founding Supplier Program (Months −2 to 0)
+- [ ] Direct founder outreach to 200–300 target suppliers across 3 verticals (Food, Electronics, Apparel) *(new)*
+- [ ] White-glove onboard all founding suppliers — specialist builds profiles to ≥80% completeness *(new)*
+- [ ] **Founding Supplier badge** — permanent badge awarded to first 50 suppliers per vertical *(new)*
+- [ ] Trade association partnership secured in at least 1 vertical for founding supplier endorsement *(new)*
+- [ ] Trade show presence in 1 target vertical — on-site white-glove onboarding bookings *(new)*
+
+### Milestone 0.3 — Founding Buyer Program & Soft Launch (Month 0–1)
+- [ ] Recruit 50–100 founding buyers via warm outreach (LinkedIn, trade associations, founder network) *(new)*
+- [ ] **Founding Buyer badge** — free Pro tier for 6 months *(new)*
+- [ ] Soft launch: founding buyers only; first sourcing requests posted *(new)*
+- [ ] Prospecting Agent fires on first sourcing requests → off-platform supplier invitations sent *(new)*
+
+**Phase 0 Exit Criteria (gate to Phase 1 public launch):**
+- 100+ verified supplier profiles at ≥80% completeness across 3 verticals
+- 500+ placeholder profiles seeded and indexed
+- 20+ introductions accepted
+- 5+ deals entered messaging stage
+
+---
+
 ## Phase 1 — Core Platform (Months 1–4)
 
 **Goal:** Launch a working marketplace where suppliers and buyers can find each other, with a production-ready billing system and an acquisition engine that works from day one.
