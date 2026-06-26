@@ -177,6 +177,42 @@ Buyers with fewer than 3 completed deals display a **"New Buyer"** badge rather 
 
 ---
 
+## 7. Buyer Activation Flow (0 → 1)
+
+The activation goal for a new buyer is their **first qualified supplier who responds to their sourcing request**. A buyer who posts a sourcing request and receives no relevant matches within 24 hours will assume the platform doesn't carry what they need and will not return.
+
+### 7.1 Sourcing Request → First Match (Target: < 1 hour)
+
+| Step | What happens | Design principle |
+|------|-------------|-----------------|
+| **1. Category template pre-fill** | On sourcing request creation, buyer selects their category. A pre-built template fills common fields (typical certifications, standard incoterms, common units) for that vertical. | Reduce blank-form friction; pre-fill removes 60% of typing for most buyers. |
+| **2. Certification auto-suggest** | Based on destination country + category, the platform auto-suggests required certifications: *"Buyers importing food ingredients to the US typically require FDA registration and FSSC 22000."* | Buyers often don't know what certifications to specify — this makes their request more effective without requiring expertise. |
+| **3. Live match count preview** | Before publishing, show a live count: *"Your current request matches 23 suppliers. Adding 'FSSC 22000 required' narrows to 9 higher-quality matches."* Buyer can tune the request before it goes live. | Buyers iterate on the request before it's sent — they arrive at a better specification and understand the trade-off between breadth and quality. |
+| **4. Sourcing request completeness coaching** | Score the request (see §3). Below 50%: flag before publishing. Between 50–70%: show specific fields that would improve match quality. Above 70%: publish encouraged. | A 45%-complete request generates poor matches; coaching the buyer before publish protects their first experience. |
+| **5. First 5 matches within 1 hour** | As soon as the sourcing request is published, surface top 5 matches immediately. Not a daily digest — real-time. | Immediacy signals the platform is alive and working. Waiting 24 hours for a "digest" is a churn event. |
+| **6. Supplier introduction coaching** | Before the buyer sends their first message to a matched supplier, AI-Brain surfaces a coaching card: authority level of the contact, what to lead with, whether to ask a technical or commercial question first. | Buyers who know how to approach a supplier have a higher first-message response rate. |
+
+### 7.2 No-Match Safety Net
+
+If no suitable matches are found within 24 hours of publishing:
+
+1. **Prospecting Agent fires automatically** — identifies off-platform suppliers matching the sourcing request and sends them opportunity-specific invitations. The buyer sees: *"We're reaching out to 3 additional suppliers on your behalf who aren't yet on the platform."*
+2. **Profile gap explanation** — if the request is too narrow (e.g., certification requirement eliminates all suppliers), the platform explains: *"No suppliers currently hold both ISO 22000 and halal certification for this category. Removing the halal requirement reveals 14 matches."*
+
+The buyer sees action and transparency, not silence.
+
+### 7.3 Activation Failure Modes
+
+| Failure mode | Cause | Fix |
+|-------------|-------|-----|
+| No matches after publishing | Request too narrow or too vague | Live match preview; completeness gate; gap explanation |
+| Matches shown but none relevant | Wrong category or geography filters | Match feedback ("wrong category") tightens filters for next run |
+| Message sent, supplier doesn't respond | Supplier busy or unresponsive | "Nudge supplier" option at 48h; platform sends a polite reminder on buyer's behalf |
+| Supplier responds but buyer can't evaluate quality | No benchmark context | AI-Brain coaching card includes supplier's key metrics vs. category average |
+| First deal stalls at RFQ/quote | No negotiation support | Negotiation Coach activates; AI Price Compass surfaces category benchmarks |
+
+---
+
 ## 6. Privacy — Contact Information Visibility
 
 Buyer contact details (email, phone) are **never shown** in public profiles or search results. They are only revealed to a matched supplier after both parties accept the introduction.

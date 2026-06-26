@@ -56,12 +56,26 @@ Gracera solves this with a structured, AI-assisted platform where both sides inv
 | Supplier profiles cited in AI assistant responses | Tracked via referral logs |
 | Sample Order Fast Track orders placed | 500 |
 
+**Activation SLAs (design constraints, not just metrics):**
+
+| SLA | Target |
+|-----|--------|
+| Time to first match after supplier profile publish | < 1 hour |
+| Time to first match after buyer sourcing request publish | < 1 hour |
+| Supplier profiles with ≥ 1 introduction accepted within 7 days of publish | > 60% |
+| Buyer sourcing requests with ≥ 1 supplier response within 48 hours | > 70% |
+| No-match rate (supplier publishes, receives zero matches) | < 5% |
+
+These are product design constraints — features that violate them (e.g. daily digest instead of real-time matching) must be justified explicitly.
+
 ---
 
 ## 5. Scope
 
 ### In Scope — Phase 1 (Core, Months 1–4)
 - User registration and onboarding (supplier and buyer flows) — including **dual-role accounts** (supplier + buyer under one login, with a dashboard context switcher)
+- **Supplier activation flow** — catalog upload → RAG auto-population → guided wizard with live match counter → completeness gate (60% minimum to publish) → first match surfaced immediately → Decision-Maker Coaching Card → 72h no-introduction safety net with specific benchmark gap list
+- **Buyer activation flow** — category template pre-fill → certification auto-suggest by destination country → live match count preview before publishing → sourcing request completeness coaching → first 5 matches within 1 hour → Decision-Maker Coaching Card → 24h no-match safety net (Prospecting Agent auto-fires)
 - Supplier profile builder with RAG auto-population (upload catalog/brochure → AI fills fields)
 - Buyer profile builder + sourcing request builder
 - Keyword and filter-based search (Elasticsearch)

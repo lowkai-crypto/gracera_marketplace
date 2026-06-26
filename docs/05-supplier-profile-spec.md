@@ -270,4 +270,38 @@ Specialists use a dedicated queue in the admin interface:
 
 ---
 
+## 5. Supplier Activation Flow (0 → 1)
+
+The activation goal for a new supplier is their **first introduction accepted** — a real buyer who wants to talk to them. Every design decision in the onboarding flow is oriented toward reaching this moment as fast as possible. A supplier who doesn't see a match in their first session rarely returns.
+
+### 5.1 Registration → First Match (Target: < 1 hour)
+
+| Step | What happens | Design principle |
+|------|-------------|-----------------|
+| **1. Catalog upload prompt** | Immediately after registration, before showing the profile form, offer a catalog/brochure upload. RAG auto-population fills 70%+ of profile fields from the document. | Never show a blank form. Let AI do the heavy lifting first. |
+| **2. Guided profile wizard** | Step-by-step wizard covers the highest-impact fields. Each step shows a live match counter: *"Adding your ideal customer description unlocks ~180 additional matches in your category."* | Progress feels rewarding; every field has a visible payoff. |
+| **3. Completeness gate** | Profile below 60% completeness cannot be published. The wizard does not let users skip to publishing without reaching the threshold. | Protect match quality — a sparse profile generates poor matches and erodes trust in the platform. |
+| **4. Benchmark nudge** | After profile save: *"You're in the bottom 40% for certification coverage in your category. Adding RoHS would unlock 210 additional buyers."* Drawn from real category benchmark data. | Specific numbers, not vague encouragement. |
+| **5. First match surfaced** | Top 3–5 matches surfaced immediately after publish. Never zero — if the algorithm cannot find a strong match, surface the closest available with an explanation of the gap. | Silence kills activation. Seeing real potential buyers is the moment the supplier believes the platform works. |
+| **6. Introduction coaching** | When first match appears, AI-Brain surfaces a Decision-Maker Coaching Card: who the buyer is, their authority level, what to lead with in the first message. | Remove the "what do I say?" friction that stops suppliers from acting on a match. |
+
+### 5.2 No-Introduction Safety Net
+
+If no introduction is accepted within 72 hours of first match:
+
+> *"Your profile has been viewed 8 times this week. Here's what the top suppliers in your category have that you don't yet: [specific gap list]. Fixing these would move you into the top 20%."*
+
+This is not a generic nudge — it is derived from actual benchmark comparison between this supplier's profile and the top performers in their category on the platform. The goal is to give the supplier a concrete action, not a reassurance.
+
+### 5.3 Activation Failure Modes
+
+| Failure mode | Cause | Fix |
+|-------------|-------|-----|
+| Zero matches after publish | Profile too sparse; hard filters exclude all candidates | Completeness gate at 60%; RAG upload prompt; wizard nudge |
+| Match shown but no message sent | Supplier doesn't know how to approach | Decision-maker coaching card before first message |
+| Message sent, no reply within 48h | Buyer unresponsive | "Nudge the other party" option; AI-Brain surfaces next-best match |
+| Introduction accepted but deal stalls | No coaching at RFQ/quote stage | Negotiation Coach activates at quote submission |
+
+---
+
 [Back to README](../README.md)
