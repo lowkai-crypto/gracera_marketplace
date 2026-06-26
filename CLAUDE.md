@@ -37,3 +37,4 @@ A two-sided B2B marketplace connecting suppliers/vendors/manufacturers with buye
 | `docs/16-category-taxonomy.md` | Full 15-vertical B2B category tree, HS code alignment, priority verticals, governance rules |
 | `docs/17-use-cases.md` | 12 end-to-end use cases (supplier + buyer per priority vertical); maps to Playwright test fixtures |
 | `docs/18-qa-test-plan.md` | QA process, Playwright structure, fixture strategy, CI/CD pipeline, bug severity, definition of done |
+| `docs/19-tech-stack-dev-setup.md` | Full stack reference, local Docker setup, env vars, migrations, Coolify deployment, troubleshooting |

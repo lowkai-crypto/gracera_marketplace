@@ -89,6 +89,7 @@ Gracera is a two-sided marketplace that removes the friction from B2B sourcing a
 | [Category Taxonomy](docs/16-category-taxonomy.md) | Full 15-vertical B2B category tree with HS code alignment, priority vertical designations, and taxonomy governance rules |
 | [Use Cases](docs/17-use-cases.md) | 12 end-to-end scenarios (1 supplier + 1 buyer per priority vertical); structured for QA and Playwright test automation |
 | [QA & Test Plan](docs/18-qa-test-plan.md) | Testing strategy, Playwright E2E structure, fixture patterns, SLA assertions, CI/CD pipeline, and bug severity definitions |
+| [Tech Stack & Dev Setup](docs/19-tech-stack-dev-setup.md) | Full tech stack reference, local environment setup, Docker Compose, env vars, migrations, deployment to Oracle Cloud via Coolify |
 
 ---
 
