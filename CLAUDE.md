@@ -35,3 +35,4 @@ A two-sided B2B marketplace connecting suppliers/vendors/manufacturers with buye
 | `docs/14-go-to-market.md` | Off-platform reach, AEO/SEO strategy, vertical playbooks |
 | `docs/15-monetization.md` | Revenue streams, subscription tiers, trade finance & logistics referral |
 | `docs/16-category-taxonomy.md` | Full 15-vertical B2B category tree, HS code alignment, priority verticals, governance rules |
+| `docs/17-use-cases.md` | 12 end-to-end use cases (supplier + buyer per priority vertical); maps to Playwright test fixtures |

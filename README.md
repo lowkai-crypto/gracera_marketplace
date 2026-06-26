@@ -87,6 +87,7 @@ Gracera is a two-sided marketplace that removes the friction from B2B sourcing a
 | [Go-to-Market](docs/14-go-to-market.md) | Buyer-led invitations, programmatic SEO, AEO/GEO strategy, vertical playbooks, community forums spec |
 | [Monetization](docs/15-monetization.md) | Subscription tiers, transaction fees, referral commissions, intelligence reports, white-glove onboarding, group buy fee, human translator margin |
 | [Category Taxonomy](docs/16-category-taxonomy.md) | Full 15-vertical B2B category tree with HS code alignment, priority vertical designations, and taxonomy governance rules |
+| [Use Cases](docs/17-use-cases.md) | 12 end-to-end scenarios (1 supplier + 1 buyer per priority vertical); structured for QA and Playwright test automation |
 
 ---
 
