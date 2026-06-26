@@ -381,6 +381,33 @@ Secondary contacts registered under a supplier or buyer profile. Used for routin
 | `created_at` | timestamp | |
 | `visible` | boolean | hidden until both parties submit |
 
+### categories
+
+Hierarchical category tree used for matching, SEO page generation, and HS code alignment. See [Category Taxonomy](16-category-taxonomy.md) for the full taxonomy.
+
+| Column | Type | Notes |
+|--------|------|-------|
+| `id` | SERIAL PK | |
+| `name` | varchar(120) | Display name (English) |
+| `slug` | varchar(120) UNIQUE | URL-safe identifier, e.g. `sauces-condiments` |
+| `parent_id` | integer FK | NULL for Level 1 verticals |
+| `level` | smallint | 1 = Vertical, 2 = Category, 3 = Subcategory |
+| `vertical_code` | char(3) | V01–V15; populated only on Level 1 rows |
+| `hs_chapters` | text[] | HS tariff chapters this node maps to |
+| `is_priority_vertical` | boolean | TRUE for the 6 launch priority verticals |
+| `active` | boolean | FALSE = deprecated; new registrations cannot select |
+| `created_at` | timestamp | |
+
+```sql
+CREATE INDEX ON categories (parent_id);
+CREATE INDEX ON categories (slug);
+```
+
+**FK references from other tables:**
+- `supplier_profiles.categories` — `integer[]` of Level 2 or Level 3 IDs (up to 5 per supplier)
+- `buyer_profiles.industry` — single Level 1 or Level 2 ID
+- `sourcing_requests.category_id` — single Level 2 or Level 3 ID
+
 ---
 
 ## 3. Dual-Role Accounts

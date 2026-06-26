@@ -6,7 +6,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ```
 gracera_marketplace/
-  docs/           # Product and architecture specs (01–13) — primary work
+  docs/           # Product and architecture specs (01–16) — primary work
   skystarcloud/   # Reference project only — do not treat as Gracera's implementation
   README.md       # Project overview and doc index
 ```
@@ -34,3 +34,4 @@ A two-sided B2B marketplace connecting suppliers/vendors/manufacturers with buye
 | `docs/13-roadmap.md` | Phased milestones (updated with all new features) |
 | `docs/14-go-to-market.md` | Off-platform reach, AEO/SEO strategy, vertical playbooks |
 | `docs/15-monetization.md` | Revenue streams, subscription tiers, trade finance & logistics referral |
+| `docs/16-category-taxonomy.md` | Full 15-vertical B2B category tree, HS code alignment, priority verticals, governance rules |
