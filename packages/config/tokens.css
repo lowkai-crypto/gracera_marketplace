@@ -1,0 +1,106 @@
+/**
+ * Gracera CSS design tokens
+ * Import this in apps/web/src/app/globals.css
+ *
+ * These mirror tailwind.config.ts so tokens are available both in Tailwind
+ * utilities and in arbitrary CSS (e.g. canvas drawing, SVG fills, JS).
+ */
+
+:root {
+  /* ── Brand colours ──────────────────────────────────────────────── */
+  --color-teal-50:   #F0FDFA;
+  --color-teal-100:  #CCFBF1;
+  --color-teal-200:  #99F6E4;
+  --color-teal-500:  #14B8A6;
+  --color-teal:      #0D9488;   /* primary */
+  --color-teal-700:  #0F766E;
+  --color-teal-900:  #134E4A;
+
+  --color-orange-100: #FFEDD5;
+  --color-orange-400: #FB923C;
+  --color-orange:     #F97316;  /* CTA only */
+  --color-orange-700: #C2410C;
+
+  /* ── Neutral slate ──────────────────────────────────────────────── */
+  --color-white:      #FFFFFF;
+  --color-slate-50:   #F8FAFC;  /* page surface */
+  --color-slate-100:  #F1F5F9;
+  --color-slate-200:  #E2E8F0;  /* borders */
+  --color-slate-300:  #CBD5E1;
+  --color-slate-400:  #94A3B8;
+  --color-slate-500:  #64748B;  /* secondary text */
+  --color-slate-600:  #475569;
+  --color-slate-700:  #334155;
+  --color-slate-800:  #1E293B;
+  --color-slate-900:  #0F172A;  /* primary text */
+  --color-slate-950:  #020617;
+
+  /* ── Semantic aliases ───────────────────────────────────────────── */
+  --color-bg:           var(--color-white);
+  --color-surface:      var(--color-slate-50);
+  --color-border:       var(--color-slate-200);
+  --color-text:         var(--color-slate-900);
+  --color-text-muted:   var(--color-slate-500);
+  --color-brand:        var(--color-teal);
+  --color-action:       var(--color-orange);
+
+  /* ── Verified / trust semantic ─────────────────────────────────── */
+  --color-verified-bg:   #F0FDFA;
+  --color-verified-text: #0F766E;
+  --color-verified-ring: #0D9488;
+
+  /* ── Status semantic (separate from brand accent) ──────────────── */
+  --color-success-bg:   #F0FDF4;
+  --color-success-text: #166534;
+  --color-warning-bg:   #FFFBEB;
+  --color-warning-text: #92400E;
+  --color-error-bg:     #FEF2F2;
+  --color-error-text:   #991B1B;
+
+  /* ── Type scale ─────────────────────────────────────────────────── */
+  --text-2xs:  0.6875rem;
+  --text-xs:   0.75rem;
+  --text-sm:   0.875rem;
+  --text-base: 1rem;
+  --text-lg:   1.125rem;
+  --text-xl:   1.25rem;
+  --text-2xl:  1.5rem;
+  --text-3xl:  1.875rem;
+  --text-4xl:  2.25rem;
+  --text-5xl:  3rem;
+  --text-6xl:  3.75rem;
+
+  /* ── Letter spacing ─────────────────────────────────────────────── */
+  --tracking-tighter: -0.04em;
+  --tracking-tight:   -0.025em;
+  --tracking-snug:    -0.015em;
+  --tracking-normal:  0em;
+  --tracking-label:   0.06em;
+  --tracking-wide:    0.1em;
+
+  /* ── Radii ──────────────────────────────────────────────────────── */
+  --radius-sm:  3px;
+  --radius:     5px;
+  --radius-md:  7px;
+  --radius-lg:  10px;
+  --radius-xl:  14px;
+
+  /* ── Shadows ────────────────────────────────────────────────────── */
+  --shadow-xs: 0 1px 2px rgba(15,23,42,0.04);
+  --shadow-sm: 0 2px 6px rgba(15,23,42,0.06);
+  --shadow:    0 4px 14px rgba(15,23,42,0.08);
+  --shadow-md: 0 6px 20px rgba(15,23,42,0.09);
+  --shadow-lg: 0 12px 36px rgba(15,23,42,0.11);
+  --shadow-teal:   0 0 0 3px rgba(13,148,136,0.18);
+  --shadow-orange: 0 0 0 3px rgba(249,115,22,0.20);
+
+  /* ── Spacing rhythm ─────────────────────────────────────────────── */
+  --space-section:    6rem;
+  --space-section-sm: 4rem;
+  --max-w-container:  72rem;
+
+  /* ── Transitions ────────────────────────────────────────────────── */
+  --transition-fast:   100ms ease;
+  --transition:        150ms ease;
+  --transition-slow:   250ms ease;
+}

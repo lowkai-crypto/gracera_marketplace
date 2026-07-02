@@ -38,3 +38,11 @@ A two-sided B2B marketplace connecting suppliers/vendors/manufacturers with buye
 | `docs/17-use-cases.md` | 12 end-to-end use cases (supplier + buyer per priority vertical); maps to Playwright test fixtures |
 | `docs/18-qa-test-plan.md` | QA process, Playwright structure, fixture strategy, CI/CD pipeline, bug severity, definition of done |
 | `docs/19-tech-stack-dev-setup.md` | Full stack reference, local Docker setup, env vars, migrations, Coolify deployment, troubleshooting |
+| `docs/20-admin-ops-spec.md` | Admin roles, verification queue, dispute queue, wire transfer queue, manual match override, platform metrics |
+| `docs/21-notifications-email-spec.md` | All email templates, in-app notification design, digest cadence, delivery rules, user preferences |
+| `docs/22-onboarding-flows.md` | Supplier and buyer activation flows, completeness gates, dual-role onboarding, white-glove concierge |
+| `docs/23-unit-economics.md` | CAC, LTV, payback period, MRR build model, GMV projections, break-even |
+| `docs/24-competitive-positioning.md` | Alibaba, ThomasNet, IndiaMART, Faire, Sourcify comparison; Gracera moat; sales objections |
+| `docs/25-legal-compliance.md` | GDPR/CCPA, KYB, sanctions screening, marketplace liability, contract template library |
+| `docs/26-runbook.md` | Incident response, on-call playbook, SLAs by tier, deployment, backup/restore, background jobs |
+| `docs/27-integrations.md` | Claude API, Stripe, SendGrid, DocuSign, QIMA, DeepL, ERP (Coupa/Odoo), freight APIs |

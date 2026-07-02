@@ -1,0 +1,16 @@
+{
+  "name": "gracera-marketplace",
+  "private": true,
+  "scripts": {
+    "dev": "pnpm --parallel --filter './apps/*' dev",
+    "build": "pnpm --filter './packages/*' build && pnpm --filter './apps/*' build",
+    "test": "pnpm --recursive test",
+    "test:unit": "pnpm --recursive test:unit",
+    "test:integration": "pnpm --recursive test:integration",
+    "test:e2e": "pnpm --filter web test:e2e"
+  },
+  "engines": {
+    "node": ">=20",
+    "pnpm": ">=8"
+  }
+}

@@ -1,0 +1,34 @@
+# Dependencies
+node_modules/
+.pnpm-store/
+
+# Next.js
+apps/web/.next/
+apps/web/out/
+
+# Python
+__pycache__/
+*.pyc
+*.pyo
+.venv/
+apps/ai-service/.venv/
+
+# Environment
+.env
+.env.local
+.env.*.local
+
+# Build outputs
+apps/web/dist/
+apps/ai-service/dist/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Editor
+.vscode/
+.idea/
+
+# Coolify / Docker
+*.log

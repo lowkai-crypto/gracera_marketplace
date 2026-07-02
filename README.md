@@ -90,6 +90,14 @@ Gracera is a two-sided marketplace that removes the friction from B2B sourcing a
 | [Use Cases](docs/17-use-cases.md) | 12 end-to-end scenarios (1 supplier + 1 buyer per priority vertical); structured for QA and Playwright test automation |
 | [QA & Test Plan](docs/18-qa-test-plan.md) | Testing strategy, Playwright E2E structure, fixture patterns, SLA assertions, CI/CD pipeline, and bug severity definitions |
 | [Tech Stack & Dev Setup](docs/19-tech-stack-dev-setup.md) | Full tech stack reference, local environment setup, Docker Compose, env vars, migrations, deployment to Oracle Cloud via Coolify |
+| [Admin & Ops Spec](docs/20-admin-ops-spec.md) | Admin roles, verification queue, dispute queue, wire transfer queue, match override, content moderation, platform metrics dashboard |
+| [Notifications & Email Spec](docs/21-notifications-email-spec.md) | All transactional email templates, in-app notification design, digest cadence, delivery rules, and user preference controls |
+| [Onboarding Flows](docs/22-onboarding-flows.md) | Supplier and buyer activation flows, completeness gates, safety nets, dual-role onboarding, white-glove concierge flow |
+| [Unit Economics](docs/23-unit-economics.md) | CAC by channel, LTV and payback by tier, MRR build model, GMV projections, break-even analysis |
+| [Competitive Positioning](docs/24-competitive-positioning.md) | Platform-by-platform analysis (Alibaba, ThomasNet, IndiaMART, Faire, Sourcify, Kompass), Gracera's moat, sales objection handling |
+| [Legal & Compliance](docs/25-legal-compliance.md) | GDPR/CCPA, KYB/sanctions screening, marketplace liability framework, contract template library, prohibited goods |
+| [Runbook](docs/26-runbook.md) | On-call structure, incident response, SLAs by tier, deployment procedures, backup/restore, background jobs, post-mortem template |
+| [Integrations](docs/27-integrations.md) | Claude API, Stripe, SendGrid, DocuSign, QIMA, DeepL, ERP (Coupa/Odoo), OAuth2, business registry APIs, freight forwarder APIs |
 
 ---
 
