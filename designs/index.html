@@ -1,0 +1,437 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Gracera — Homepage Design Review</title>
+<style>
+:root {
+  --ink: #111827;
+  --ink2: #374151;
+  --muted: #6B7280;
+  --light: #9CA3AF;
+  --border: #E5E7EB;
+  --bg: #F9FAFB;
+  --white: #FFFFFF;
+  --green: #22C55E;
+  --green-bg: rgba(34,197,94,.08);
+  --orange: #F97316;
+  --orange-bg: rgba(249,115,22,.08);
+  --max-w: 72rem;
+}
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html { scroll-behavior: smooth; }
+body {
+  background: var(--bg);
+  color: var(--ink);
+  font-family: system-ui, -apple-system, 'Helvetica Neue', Arial, sans-serif;
+  line-height: 1.6;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* HEADER */
+header {
+  background: var(--white);
+  border-bottom: 1px solid var(--border);
+  padding: 2rem 2rem 1.75rem;
+}
+.hd-inner {
+  max-width: var(--max-w);
+  margin: 0 auto;
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 2rem;
+  flex-wrap: wrap;
+}
+.hd-logo {
+  font-size: .875rem;
+  font-weight: 800;
+  letter-spacing: -.03em;
+  color: var(--ink);
+  text-decoration: none;
+}
+.hd-logo span { color: var(--green); }
+.hd-title {
+  font-size: clamp(1.375rem, 2.5vw, 1.875rem);
+  font-weight: 700;
+  letter-spacing: -.04em;
+  line-height: 1.15;
+  color: var(--ink);
+  margin-bottom: .375rem;
+}
+.hd-sub {
+  font-size: .9375rem;
+  color: var(--muted);
+  line-height: 1.6;
+  max-width: 52ch;
+}
+.hd-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: .375rem;
+  font-size: .6875rem;
+  font-weight: 600;
+  letter-spacing: .06em;
+  text-transform: uppercase;
+  color: var(--green);
+  background: var(--green-bg);
+  padding: .3125rem .75rem;
+  border-radius: 100px;
+  white-space: nowrap;
+  margin-top: .25rem;
+}
+.hd-badge::before {
+  content: '';
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--green);
+}
+
+/* INSTRUCTIONS */
+.instructions {
+  background: var(--white);
+  border-bottom: 1px solid var(--border);
+  padding: 1.25rem 2rem;
+}
+.instr-inner {
+  max-width: var(--max-w);
+  margin: 0 auto;
+  display: flex;
+  align-items: center;
+  gap: 2.5rem;
+  flex-wrap: wrap;
+}
+.instr-item {
+  font-size: .8125rem;
+  color: var(--muted);
+  display: flex;
+  align-items: center;
+  gap: .5rem;
+}
+.instr-n {
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background: var(--ink);
+  color: #fff;
+  font-size: .5625rem;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+/* GRID */
+main {
+  max-width: var(--max-w);
+  margin: 0 auto;
+  padding: 2.5rem 2rem 4rem;
+}
+.grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 1.25rem;
+}
+
+/* CARD */
+.card {
+  background: var(--white);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  transition: box-shadow .15s, border-color .15s;
+}
+.card:hover {
+  border-color: #D1D5DB;
+  box-shadow: 0 4px 24px rgba(0,0,0,.07);
+}
+.card-preview {
+  width: 100%;
+  height: 200px;
+  border: none;
+  display: block;
+  background: #F3F4F6;
+  pointer-events: none;
+}
+.card-body {
+  padding: 1.25rem 1.25rem 1.5rem;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: .875rem;
+}
+.card-meta {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+.card-num {
+  font-size: .5625rem;
+  font-weight: 700;
+  letter-spacing: .12em;
+  text-transform: uppercase;
+  color: var(--light);
+}
+.card-style-tag {
+  font-size: .5625rem;
+  font-weight: 600;
+  letter-spacing: .08em;
+  text-transform: uppercase;
+  padding: .2rem .5rem;
+  border-radius: 4px;
+}
+.tag-dark    { background: #1F2937; color: #6EE7B7; }
+.tag-light   { background: #F3F4F6; color: #374151; }
+.tag-minimal { background: #F0FDF4; color: #15803D; }
+.tag-bold    { background: #FFF7ED; color: #C2410C; }
+.tag-split   { background: linear-gradient(to right, #F0FDF4, #FFF7ED); color: #374151; }
+
+.card-name {
+  font-size: 1.0625rem;
+  font-weight: 700;
+  letter-spacing: -.025em;
+  line-height: 1.25;
+  color: var(--ink);
+}
+.card-desc {
+  font-size: .8125rem;
+  line-height: 1.65;
+  color: var(--muted);
+  flex: 1;
+}
+.card-cta {
+  display: inline-flex;
+  align-items: center;
+  gap: .375rem;
+  font-size: .8125rem;
+  font-weight: 600;
+  color: var(--white);
+  background: var(--green);
+  padding: .5625rem 1.125rem;
+  border-radius: 6px;
+  text-decoration: none;
+  transition: opacity .15s;
+  align-self: flex-start;
+}
+.card-cta:hover { opacity: .85; }
+.card-cta svg { flex-shrink: 0; }
+
+/* FOOTER */
+footer {
+  border-top: 1px solid var(--border);
+  padding: 1.5rem 2rem;
+  text-align: center;
+}
+.ft-inner {
+  max-width: var(--max-w);
+  margin: 0 auto;
+  font-size: .75rem;
+  color: var(--light);
+}
+
+@media (max-width: 640px) {
+  .grid { grid-template-columns: 1fr; }
+  .instr-inner { flex-direction: column; gap: .75rem; }
+}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="hd-inner">
+    <div>
+      <a href="https://gracera.ai" class="hd-logo">gracera<span>.</span>ai</a>
+    </div>
+    <div>
+      <h1 class="hd-title">Homepage Design Review</h1>
+      <p class="hd-sub">10 homepage concepts for gracera.ai — each with a distinct visual style. Click any design to view it full-screen, then reply with your favorite number.</p>
+      <div class="hd-badge">10 designs · Spring 2026</div>
+    </div>
+  </div>
+</header>
+
+<div class="instructions">
+  <div class="instr-inner">
+    <div class="instr-item"><span class="instr-n">1</span>Browse all 10 designs below</div>
+    <div class="instr-item"><span class="instr-n">2</span>Click "Open Design" to view full-screen</div>
+    <div class="instr-item"><span class="instr-n">3</span>Reply with the number of your favorite</div>
+  </div>
+</div>
+
+<main>
+  <div class="grid">
+
+    <div class="card">
+      <iframe class="card-preview" src="web-dark" loading="lazy" title="Dark Observatory preview" scrolling="no"></iframe>
+      <div class="card-body">
+        <div class="card-meta">
+          <span class="card-num">Design 01</span>
+          <span class="card-style-tag tag-dark">Dark Premium</span>
+        </div>
+        <div class="card-name">Dark Observatory</div>
+        <p class="card-desc">Deep navy background, animated trade network canvas, glowing spring green accents. Feels premium and technical — like a Bloomberg terminal for B2B trade.</p>
+        <a href="web-dark" target="_blank" class="card-cta">
+          <svg width="13" height="13" viewBox="0 0 13 13" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2 11L11 2M11 2H5M11 2v6"/></svg>
+          Open Design
+        </a>
+      </div>
+    </div>
+
+    <div class="card">
+      <iframe class="card-preview" src="web-editorial" loading="lazy" title="Editorial Broadsheet preview" scrolling="no"></iframe>
+      <div class="card-body">
+        <div class="card-meta">
+          <span class="card-num">Design 02</span>
+          <span class="card-style-tag tag-light">Editorial</span>
+        </div>
+        <div class="card-name">Editorial Broadsheet</div>
+        <p class="card-desc">Newspaper-style layout with serif typography, column rules, and live match results in a masthead format. Authoritative and trust-building.</p>
+        <a href="web-editorial" target="_blank" class="card-cta">
+          <svg width="13" height="13" viewBox="0 0 13 13" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2 11L11 2M11 2H5M11 2v6"/></svg>
+          Open Design
+        </a>
+      </div>
+    </div>
+
+    <div class="card">
+      <iframe class="card-preview" src="web-brutalist" loading="lazy" title="Brutalist Direct preview" scrolling="no"></iframe>
+      <div class="card-body">
+        <div class="card-meta">
+          <span class="card-num">Design 03</span>
+          <span class="card-style-tag tag-bold">Brutalist</span>
+        </div>
+        <div class="card-name">Brutalist Direct</div>
+        <p class="card-desc">Heavy black borders, maximum contrast, uppercase typography. A bold spring green "How It Works" section. Direct and uncompromising — stands out in any feed.</p>
+        <a href="web-brutalist" target="_blank" class="card-cta">
+          <svg width="13" height="13" viewBox="0 0 13 13" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2 11L11 2M11 2H5M11 2v6"/></svg>
+          Open Design
+        </a>
+      </div>
+    </div>
+
+    <div class="card">
+      <iframe class="card-preview" src="web-minimal" loading="lazy" title="Ma Negative Space preview" scrolling="no"></iframe>
+      <div class="card-body">
+        <div class="card-meta">
+          <span class="card-num">Design 04</span>
+          <span class="card-style-tag tag-minimal">Minimal</span>
+        </div>
+        <div class="card-name">Ma — Negative Space</div>
+        <p class="card-desc">Japanese-inspired extreme whitespace. Light weight typography, 1px hairline score bars, no decoration. Lets the content speak entirely on its own.</p>
+        <a href="web-minimal" target="_blank" class="card-cta">
+          <svg width="13" height="13" viewBox="0 0 13 13" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2 11L11 2M11 2H5M11 2v6"/></svg>
+          Open Design
+        </a>
+      </div>
+    </div>
+
+    <div class="card">
+      <iframe class="card-preview" src="web-terminal" loading="lazy" title="Trading Floor Terminal preview" scrolling="no"></iframe>
+      <div class="card-body">
+        <div class="card-meta">
+          <span class="card-num">Design 05</span>
+          <span class="card-style-tag tag-dark">Terminal</span>
+        </div>
+        <div class="card-name">Trading Floor Terminal</div>
+        <p class="card-desc">Monospace font throughout, dark GitHub-style panels, live match feed ticker, blinking cursor. Looks like a professional trading platform for B2B deals.</p>
+        <a href="web-terminal" target="_blank" class="card-cta">
+          <svg width="13" height="13" viewBox="0 0 13 13" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2 11L11 2M11 2H5M11 2v6"/></svg>
+          Open Design
+        </a>
+      </div>
+    </div>
+
+    <div class="card">
+      <iframe class="card-preview" src="web-poster" loading="lazy" title="Signal Poster preview" scrolling="no"></iframe>
+      <div class="card-body">
+        <div class="card-meta">
+          <span class="card-num">Design 06</span>
+          <span class="card-style-tag tag-bold">Poster / Bold</span>
+        </div>
+        <div class="card-name">Signal Poster</div>
+        <p class="card-desc">Giant billboard typography over a full-screen spring green hero block. Graphic and loud — unmissable. The CTA section splits into a teal/orange diptych.</p>
+        <a href="web-poster" target="_blank" class="card-cta">
+          <svg width="13" height="13" viewBox="0 0 13 13" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2 11L11 2M11 2H5M11 2v6"/></svg>
+          Open Design
+        </a>
+      </div>
+    </div>
+
+    <div class="card">
+      <iframe class="card-preview" src="web-swiss" loading="lazy" title="Swiss System preview" scrolling="no"></iframe>
+      <div class="card-body">
+        <div class="card-meta">
+          <span class="card-num">Design 07</span>
+          <span class="card-style-tag tag-light">Swiss Grid</span>
+        </div>
+        <div class="card-name">Swiss System</div>
+        <p class="card-desc">Strict typographic grid, 1px hairline rules, watermark numerals. Every element locked to a column system. Clean, rational, and highly structured.</p>
+        <a href="web-swiss" target="_blank" class="card-cta">
+          <svg width="13" height="13" viewBox="0 0 13 13" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2 11L11 2M11 2H5M11 2v6"/></svg>
+          Open Design
+        </a>
+      </div>
+    </div>
+
+    <div class="card">
+      <iframe class="card-preview" src="web-warm" loading="lazy" title="Warm Connections preview" scrolling="no"></iframe>
+      <div class="card-body">
+        <div class="card-meta">
+          <span class="card-num">Design 08</span>
+          <span class="card-style-tag tag-light">Warm / Human</span>
+        </div>
+        <div class="card-name">Warm Connections</div>
+        <p class="card-desc">Warm cream palette, rounded cards, soft shadows, animated trade visualization. Approachable and human — feels like a trusted platform, not a trading floor.</p>
+        <a href="web-warm" target="_blank" class="card-cta">
+          <svg width="13" height="13" viewBox="0 0 13 13" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2 11L11 2M11 2H5M11 2v6"/></svg>
+          Open Design
+        </a>
+      </div>
+    </div>
+
+    <div class="card">
+      <iframe class="card-preview" src="web-lattice" loading="lazy" title="Hexagonal Lattice preview" scrolling="no"></iframe>
+      <div class="card-body">
+        <div class="card-meta">
+          <span class="card-num">Design 09</span>
+          <span class="card-style-tag tag-minimal">Geometric</span>
+        </div>
+        <div class="card-name">Hexagonal Lattice</div>
+        <p class="card-desc">Animated hexagonal grid canvas fills the hero — spring green supplier nodes pulsing and orange buyer nodes responding. Tech-forward and visually distinctive.</p>
+        <a href="web-lattice" target="_blank" class="card-cta">
+          <svg width="13" height="13" viewBox="0 0 13 13" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2 11L11 2M11 2H5M11 2v6"/></svg>
+          Open Design
+        </a>
+      </div>
+    </div>
+
+    <div class="card">
+      <iframe class="card-preview" src="web-split" loading="lazy" title="Two Worlds preview" scrolling="no"></iframe>
+      <div class="card-body">
+        <div class="card-meta">
+          <span class="card-num">Design 10</span>
+          <span class="card-style-tag tag-split">Split</span>
+        </div>
+        <div class="card-name">Two Worlds</div>
+        <p class="card-desc">Full-viewport vertical split — deep forest green for suppliers on the left, warm white for buyers on the right. The AI orb floats at the exact seam. Directly visualizes the two-sided marketplace.</p>
+        <a href="web-split" target="_blank" class="card-cta">
+          <svg width="13" height="13" viewBox="0 0 13 13" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2 11L11 2M11 2H5M11 2v6"/></svg>
+          Open Design
+        </a>
+      </div>
+    </div>
+
+  </div>
+</main>
+
+<footer>
+  <div class="ft-inner">Gracera.ai · Homepage Design Review · Confidential</div>
+</footer>
+
+</body>
+</html>

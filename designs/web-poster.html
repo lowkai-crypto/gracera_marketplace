@@ -1,0 +1,236 @@
+<title>Gracera — Signal</title>
+<meta name="description" content="Gracera: AI-scored B2B introductions. The right supplier. Ranked.">
+<style>
+:root{
+  --teal:#22C55E;
+  --teal-dark:#15803D;
+  --orange:#F97316;
+  --black:#0A0A0A;
+  --white:#FFFFFF;
+  --off-white:#F5F5F3;
+  --muted:#6B6B6B;
+  --max-w:80rem;
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth}
+body{background:var(--white);color:var(--black);font-family:system-ui,-apple-system,'Helvetica Neue',Arial,sans-serif;-webkit-font-smoothing:antialiased;overflow-x:hidden}
+
+/* NAV — sparse */
+nav{position:sticky;top:0;z-index:100;padding:1.375rem 2.5rem;display:flex;align-items:center;background:rgba(255,255,255,0.95);backdrop-filter:blur(12px)}
+.logo{text-decoration:none;color:var(--black);font-size:.875rem;font-weight:700;letter-spacing:.01em}
+.logo-dot{color:var(--teal)}
+.nav-links{margin-left:auto;display:flex;gap:2rem;list-style:none}
+.nav-links a{font-size:.75rem;font-weight:400;color:var(--muted);text-decoration:none;transition:color .15s}
+.nav-links a:hover{color:var(--black)}
+.btn-nav{margin-left:2rem;font-size:.75rem;font-weight:600;color:var(--white);background:var(--orange);padding:.4375rem 1.125rem;border-radius:2px;text-decoration:none;transition:opacity .15s}
+.btn-nav:hover{opacity:.85}
+
+/* HERO — billboard */
+.hero{min-height:90vh;display:flex;flex-direction:column;position:relative;overflow:hidden}
+.hero-teal-block{position:absolute;top:0;left:0;right:0;height:58%;background:var(--teal);z-index:0}
+.hero-content{position:relative;z-index:1;flex:1;display:flex;flex-direction:column;justify-content:center;padding:6rem 2.5rem 2rem}
+.hero-tag{font-size:.5625rem;font-weight:700;letter-spacing:.2em;text-transform:uppercase;color:rgba(255,255,255,.6);margin-bottom:2rem}
+.hero-h1{font-size:clamp(4rem,10vw,8.5rem);font-weight:900;line-height:.92;letter-spacing:-.05em;color:var(--white);text-transform:uppercase;max-width:10ch;text-wrap:balance}
+.hero-h1 .line-two{color:var(--white);display:block;margin-top:.1em}
+.hero-h1 .line-three{font-style:italic;font-weight:300;color:rgba(255,255,255,.45);font-size:.42em;letter-spacing:-.02em;text-transform:none;display:block;margin-top:.3em}
+.hero-bottom{position:relative;z-index:1;background:var(--white);padding:4rem 2.5rem 5rem;display:grid;grid-template-columns:1fr 1fr;gap:5rem;align-items:start}
+.hero-desc{font-size:1.125rem;line-height:1.7;color:var(--black);max-width:44ch;font-weight:300}
+.hero-desc strong{font-weight:700}
+.hero-ctas{display:flex;flex-direction:column;gap:1rem;align-items:flex-start}
+.btn-huge{font-size:1.0625rem;font-weight:700;padding:1.125rem 2.5rem;text-decoration:none;display:inline-flex;align-items:center;gap:.75rem;transition:opacity .15s}
+.btn-huge:hover{opacity:.85}
+.btn-huge-teal{color:var(--white);background:var(--teal)}
+.btn-huge-ghost{color:var(--black);border:2px solid var(--black)}
+.btn-huge-ghost:hover{background:var(--black);color:var(--white);opacity:1}
+.hero-note{font-size:.75rem;font-weight:400;color:var(--muted);margin-top:.5rem}
+
+/* STATS BAND */
+.stats-band{background:var(--black);padding:2.5rem 2.5rem;display:flex;gap:0;align-items:stretch}
+.stat-b{flex:1;padding:0 3rem 0 0;border-right:1px solid rgba(255,255,255,.1)}
+.stat-b:last-child{border-right:none;padding-right:0}
+.stat-b:not(:first-child){padding-left:3rem}
+.sv-b{font-size:2.75rem;font-weight:900;letter-spacing:-.055em;color:var(--white);line-height:1;font-variant-numeric:tabular-nums}
+.sv-b sup{font-size:.45em;vertical-align:super;color:var(--teal)}
+.sl-b{font-size:.5625rem;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:rgba(255,255,255,.35);margin-top:.375rem}
+
+/* DIMENSIONS STRIP */
+.dims-strip{padding:5rem 2.5rem;border-bottom:1px solid #E8E8E5}
+.ds-head{margin-bottom:3.5rem}
+.ds-tag{font-size:.5625rem;font-weight:700;letter-spacing:.2em;text-transform:uppercase;color:var(--teal);margin-bottom:1.25rem}
+.ds-h{font-size:clamp(2rem,4vw,3.5rem);font-weight:900;letter-spacing:-.05em;text-transform:uppercase;line-height:.96;color:var(--black);text-wrap:balance}
+.ds-h em{font-style:italic;font-weight:300;font-size:.65em;letter-spacing:-.02em;text-transform:none;display:block;margin-top:.2em;color:var(--muted)}
+.dims-row{display:flex;gap:0;border-left:3px solid var(--teal)}
+.dim-item{flex:1;padding:1.75rem 1.5rem;border-right:1px solid #E8E8E5}
+.dim-item:last-child{border-right:none}
+.di-n{font-size:2rem;font-weight:900;letter-spacing:-.05em;color:#F0F0EE;line-height:1;font-variant-numeric:tabular-nums;margin-bottom:.625rem}
+.di-label{font-size:.6875rem;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--black)}
+.di-desc{font-size:.75rem;line-height:1.6;color:var(--muted);margin-top:.375rem}
+
+/* MATCH CARD — large, poster-scale */
+.match-sec{padding:5rem 2.5rem;background:var(--off-white)}
+.match-inner{display:grid;grid-template-columns:1fr 460px;gap:5rem;align-items:center}
+.mi-tag{font-size:.5625rem;font-weight:700;letter-spacing:.2em;text-transform:uppercase;color:var(--teal);margin-bottom:1.5rem}
+.mi-h{font-size:clamp(2rem,4vw,3.25rem);font-weight:900;letter-spacing:-.05em;text-transform:uppercase;line-height:.96;color:var(--black);margin-bottom:1.5rem;text-wrap:balance}
+.mi-h em{font-style:italic;font-weight:300;font-size:.6em;letter-spacing:-.02em;text-transform:none;display:block;margin-top:.25em;color:var(--muted)}
+.mi-p{font-size:1rem;line-height:1.75;color:var(--muted);max-width:44ch;font-weight:300}
+.card-poster{background:var(--white);border:2px solid var(--black);overflow:hidden}
+.cp-top{padding:1.25rem 1.5rem;border-bottom:2px solid var(--black);display:flex;justify-content:space-between;align-items:center}
+.cp-pair{font-size:.875rem;font-weight:700}
+.cp-pct{font-size:2rem;font-weight:900;letter-spacing:-.05em;color:var(--teal);font-variant-numeric:tabular-nums}
+.cp-dims{padding:1.5rem}
+.dim-p{display:grid;grid-template-columns:120px 1fr 38px;align-items:center;gap:.875rem;margin-bottom:1rem}
+.dim-p:last-child{margin-bottom:0}
+.dp-name{font-size:.625rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
+.dp-track{height:5px;background:#E8E8E5}
+.dp-fill{height:100%;background:var(--black);width:0;transition:width 1.1s cubic-bezier(.22,.61,.36,1)}
+.dp-val{font-size:.625rem;font-weight:900;color:var(--black);font-variant-numeric:tabular-nums}
+
+/* CTA — split */
+.cta-sec{display:grid;grid-template-columns:1fr 1fr}
+.cta-left{background:var(--teal);padding:4rem 3rem}
+.cta-right{background:var(--orange);padding:4rem 3rem}
+.cta-tag{font-size:.5625rem;font-weight:700;letter-spacing:.2em;text-transform:uppercase;color:rgba(255,255,255,.6);margin-bottom:1.25rem}
+.cta-h{font-size:clamp(1.625rem,2.5vw,2.25rem);font-weight:900;letter-spacing:-.04em;text-transform:uppercase;line-height:1.05;color:var(--white);margin-bottom:1rem;text-wrap:balance}
+.cta-p-text{font-size:.9375rem;line-height:1.7;color:rgba(255,255,255,.75);margin-bottom:2rem;max-width:30ch;font-weight:300}
+.btn-cta-w{font-size:.875rem;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--teal);background:var(--white);padding:.875rem 1.875rem;text-decoration:none;display:inline-block;transition:opacity .15s}
+.btn-cta-w:hover{opacity:.88}
+.btn-cta-w-o{color:var(--orange)}
+.cta-note{font-size:.625rem;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:rgba(255,255,255,.4);margin-top:.875rem}
+
+/* FOOTER */
+footer{background:var(--black);padding:2rem 2.5rem;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:1rem}
+.ft-logo{text-decoration:none;color:var(--white);font-size:.875rem;font-weight:700;letter-spacing:.01em}
+.ft-links{display:flex;gap:1.5rem;list-style:none}
+.ft-links a{font-size:.625rem;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:rgba(255,255,255,.3);text-decoration:none;transition:color .15s}
+.ft-links a:hover{color:var(--white)}
+.ft-copy{font-size:.625rem;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:rgba(255,255,255,.2)}
+
+@media(max-width:900px){
+  nav{padding:1rem 1.5rem}
+  .nav-links{display:none}
+  .hero-h1{font-size:clamp(3rem,10vw,6rem)}
+  .hero-bottom{grid-template-columns:1fr;gap:2.5rem;padding:3rem 1.5rem}
+  .stats-band{flex-direction:column;gap:2rem;padding:2.5rem 1.5rem}
+  .stat-b{border-right:none;border-bottom:1px solid rgba(255,255,255,.1);padding:0 0 2rem 0}
+  .stat-b:last-child{border-bottom:none;padding-bottom:0}
+  .stat-b:not(:first-child){padding-left:0}
+  .dims-strip{padding:3rem 1.5rem}
+  .dims-row{flex-direction:column;border-left:none;border-top:3px solid var(--teal)}
+  .dim-item{border-right:none;border-bottom:1px solid #E8E8E5}
+  .match-inner{grid-template-columns:1fr;gap:3rem;padding:3rem 1.5rem}
+  .match-sec{padding:3rem 1.5rem}
+  .cta-sec{grid-template-columns:1fr}
+}
+@media(prefers-reduced-motion:reduce){.dp-fill{transition:none}}
+</style>
+
+<nav>
+  <a href="#" class="logo">gracera<span class="logo-dot">.</span>ai</a>
+  <ul class="nav-links">
+    <li><a href="#">How it works</a></li>
+    <li><a href="#">For suppliers</a></li>
+    <li><a href="#">For buyers</a></li>
+    <li><a href="#">Pricing</a></li>
+  </ul>
+  <a href="#" class="btn-nav">Get started free</a>
+</nav>
+
+<section class="hero">
+  <div class="hero-teal-block"></div>
+  <div class="hero-content">
+    <div class="hero-tag">B2B Trade Intelligence Platform</div>
+    <h1 class="hero-h1">
+      Find<br>
+      <span class="line-two">Your Match.</span>
+      <em class="line-three">AI-scored introductions for global trade</em>
+    </h1>
+  </div>
+  <div class="hero-bottom">
+    <div>
+      <p class="hero-desc">Gracera scores supplier–buyer compatibility across <strong>6 dimensions</strong> and surfaces your best matches — with a plain-language explanation for every introduction. No directories. No pay-to-rank.</p>
+    </div>
+    <div class="hero-ctas">
+      <a href="#" class="btn-huge btn-huge-teal">List as a supplier →</a>
+      <a href="#" class="btn-huge btn-huge-ghost">Post a sourcing request</a>
+      <p class="hero-note">Free to start · No credit card required</p>
+    </div>
+  </div>
+</section>
+
+<div class="stats-band">
+  <div class="stat-b"><div class="sv-b">6<sup>×</sup></div><div class="sl-b">Matching Dimensions</div></div>
+  <div class="stat-b"><div class="sv-b">15</div><div class="sl-b">B2B Verticals</div></div>
+  <div class="stat-b"><div class="sv-b">40<sup>+</sup></div><div class="sl-b">Countries</div></div>
+  <div class="stat-b"><div class="sv-b">0</div><div class="sl-b">Pay-to-rank Positions</div></div>
+</div>
+
+<section class="dims-strip">
+  <div class="ds-head">
+    <div class="ds-tag">How We Score</div>
+    <h2 class="ds-h">Six Dimensions.<br><em>Every introduction explained.</em></h2>
+  </div>
+  <div class="dims-row">
+    <div class="dim-item"><div class="di-n">01</div><div class="di-label">Category</div><p class="di-desc">HS-code-level alignment, not just broad industry match.</p></div>
+    <div class="dim-item"><div class="di-n">02</div><div class="di-label">Geography</div><p class="di-desc">Trade lanes, regulatory zones, logistics cost weighting.</p></div>
+    <div class="dim-item"><div class="di-n">03</div><div class="di-label">Scale</div><p class="di-desc">Production capacity matched to actual order volume.</p></div>
+    <div class="dim-item"><div class="di-n">04</div><div class="di-label">Certifications</div><p class="di-desc">Verified against destination market requirements.</p></div>
+    <div class="dim-item"><div class="di-n">05</div><div class="di-label">Customer Fit</div><p class="di-desc">Target buyer type, not just product category.</p></div>
+    <div class="dim-item"><div class="di-n">06</div><div class="di-label">Language</div><p class="di-desc">Communication capacity — essential for closing.</p></div>
+  </div>
+</section>
+
+<section class="match-sec">
+  <div class="match-inner">
+    <div>
+      <div class="mi-tag">Live Match Example</div>
+      <h2 class="mi-h">89% match.<br><em>And here's exactly why.</em></h2>
+      <p class="mi-p">The AI doesn't just rank — it explains. Every introduction comes with a plain-language rationale, in the buyer's preferred language.</p>
+    </div>
+    <div class="card-poster" id="sc-poster">
+      <div class="cp-top">
+        <div class="cp-pair">Jangdok Foods → Lone Star Specialty</div>
+        <div class="cp-pct">89%</div>
+      </div>
+      <div class="cp-dims">
+        <div class="dim-p"><span class="dp-name">Category</span><div class="dp-track"><div class="dp-fill" data-p="96"></div></div><span class="dp-val">96%</span></div>
+        <div class="dim-p"><span class="dp-name">Geography</span><div class="dp-track"><div class="dp-fill" data-p="88"></div></div><span class="dp-val">88%</span></div>
+        <div class="dim-p"><span class="dp-name">Scale</span><div class="dp-track"><div class="dp-fill" data-p="92"></div></div><span class="dp-val">92%</span></div>
+        <div class="dim-p"><span class="dp-name">Certifications</span><div class="dp-track"><div class="dp-fill" data-p="85"></div></div><span class="dp-val">85%</span></div>
+        <div class="dim-p"><span class="dp-name">Customer Fit</span><div class="dp-track"><div class="dp-fill" data-p="90"></div></div><span class="dp-val">90%</span></div>
+        <div class="dim-p"><span class="dp-name">Language</span><div class="dp-track"><div class="dp-fill" data-p="82"></div></div><span class="dp-val">82%</span></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="cta-sec">
+  <div class="cta-left">
+    <div class="cta-tag">For Suppliers</div>
+    <h2 class="cta-h">Reach the buyers you've been looking for.</h2>
+    <p class="cta-p-text">Upload your catalog. Complete your profile. Start receiving ranked buyer introductions within 24 hours of verification.</p>
+    <a href="#" class="btn-cta-w">List as a supplier — free</a>
+    <p class="cta-note">3 AI matches/month on free tier</p>
+  </div>
+  <div class="cta-right">
+    <div class="cta-tag">For Buyers</div>
+    <h2 class="cta-h">Stop searching. Start matching.</h2>
+    <p class="cta-p-text">Describe what you need. Gracera surfaces your best-fit suppliers within hours. No credit card required.</p>
+    <a href="#" class="btn-cta-w btn-cta-w-o">Post a sourcing request — free</a>
+    <p class="cta-note">5 AI match suggestions on free tier</p>
+  </div>
+</section>
+
+<footer>
+  <a href="#" class="ft-logo">gracera.ai</a>
+  <ul class="ft-links"><li><a href="#">How it works</a></li><li><a href="#">Pricing</a></li><li><a href="#">Privacy</a></li><li><a href="#">Terms</a></li></ul>
+  <p class="ft-copy">© 2026 Gracera</p>
+</footer>
+
+<script>
+(function(){
+  const sc=document.getElementById('sc-poster');if(!sc)return;
+  let fired=false;
+  const obs=new IntersectionObserver(e=>{if(e[0].isIntersecting&&!fired){fired=true;setTimeout(()=>{sc.querySelectorAll('.dp-fill').forEach(el=>el.style.width=el.dataset.p+'%')},200);obs.disconnect();}},{threshold:.3});
+  obs.observe(sc);
+})();
+</script>

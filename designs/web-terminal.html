@@ -1,0 +1,297 @@
+<title>GRACERA // TRADING FLOOR</title>
+<meta name="description" content="Gracera: AI-scored B2B trade introductions. Live matching engine.">
+<style>
+:root{
+  --bg:#0D1117;
+  --surface:#161B22;
+  --surface2:#1C2333;
+  --border:#30363D;
+  --teal:#22C55E;
+  --teal-dim:rgba(34,197,94,.15);
+  --green:#3FB950;
+  --orange:#F97316;
+  --orange-dim:rgba(249,115,22,.15);
+  --text:#E6EDF3;
+  --muted:#8B949E;
+  --faint:#3D444D;
+  --max-w:80rem;
+  --mono:ui-monospace,'Cascadia Code','Source Code Pro','Courier New',monospace;
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth}
+body{background:var(--bg);color:var(--text);font-family:var(--mono);line-height:1.6;-webkit-font-smoothing:antialiased}
+.container{max-width:var(--max-w);margin:0 auto;padding:0 1.5rem}
+
+/* TICKER */
+.ticker{background:var(--surface);border-bottom:1px solid var(--border);padding:.4375rem 0;overflow:hidden}
+.ticker-inner{max-width:var(--max-w);margin:0 auto;padding:0 1.5rem;display:flex;gap:2rem;align-items:center}
+.tick{font-size:.6875rem;color:var(--muted);white-space:nowrap;display:flex;align-items:center;gap:.625rem}
+.tick strong{color:var(--teal)}
+.tick-sep{color:var(--faint)}
+.tick-up{color:var(--green)}
+.tick-new{color:var(--orange);animation:blink 1.2s step-end infinite}
+@keyframes blink{50%{opacity:0}}
+
+/* NAV */
+nav{border-bottom:1px solid var(--border);background:var(--surface)}
+.nav-i{max-width:var(--max-w);margin:0 auto;padding:0 1.5rem;height:52px;display:flex;align-items:center;gap:0}
+.logo{text-decoration:none;color:var(--teal);font-size:.9375rem;font-weight:700;letter-spacing:.04em;padding-right:2rem;border-right:1px solid var(--border);white-space:nowrap}
+.logo span{color:var(--muted)}
+.nav-links{display:flex;list-style:none;margin-left:auto}
+.nav-links a{font-size:.6875rem;font-weight:600;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);text-decoration:none;padding:.5rem 1.25rem;border-left:1px solid var(--border);transition:color .15s}
+.nav-links a:hover{color:var(--text)}
+.btn-nav{font-size:.6875rem;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--bg);background:var(--teal);text-decoration:none;padding:.5rem 1.25rem;border-left:1px solid var(--teal)}
+.btn-nav:hover{background:#15803D}
+
+/* HERO */
+.hero{padding:3rem 0;border-bottom:1px solid var(--border)}
+.hero-g{display:grid;grid-template-columns:1fr 380px;gap:2.5rem;align-items:start}
+.prompt-prefix{font-size:.6875rem;color:var(--teal);margin-bottom:1.25rem;display:flex;align-items:center;gap:.5rem}
+.prompt-prefix .path{color:var(--muted)}
+.prompt-prefix .branch{color:var(--orange)}
+.caret{color:var(--teal);animation:blink 1.2s step-end infinite}
+h1{font-size:clamp(1.625rem,3.5vw,2.625rem);font-weight:700;line-height:1.25;letter-spacing:-.02em;color:var(--text);margin-bottom:1.25rem}
+h1 .comment{color:var(--muted);font-weight:400;font-size:.7em}
+.hero-sub{font-size:.9375rem;line-height:1.75;color:var(--muted);max-width:52ch;margin-bottom:2rem}
+.ctas{display:flex;gap:.75rem;flex-wrap:wrap;margin-bottom:2.5rem}
+.btn-t{font-size:.75rem;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--bg);background:var(--teal);padding:.5rem 1.125rem;text-decoration:none;border:1px solid var(--teal);transition:all .15s}
+.btn-t:hover{background:transparent;color:var(--teal)}
+.btn-o{font-size:.75rem;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--bg);background:var(--orange);padding:.5rem 1.125rem;text-decoration:none;border:1px solid var(--orange);transition:all .15s}
+.btn-o:hover{background:transparent;color:var(--orange)}
+.status-row{display:flex;gap:1.5rem;flex-wrap:wrap}
+.status{font-size:.625rem;font-weight:600;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);display:flex;align-items:center;gap:.375rem}
+.status-dot{width:5px;height:5px;border-radius:50%;background:var(--green)}
+.status-dot-o{background:var(--orange)}
+
+/* Stats panel */
+.stats-panel{background:var(--surface);border:1px solid var(--border)}
+.panel-head{padding:.625rem 1rem;border-bottom:1px solid var(--border);font-size:.5625rem;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);display:flex;align-items:center;justify-content:space-between}
+.panel-live{color:var(--green);font-size:.5625rem;font-weight:700;letter-spacing:.08em;display:flex;align-items:center;gap:.375rem}
+.panel-live::before{content:'';width:5px;height:5px;border-radius:50%;background:var(--green);animation:blink 1s step-end infinite}
+.stats-grid{display:grid;grid-template-columns:1fr 1fr;gap:1px;background:var(--border)}
+.stat{background:var(--surface);padding:1rem}
+.sv-term{font-size:1.75rem;font-weight:700;letter-spacing:-.04em;color:var(--text);line-height:1;font-variant-numeric:tabular-nums}
+.sv-term sup{font-size:.45em;vertical-align:super;color:var(--teal)}
+.sl-term{font-size:.5625rem;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);margin-top:.25rem}
+.match-feed{padding:.75rem 0}
+.feed-item{padding:.625rem 1rem;border-bottom:1px solid var(--border);display:grid;grid-template-columns:1fr auto;align-items:center;gap:1rem;font-size:.6875rem}
+.feed-item:last-child{border-bottom:none}
+.fi-pair{color:var(--muted)}
+.fi-pair strong{color:var(--text)}
+.fi-score{color:var(--teal);font-weight:700;font-variant-numeric:tabular-nums}
+
+/* MATCHING */
+.match-sec{padding:3rem 0;border-bottom:1px solid var(--border)}
+.sec-label{font-size:.5625rem;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--teal);margin-bottom:1rem}
+.sec-h{font-size:clamp(1.25rem,2.5vw,1.875rem);font-weight:700;letter-spacing:-.02em;color:var(--text);line-height:1.3;margin-bottom:.75rem;text-wrap:balance}
+.match-g{display:grid;grid-template-columns:1fr 400px;gap:3rem;align-items:start}
+.bullets{list-style:none;margin-top:1.5rem;display:flex;flex-direction:column;gap:.625rem}
+.bullets li{font-size:.8125rem;color:var(--muted);line-height:1.55;display:flex;gap:.625rem;align-items:flex-start}
+.bullets li::before{content:'#';color:var(--teal);flex-shrink:0;font-size:.75rem}
+
+/* Score card terminal */
+.score-term{background:var(--surface);border:1px solid var(--border)}
+.st-head{padding:.625rem 1rem;border-bottom:1px solid var(--border);font-size:.5625rem;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--muted)}
+.st-pair{padding:.875rem 1rem;border-bottom:1px solid var(--border);font-size:.75rem;color:var(--muted)}
+.st-pair strong{color:var(--text)}
+.st-pair .score-big{font-size:1.375rem;font-weight:700;color:var(--teal);font-variant-numeric:tabular-nums;float:right}
+.dims-term{padding:1rem}
+.dim-t{display:grid;grid-template-columns:110px 1fr 38px;align-items:center;gap:.75rem;margin-bottom:.75rem}
+.dim-t:last-child{margin-bottom:0}
+.dn-t{font-size:.5625rem;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--muted)}
+.dt-t{height:8px;background:var(--surface2);border:1px solid var(--border);position:relative;overflow:hidden}
+.df-t{height:100%;background:var(--teal);width:0;transition:width 1.1s cubic-bezier(.22,.61,.36,1)}
+.dp-t{font-size:.625rem;font-weight:700;color:var(--text);text-align:right;font-variant-numeric:tabular-nums}
+.rationale-t{padding:.875rem 1rem;border-top:1px solid var(--border);background:var(--bg)}
+.rt-label{font-size:.5625rem;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);margin-bottom:.375rem}
+.rt-text{font-size:.75rem;line-height:1.65;color:var(--muted);font-style:italic}
+
+/* HOW IT WORKS */
+.how{padding:3rem 0;border-bottom:1px solid var(--border)}
+.steps-term{display:grid;grid-template-columns:repeat(3,1fr);gap:1px;background:var(--border);border:1px solid var(--border);margin-top:2rem}
+.step-t{background:var(--surface);padding:1.75rem 1.5rem}
+.sn-t{font-size:.5625rem;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--teal);margin-bottom:1rem;font-variant-numeric:tabular-nums}
+.step-t h3{font-size:.9375rem;font-weight:700;letter-spacing:-.015em;color:var(--text);margin-bottom:.5rem;line-height:1.35}
+.step-t p{font-size:.8125rem;line-height:1.65;color:var(--muted)}
+
+/* CTA */
+.cta-sec{padding:3rem 0}
+.cta-g{display:grid;grid-template-columns:1fr 1fr;gap:1px;background:var(--border);border:1px solid var(--border)}
+.cta-p{background:var(--surface);padding:2.5rem 2rem}
+.cta-p .sec-label{margin-bottom:.75rem}
+.cta-p h2{font-size:1.25rem;font-weight:700;letter-spacing:-.02em;color:var(--text);line-height:1.3;margin-bottom:.625rem;text-wrap:balance}
+.cta-p p{font-size:.8125rem;line-height:1.65;color:var(--muted);margin-bottom:1.5rem;max-width:36ch}
+.csub{font-size:.5625rem;font-weight:600;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);margin-top:.625rem}
+
+/* FOOTER */
+footer{border-top:1px solid var(--border);background:var(--surface);padding:1.5rem 0}
+.ft-r{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:1.25rem}
+.ft-logo{text-decoration:none;color:var(--teal);font-size:.8125rem;font-weight:700;letter-spacing:.04em}
+.ft-links{display:flex;gap:1.5rem;list-style:none}
+.ft-links a{font-size:.5625rem;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);text-decoration:none;transition:color .15s}
+.ft-links a:hover{color:var(--text)}
+.ft-copy{font-size:.5625rem;font-weight:600;letter-spacing:.06em;text-transform:uppercase;color:var(--faint)}
+
+@media(max-width:900px){.nav-links,.btn-nav{display:none}.hero-g,.match-g,.cta-g{grid-template-columns:1fr}.steps-term{grid-template-columns:1fr}.ticker-inner{flex-wrap:wrap;gap:.75rem}}
+@media(prefers-reduced-motion:reduce){.df-t{transition:none}.caret,.tick-new,.panel-live::before{animation:none}}
+</style>
+
+<div class="ticker">
+  <div class="ticker-inner">
+    <span class="tick"><strong>AI ENGINE</strong> <span class="tick-up">ONLINE</span></span>
+    <span class="tick-sep">|</span>
+    <span class="tick"><strong>ACTIVE DIMS:</strong> 6</span>
+    <span class="tick-sep">|</span>
+    <span class="tick"><strong>VERTICALS:</strong> 15</span>
+    <span class="tick-sep">|</span>
+    <span class="tick"><strong>COUNTRIES:</strong> 40+</span>
+    <span class="tick-sep">|</span>
+    <span class="tick"><strong class="tick-new">NEW MATCH</strong> EcoThread → Verdant Studio <span class="tick-up">91%</span></span>
+    <span class="tick-sep">|</span>
+    <span class="tick"><strong>PAY-TO-RANK:</strong> 0</span>
+  </div>
+</div>
+
+<nav>
+  <div class="nav-i">
+    <a href="#" class="logo">GRACERA<span>/</span>AI</a>
+    <ul class="nav-links">
+      <li><a href="#">HOW_IT_WORKS</a></li>
+      <li><a href="#">SUPPLIERS</a></li>
+      <li><a href="#">BUYERS</a></li>
+      <li><a href="#">PRICING</a></li>
+    </ul>
+    <a href="#" class="btn-nav">START_FREE →</a>
+  </div>
+</nav>
+
+<section class="hero">
+  <div class="container">
+    <div class="hero-g">
+      <div>
+        <div class="prompt-prefix">
+          <span class="path">~/trade</span>
+          <span class="branch">(main)</span>
+          <span class="caret">$</span>
+          <span>gracera --find-match --dims 6</span>
+        </div>
+        <h1>Ranked B2B introductions.<br><span class="comment">// AI-scored across 6 dimensions</span></h1>
+        <p class="hero-sub">Upload your catalog or sourcing request. The matching engine scores every potential counterpart across category, geography, scale, certifications, customer fit, and language — and explains each result.</p>
+        <div class="ctas">
+          <a href="#" class="btn-t">LIST_AS_SUPPLIER</a>
+          <a href="#" class="btn-o">POST_SOURCING_RFQ</a>
+        </div>
+        <div class="status-row">
+          <span class="status"><span class="status-dot"></span>KYB Verification Live</span>
+          <span class="status"><span class="status-dot"></span>15 Verticals Active</span>
+          <span class="status"><span class="status-dot-o status-dot"></span>40+ Countries</span>
+          <span class="status"><span class="status-dot"></span>Zero pay-to-rank</span>
+        </div>
+      </div>
+      <div>
+        <div class="stats-panel">
+          <div class="panel-head">PLATFORM_STATS <span class="panel-live">LIVE</span></div>
+          <div class="stats-grid">
+            <div class="stat"><div class="sv-term">6<sup>×</sup></div><div class="sl-term">Match Dims</div></div>
+            <div class="stat"><div class="sv-term">15</div><div class="sl-term">Verticals</div></div>
+            <div class="stat"><div class="sv-term">40<sup>+</sup></div><div class="sl-term">Countries</div></div>
+            <div class="stat"><div class="sv-term">0</div><div class="sl-term">Pay-to-rank</div></div>
+          </div>
+          <div class="panel-head" style="border-top:1px solid var(--border)">RECENT_MATCHES</div>
+          <div class="match-feed">
+            <div class="feed-item"><span class="fi-pair"><strong>Jangdok Foods</strong> → Lone Star</span><span class="fi-score">89%</span></div>
+            <div class="feed-item"><span class="fi-pair"><strong>EcoThread</strong> → Verdant Studio</span><span class="fi-score">91%</span></div>
+            <div class="feed-item"><span class="fi-pair"><strong>Xincheng Elec.</strong> → Steuerwerk</span><span class="fi-score">84%</span></div>
+            <div class="feed-item"><span class="fi-pair"><strong>Precision One</strong> → BioClean BV</span><span class="fi-score">87%</span></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="match-sec">
+  <div class="container">
+    <div class="match-g">
+      <div>
+        <p class="sec-label">AI_MATCHING_ENGINE</p>
+        <h2 class="sec-h">Every introduction scored across 6 dimensions. Every result explained.</h2>
+        <ul class="bullets">
+          <li>Category and sub-category alignment — weighted by specificity depth</li>
+          <li>Geographic fit — trade lanes, regulatory zones, distance cost</li>
+          <li>Production scale matched to actual order volume requirements</li>
+          <li>Certifications verified against destination market requirements</li>
+          <li>Customer-type fit — not just category, but who they sell to</li>
+          <li>Language and communication capacity — critical for closing deals</li>
+        </ul>
+      </div>
+      <div class="score-term" id="sc-term">
+        <div class="st-head">MATCH_RESULT // GRACERA_AI_v2</div>
+        <div class="st-pair"><strong>Jangdok Foods</strong> → <strong>Lone Star Specialty</strong><span class="score-big">89%</span><br><span style="font-size:.625rem">KR → US · Food & Beverage · Fermented Condiments</span></div>
+        <div class="dims-term">
+          <div class="dim-t"><span class="dn-t">Category</span><div class="dt-t"><div class="df-t" data-p="96"></div></div><span class="dp-t">96%</span></div>
+          <div class="dim-t"><span class="dn-t">Geography</span><div class="dt-t"><div class="df-t" data-p="88"></div></div><span class="dp-t">88%</span></div>
+          <div class="dim-t"><span class="dn-t">Scale</span><div class="dt-t"><div class="df-t" data-p="92"></div></div><span class="dp-t">92%</span></div>
+          <div class="dim-t"><span class="dn-t">Certs</span><div class="dt-t"><div class="df-t" data-p="85"></div></div><span class="dp-t">85%</span></div>
+          <div class="dim-t"><span class="dn-t">Customer Fit</span><div class="dt-t"><div class="df-t" data-p="90"></div></div><span class="dp-t">90%</span></div>
+          <div class="dim-t"><span class="dn-t">Language</span><div class="dt-t"><div class="df-t" data-p="82"></div></div><span class="dp-t">82%</span></div>
+        </div>
+        <div class="rationale-t">
+          <div class="rt-label">RATIONALE</div>
+          <p class="rt-text">"Strong category alignment in Korean fermented condiments. FDA and HACCP certifications confirmed. MOQ of 500 units aligns with pilot order range. English capacity confirmed."</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="how">
+  <div class="container">
+    <p class="sec-label">PROCESS</p>
+    <div class="steps-term">
+      <div class="step-t"><div class="sn-t">STEP_01 // PROFILE</div><h3>Build your verified profile</h3><p>Upload your catalog. AI extracts categories, MOQ, certifications, target markets. KYB verification in 24h. Profile live immediately after.</p></div>
+      <div class="step-t"><div class="sn-t">STEP_02 // MATCH</div><h3>Receive ranked introductions</h3><p>Six-dimension scoring runs on every profile and sourcing request. Best-fit counterparts, ranked and explained — in your preferred language.</p></div>
+      <div class="step-t"><div class="sn-t">STEP_03 // DEAL</div><h3>Close in-platform</h3><p>RFQ, Deal Room, AI Negotiation Coach, e-signature. From first introduction to signed agreement without switching tools.</p></div>
+    </div>
+  </div>
+</section>
+
+<section class="cta-sec">
+  <div class="container">
+    <div class="cta-g">
+      <div class="cta-p">
+        <p class="sec-label">FOR_SUPPLIERS</p>
+        <h2>List your company. Reach verified buyers globally.</h2>
+        <p>Upload your catalog, complete your profile, and start receiving ranked introductions within 24 hours of verification.</p>
+        <a href="#" class="btn-t">LIST_AS_SUPPLIER →</a>
+        <p class="csub">FREE_TIER // 3 AI MATCHES/MONTH</p>
+      </div>
+      <div class="cta-p">
+        <p class="sec-label" style="color:var(--orange)">FOR_BUYERS</p>
+        <h2>Post your sourcing request. Let AI find the match.</h2>
+        <p>Describe what you need. Gracera surfaces ranked supplier matches within hours. No credit card required.</p>
+        <a href="#" class="btn-o">POST_SOURCING_RFQ →</a>
+        <p class="csub">FREE_TIER // 5 AI MATCH SUGGESTIONS</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <div class="container">
+    <div class="ft-r">
+      <a href="#" class="ft-logo">GRACERA/AI</a>
+      <ul class="ft-links"><li><a href="#">HOW_IT_WORKS</a></li><li><a href="#">PRICING</a></li><li><a href="#">PRIVACY</a></li><li><a href="#">TERMS</a></li></ul>
+      <p class="ft-copy">© 2026 GRACERA // ALL_RIGHTS_RESERVED</p>
+    </div>
+  </div>
+</footer>
+
+<script>
+(function(){
+  const sc=document.getElementById('sc-term');if(!sc)return;
+  let fired=false;
+  const obs=new IntersectionObserver(e=>{if(e[0].isIntersecting&&!fired){fired=true;setTimeout(()=>{sc.querySelectorAll('.df-t').forEach(el=>el.style.width=el.dataset.p+'%')},200);obs.disconnect();}},{threshold:.3});
+  obs.observe(sc);
+})();
+</script>

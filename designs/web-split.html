@@ -1,0 +1,524 @@
+<title>Gracera — Two Worlds</title>
+<meta name="description" content="Gracera connects global suppliers and buyers through AI-scored introductions.">
+<style>
+:root {
+  --sup-bg:   #021A0B;
+  --sup-mid:  #03260F;
+  --sup-surf: #053318;
+  --sup-bord: rgba(34,197,94,.25);
+  --teal:     #22C55E;
+  --teal-lit: #4ADE80;
+  --buy-bg:   #FEFDF8;
+  --buy-mid:  #F5F0E8;
+  --buy-bord: #E2D9CC;
+  --orange:   #F97316;
+  --orange-d: #C2410C;
+  --ink:      #1A100A;
+  --ink2:     #3D2E24;
+  --muted-b:  #8C7A6A;
+  --muted-s:  rgba(255,255,255,.45);
+  --max-w:    80rem;
+}
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html { scroll-behavior: smooth; }
+body {
+  background: var(--buy-bg);
+  color: var(--ink);
+  font-family: system-ui, -apple-system, 'Helvetica Neue', Arial, sans-serif;
+  line-height: 1.6;
+  -webkit-font-smoothing: antialiased;
+  overflow-x: hidden;
+}
+
+/* ── NAV ── */
+nav {
+  position: fixed; top: 0; left: 0; right: 0; z-index: 200;
+  height: 58px;
+  display: grid; grid-template-columns: 1fr 1fr;
+}
+.nav-left {
+  background: rgba(3,30,27,.92);
+  backdrop-filter: blur(16px);
+  display: flex; align-items: center;
+  padding: 0 2.5rem; gap: 2rem;
+}
+.nav-right {
+  background: rgba(254,253,248,.92);
+  backdrop-filter: blur(16px);
+  border-bottom: 1px solid var(--buy-bord);
+  display: flex; align-items: center; justify-content: flex-end;
+  padding: 0 2.5rem; gap: 1.5rem;
+}
+.logo {
+  text-decoration: none; font-size: .9375rem; font-weight: 800;
+  letter-spacing: -.03em; color: #fff; white-space: nowrap;
+}
+.logo span { color: var(--teal); }
+.nav-sup-links { display: flex; gap: 1.75rem; list-style: none; }
+.nav-sup-links a { font-size: .75rem; font-weight: 500; color: var(--muted-s); text-decoration: none; transition: color .15s; }
+.nav-sup-links a:hover { color: #fff; }
+.nav-buy-links { display: flex; gap: 1.75rem; list-style: none; }
+.nav-buy-links a { font-size: .75rem; font-weight: 500; color: var(--muted-b); text-decoration: none; transition: color .15s; }
+.nav-buy-links a:hover { color: var(--ink); }
+.btn-s { font-size: .75rem; font-weight: 600; color: var(--sup-bg); background: var(--teal); padding: .375rem 1rem; border-radius: 4px; text-decoration: none; transition: opacity .15s; }
+.btn-s:hover { opacity: .85; }
+.btn-b { font-size: .75rem; font-weight: 600; color: #fff; background: var(--orange); padding: .375rem 1rem; border-radius: 4px; text-decoration: none; transition: opacity .15s; }
+.btn-b:hover { opacity: .85; }
+
+/* ── HERO SPLIT ── */
+.hero {
+  display: grid; grid-template-columns: 1fr 1fr;
+  min-height: 100vh; padding-top: 58px;
+  position: relative;
+}
+/* Supplier side */
+.hero-s {
+  background: var(--sup-bg);
+  padding: 5rem 3.5rem 5rem 3rem;
+  display: flex; flex-direction: column; justify-content: center;
+  position: relative; overflow: hidden;
+}
+.hero-s::before {
+  content: '';
+  position: absolute; top: -200px; left: -200px;
+  width: 600px; height: 600px;
+  background: radial-gradient(circle, rgba(34,197,94,.12) 0%, transparent 65%);
+  pointer-events: none;
+}
+.hero-s-label {
+  font-size: .5625rem; font-weight: 700; letter-spacing: .18em;
+  text-transform: uppercase; color: var(--teal);
+  display: flex; align-items: center; gap: .625rem; margin-bottom: 2rem;
+}
+.hero-s-label::before { content: ''; width: 24px; height: 1px; background: var(--teal); }
+.hero-s h1 {
+  font-size: clamp(2.25rem, 3.5vw, 3.375rem);
+  font-weight: 800; letter-spacing: -.04em; line-height: 1.1;
+  color: #fff; text-wrap: balance; margin-bottom: 1.25rem;
+}
+.hero-s h1 em { font-style: italic; color: var(--teal-lit); font-weight: 300; }
+.hero-s-sub {
+  font-size: 1rem; line-height: 1.75;
+  color: var(--muted-s); max-width: 42ch; margin-bottom: 2.5rem;
+}
+.btn-sup-hero {
+  font-size: .875rem; font-weight: 600; color: var(--sup-bg);
+  background: var(--teal); padding: .75rem 1.75rem;
+  border-radius: 4px; text-decoration: none;
+  display: inline-flex; align-items: center; gap: .5rem;
+  transition: opacity .15s; align-self: flex-start;
+}
+.btn-sup-hero:hover { opacity: .85; }
+.hero-s-trust {
+  margin-top: 2.25rem; display: flex; flex-direction: column; gap: .625rem;
+}
+.ht-item {
+  font-size: .75rem; font-weight: 500; color: rgba(255,255,255,.3);
+  display: flex; align-items: center; gap: .5rem;
+}
+.ht-item::before { content: ''; width: 5px; height: 5px; border-radius: 50%; background: var(--teal); flex-shrink: 0; }
+
+/* Buyer side */
+.hero-b {
+  background: var(--buy-bg);
+  padding: 5rem 3rem 5rem 3.5rem;
+  display: flex; flex-direction: column; justify-content: center;
+  position: relative; overflow: hidden;
+}
+.hero-b::before {
+  content: '';
+  position: absolute; bottom: -200px; right: -200px;
+  width: 500px; height: 500px;
+  background: radial-gradient(circle, rgba(249,115,22,.07) 0%, transparent 65%);
+  pointer-events: none;
+}
+.hero-b-label {
+  font-size: .5625rem; font-weight: 700; letter-spacing: .18em;
+  text-transform: uppercase; color: var(--orange);
+  display: flex; align-items: center; gap: .625rem; margin-bottom: 2rem;
+}
+.hero-b-label::after { content: ''; width: 24px; height: 1px; background: var(--orange); }
+.hero-b h1 {
+  font-size: clamp(2.25rem, 3.5vw, 3.375rem);
+  font-weight: 800; letter-spacing: -.04em; line-height: 1.1;
+  color: var(--ink); text-wrap: balance; margin-bottom: 1.25rem;
+}
+.hero-b h1 em { font-style: italic; color: var(--orange); font-weight: 300; }
+.hero-b-sub {
+  font-size: 1rem; line-height: 1.75;
+  color: var(--muted-b); max-width: 42ch; margin-bottom: 2.5rem;
+}
+.btn-buy-hero {
+  font-size: .875rem; font-weight: 600; color: #fff;
+  background: var(--orange); padding: .75rem 1.75rem;
+  border-radius: 4px; text-decoration: none;
+  display: inline-flex; align-items: center; gap: .5rem;
+  transition: opacity .15s; align-self: flex-start;
+}
+.btn-buy-hero:hover { opacity: .85; }
+.hero-b-trust {
+  margin-top: 2.25rem; display: flex; flex-direction: column; gap: .625rem;
+}
+.ht-item-b {
+  font-size: .75rem; font-weight: 500; color: var(--muted-b);
+  display: flex; align-items: center; gap: .5rem;
+}
+.ht-item-b::before { content: ''; width: 5px; height: 5px; border-radius: 50%; background: var(--orange); flex-shrink: 0; }
+
+/* ── AI SEAM ── */
+.ai-seam {
+  position: absolute;
+  left: 50%; top: 0; bottom: 0;
+  transform: translateX(-50%);
+  width: 120px;
+  display: flex; flex-direction: column; align-items: center;
+  justify-content: center; gap: 0;
+  z-index: 10; pointer-events: none;
+}
+.ai-line-top {
+  flex: 1; width: 1px;
+  background: linear-gradient(to bottom, transparent, var(--teal));
+}
+.ai-line-bot {
+  flex: 1; width: 1px;
+  background: linear-gradient(to bottom, var(--teal), transparent);
+}
+.ai-orb {
+  width: 80px; height: 80px; border-radius: 50%;
+  background: var(--sup-bg);
+  border: 1.5px solid var(--teal);
+  box-shadow: 0 0 0 8px rgba(34,197,94,.08), 0 0 0 16px rgba(34,197,94,.04);
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  gap: 2px; flex-shrink: 0;
+}
+.ai-orb-label { font-size: .5rem; font-weight: 700; letter-spacing: .1em; text-transform: uppercase; color: rgba(255,255,255,.4); }
+.ai-orb-text { font-size: .875rem; font-weight: 800; color: var(--teal); letter-spacing: -.01em; }
+
+/* ── STATS BAND ── */
+.stats-band {
+  display: grid; grid-template-columns: 1fr 1fr;
+  border-top: 1px solid rgba(0,0,0,.06);
+}
+.stats-s {
+  background: var(--sup-mid);
+  padding: 2.5rem 3.5rem 2.5rem 3rem;
+  display: grid; grid-template-columns: 1fr 1fr; gap: 0;
+}
+.stats-b {
+  background: var(--buy-mid);
+  border-left: 1px solid var(--buy-bord);
+  padding: 2.5rem 3rem 2.5rem 3.5rem;
+  display: grid; grid-template-columns: 1fr 1fr; gap: 0;
+}
+.stat-item {
+  padding: 0 2rem 0 0;
+  border-right: 1px solid rgba(255,255,255,.06);
+}
+.stat-item:nth-child(2) { padding-left: 2rem; border-right: none; padding-right: 0; }
+.stat-item-b {
+  padding: 0 2rem 0 0;
+  border-right: 1px solid var(--buy-bord);
+}
+.stat-item-b:nth-child(2) { padding-left: 2rem; border-right: none; padding-right: 0; }
+.sv-split { font-size: 2.25rem; font-weight: 800; letter-spacing: -.04em; line-height: 1; font-variant-numeric: tabular-nums; }
+.sv-split sup { font-size: .45em; vertical-align: super; }
+.sv-s { color: #fff; }
+.sv-s sup { color: var(--teal); }
+.sv-b { color: var(--ink); }
+.sv-b sup { color: var(--orange); }
+.sl-split { font-size: .5625rem; font-weight: 700; letter-spacing: .1em; text-transform: uppercase; margin-top: .375rem; }
+.sl-s { color: rgba(255,255,255,.3); }
+.sl-b { color: var(--muted-b); }
+
+/* ── MATCH SECTION ── */
+.match-sec {
+  display: grid; grid-template-columns: 1fr 1fr;
+}
+.match-s-panel {
+  background: var(--sup-bg);
+  padding: 5rem 3.5rem 5rem 3rem;
+}
+.match-b-panel {
+  background: var(--buy-bg);
+  padding: 5rem 3rem 5rem 3.5rem;
+  border-left: 1px solid var(--buy-bord);
+}
+.mp-label-s { font-size: .5625rem; font-weight: 700; letter-spacing: .15em; text-transform: uppercase; color: var(--teal); margin-bottom: .875rem; }
+.mp-label-b { font-size: .5625rem; font-weight: 700; letter-spacing: .15em; text-transform: uppercase; color: var(--orange); margin-bottom: .875rem; }
+.mp-h-s { font-size: clamp(1.5rem, 2.5vw, 2.125rem); font-weight: 700; letter-spacing: -.035em; line-height: 1.2; color: #fff; margin-bottom: 1rem; text-wrap: balance; }
+.mp-h-b { font-size: clamp(1.5rem, 2.5vw, 2.125rem); font-weight: 700; letter-spacing: -.035em; line-height: 1.2; color: var(--ink); margin-bottom: 1rem; text-wrap: balance; }
+.mp-p-s { font-size: .9375rem; line-height: 1.75; color: var(--muted-s); max-width: 40ch; }
+.mp-p-b { font-size: .9375rem; line-height: 1.75; color: var(--muted-b); max-width: 40ch; }
+
+/* Score card — bridging both worlds */
+.score-wrap {
+  position: relative;
+  display: grid; grid-template-columns: 1fr 1fr;
+}
+.score-anchor {
+  grid-column: 1 / -1;
+  display: flex; justify-content: center;
+  padding: 0 0 4rem;
+  background: linear-gradient(to right, var(--sup-bg) 50%, var(--buy-bg) 50%);
+}
+.score-card {
+  width: min(540px, 90vw);
+  background: #fff;
+  border: 1px solid #E8E0D6;
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: 0 8px 48px rgba(0,0,0,.18);
+}
+.sc-top {
+  padding: 1.25rem 1.5rem;
+  border-bottom: 1px solid #F0EBE3;
+  display: flex; align-items: center; justify-content: space-between;
+  background: #FAFAF8;
+}
+.sc-pair { display: flex; align-items: center; gap: .625rem; }
+.av { width: 30px; height: 30px; border-radius: 50%; font-size: .625rem; font-weight: 800; display: flex; align-items: center; justify-content: center; }
+.avs { background: rgba(34,197,94,.12); color: #15803D; }
+.avb { background: rgba(249,115,22,.12); color: #C2410C; }
+.aname { display: flex; flex-direction: column; }
+.acomp { font-size: .8125rem; font-weight: 700; color: var(--ink); }
+.acountry { font-size: .625rem; color: var(--muted-b); }
+.arr { color: #D4C8BC; padding: 0 .125rem; font-size: .75rem; }
+.pct-badge { font-size: .75rem; font-weight: 700; color: #15803D; background: rgba(34,197,94,.1); padding: .25rem .625rem; border-radius: 4px; font-variant-numeric: tabular-nums; }
+.dims { padding: 1.25rem 1.5rem; display: flex; flex-direction: column; gap: .875rem; }
+.dim { display: grid; grid-template-columns: 110px 1fr 36px; align-items: center; gap: .875rem; }
+.dn { font-size: .6875rem; font-weight: 600; color: var(--muted-b); }
+.dt { height: 4px; background: #F0EBE3; border-radius: 2px; overflow: hidden; }
+.df { height: 100%; background: var(--teal); border-radius: 2px; width: 0; transition: width 1.2s cubic-bezier(.22,.61,.36,1); }
+.dp { font-size: .6875rem; font-weight: 700; color: var(--ink); text-align: right; font-variant-numeric: tabular-nums; }
+.rationale { padding: 1rem 1.5rem; background: #F8F5F0; border-top: 1px solid #F0EBE3; }
+.rl { font-size: .5rem; font-weight: 700; letter-spacing: .14em; text-transform: uppercase; color: #B8A898; margin-bottom: .375rem; }
+.rt { font-size: .8125rem; line-height: 1.65; color: var(--muted-b); font-style: italic; }
+
+/* ── HOW IT WORKS ── */
+.how-sec {
+  display: grid; grid-template-columns: 1fr 1fr;
+}
+.how-s { background: var(--sup-surf); padding: 4.5rem 3.5rem 4.5rem 3rem; }
+.how-b { background: var(--buy-mid); padding: 4.5rem 3rem 4.5rem 3.5rem; border-left: 1px solid var(--buy-bord); }
+.how-sec-label-s { font-size: .5rem; font-weight: 700; letter-spacing: .18em; text-transform: uppercase; color: var(--teal); margin-bottom: 1.75rem; }
+.how-sec-label-b { font-size: .5rem; font-weight: 700; letter-spacing: .18em; text-transform: uppercase; color: var(--orange); margin-bottom: 1.75rem; }
+.steps-col { display: flex; flex-direction: column; gap: 2rem; }
+.step-row { display: grid; grid-template-columns: 2rem 1fr; gap: 1rem; align-items: start; }
+.step-n-s { font-size: .75rem; font-weight: 700; color: var(--teal); font-variant-numeric: tabular-nums; margin-top: .1rem; }
+.step-n-b { font-size: .75rem; font-weight: 700; color: var(--orange); font-variant-numeric: tabular-nums; margin-top: .1rem; }
+.step-body h3 { font-size: 1rem; font-weight: 700; letter-spacing: -.02em; line-height: 1.3; margin-bottom: .375rem; }
+.step-body-s h3 { color: #fff; }
+.step-body-b h3 { color: var(--ink); }
+.step-body-s p { font-size: .8125rem; line-height: 1.65; color: var(--muted-s); }
+.step-body-b p { font-size: .8125rem; line-height: 1.65; color: var(--muted-b); }
+
+/* ── FOOTER ── */
+footer {
+  display: grid; grid-template-columns: 1fr 1fr;
+}
+.ft-s { background: #020F0D; padding: 2rem 3.5rem 2rem 3rem; display: flex; align-items: center; gap: 2rem; }
+.ft-b { background: var(--ink); padding: 2rem 3rem 2rem 3.5rem; display: flex; align-items: center; justify-content: flex-end; gap: 2rem; }
+.ft-logo { text-decoration: none; color: #fff; font-size: .875rem; font-weight: 800; letter-spacing: -.03em; white-space: nowrap; }
+.ft-logo span { color: var(--teal); }
+.ft-links { display: flex; gap: 1.25rem; list-style: none; }
+.ft-links a { font-size: .6875rem; font-weight: 500; color: rgba(255,255,255,.3); text-decoration: none; transition: color .15s; }
+.ft-links a:hover { color: rgba(255,255,255,.7); }
+.ft-copy { font-size: .625rem; color: rgba(255,255,255,.15); white-space: nowrap; }
+
+/* ── RESPONSIVE ── */
+@media (max-width: 860px) {
+  nav { grid-template-columns: 1fr; }
+  .nav-left { border-bottom: 1px solid rgba(13,148,136,.2); }
+  .nav-right { display: none; }
+  .hero, .stats-band, .match-sec, .how-sec, .score-wrap, footer { grid-template-columns: 1fr; }
+  .hero-s, .hero-b { padding: 4rem 2rem; }
+  .ai-seam { display: none; }
+  .stats-s, .stats-b { border-left: none; border-top: 1px solid rgba(255,255,255,.06); }
+  .match-b-panel, .how-b, .ft-b { border-left: none; border-top: 1px solid var(--buy-bord); }
+  .score-anchor { background: var(--buy-bg); }
+  footer { grid-template-columns: 1fr; }
+  .ft-b { justify-content: flex-start; border-top: 1px solid rgba(255,255,255,.08); }
+}
+@media (prefers-reduced-motion: reduce) { .df { transition: none; } }
+</style>
+
+<nav>
+  <div class="nav-left">
+    <a href="#" class="logo">gracera<span>.</span>ai</a>
+    <ul class="nav-sup-links">
+      <li><a href="#">How it works</a></li>
+      <li><a href="#">For Suppliers</a></li>
+      <li><a href="#">Pricing</a></li>
+    </ul>
+    <a href="#" class="btn-s" style="margin-left:auto">List as supplier</a>
+  </div>
+  <div class="nav-right">
+    <ul class="nav-buy-links">
+      <li><a href="#">For Buyers</a></li>
+      <li><a href="#">Pricing</a></li>
+      <li><a href="#">Sign in</a></li>
+    </ul>
+    <a href="#" class="btn-b">Post sourcing request</a>
+  </div>
+</nav>
+
+<section class="hero">
+  <!-- Supplier side -->
+  <div class="hero-s">
+    <div class="hero-s-label">For Suppliers</div>
+    <h1>Reach the buyers<br>you've been<br><em>looking for.</em></h1>
+    <p class="hero-s-sub">Upload your catalog and let AI introduce you to the buyers most likely to close — scored across 6 dimensions, with a reason for every match.</p>
+    <a href="#" class="btn-sup-hero">
+      <svg width="14" height="14" viewBox="0 0 14 14" fill="none" aria-hidden="true" style="stroke:currentColor;stroke-width:2;stroke-linecap:round"><rect x="1" y="3" width="12" height="9" rx="1.5"/><path d="M1 6h12"/></svg>
+      List as a supplier — free
+    </a>
+    <div class="hero-s-trust">
+      <span class="ht-item">KYB verification in 24 hours</span>
+      <span class="ht-item">RAG catalog auto-population</span>
+      <span class="ht-item">15 B2B verticals · 40+ countries</span>
+      <span class="ht-item">Zero pay-to-rank, ever</span>
+    </div>
+  </div>
+
+  <!-- AI seam -->
+  <div class="ai-seam" aria-hidden="true">
+    <div class="ai-line-top"></div>
+    <div class="ai-orb">
+      <span class="ai-orb-label">gracera</span>
+      <span class="ai-orb-text">AI</span>
+    </div>
+    <div class="ai-line-bot"></div>
+  </div>
+
+  <!-- Buyer side -->
+  <div class="hero-b">
+    <div class="hero-b-label">For Buyers</div>
+    <h1>Stop searching.<br>Start getting<br><em>ranked matches.</em></h1>
+    <p class="hero-b-sub">Post your sourcing request and receive ranked supplier introductions — pre-scored for category, certifications, scale, and fit — within hours.</p>
+    <a href="#" class="btn-buy-hero">
+      <svg width="14" height="14" viewBox="0 0 14 14" fill="none" aria-hidden="true" style="stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round"><circle cx="7" cy="7" r="6"/><path d="M7 4v3l2 2"/></svg>
+      Post a sourcing request — free
+    </a>
+    <div class="hero-b-trust">
+      <span class="ht-item-b">AI-ranked matches within hours</span>
+      <span class="ht-item-b">Certifications pre-verified</span>
+      <span class="ht-item-b">RFQ → signed agreement in-platform</span>
+      <span class="ht-item-b">No credit card required</span>
+    </div>
+  </div>
+</section>
+
+<!-- STATS -->
+<div class="stats-band">
+  <div class="stats-s">
+    <div class="stat-item"><div class="sv-split sv-s">15</div><div class="sl-split sl-s">B2B Verticals</div></div>
+    <div class="stat-item"><div class="sv-split sv-s">40<sup>+</sup></div><div class="sl-split sl-s">Countries</div></div>
+  </div>
+  <div class="stats-b">
+    <div class="stat-item-b"><div class="sv-split sv-b">6<sup>×</sup></div><div class="sl-split sl-b">Matching Dimensions</div></div>
+    <div class="stat-item-b"><div class="sv-split sv-b">0</div><div class="sl-split sl-b">Pay-to-rank Positions</div></div>
+  </div>
+</div>
+
+<!-- SCORE CARD spanning the seam -->
+<div class="score-anchor">
+  <div class="score-card" id="sc-split">
+    <div class="sc-top">
+      <div class="sc-pair">
+        <div class="av avs">JF</div>
+        <div class="aname"><span class="acomp">Jangdok Foods</span><span class="acountry">Supplier · South Korea</span></div>
+        <span class="arr">→</span>
+        <div class="av avb">LS</div>
+        <div class="aname"><span class="acomp">Lone Star Specialty</span><span class="acountry">Buyer · United States</span></div>
+      </div>
+      <div class="pct-badge">89% match</div>
+    </div>
+    <div class="dims">
+      <div class="dim"><span class="dn">Category</span><div class="dt"><div class="df" data-p="96"></div></div><span class="dp">96%</span></div>
+      <div class="dim"><span class="dn">Geography</span><div class="dt"><div class="df" data-p="88"></div></div><span class="dp">88%</span></div>
+      <div class="dim"><span class="dn">Scale</span><div class="dt"><div class="df" data-p="92"></div></div><span class="dp">92%</span></div>
+      <div class="dim"><span class="dn">Certifications</span><div class="dt"><div class="df" data-p="85"></div></div><span class="dp">85%</span></div>
+      <div class="dim"><span class="dn">Customer Fit</span><div class="dt"><div class="df" data-p="90"></div></div><span class="dp">90%</span></div>
+      <div class="dim"><span class="dn">Language</span><div class="dt"><div class="df" data-p="82"></div></div><span class="dp">82%</span></div>
+    </div>
+    <div class="rationale">
+      <div class="rl">AI Rationale</div>
+      <p class="rt">"Strong category alignment in Korean fermented condiments. Jangdok holds FDA and HACCP certifications covering US import requirements. MOQ of 500 units aligns with Lone Star's pilot order range. Primary English communication confirmed."</p>
+    </div>
+  </div>
+</div>
+
+<!-- HOW IT WORKS -->
+<div class="how-sec">
+  <div class="how-s">
+    <div class="how-sec-label-s">For Suppliers — How it works</div>
+    <div class="steps-col">
+      <div class="step-row">
+        <span class="step-n-s">01</span>
+        <div class="step-body step-body-s"><h3>Build your verified profile</h3><p>Upload your catalog. AI extracts categories, MOQ, certifications, and target markets automatically. KYB verification completes in 24 hours.</p></div>
+      </div>
+      <div class="step-row">
+        <span class="step-n-s">02</span>
+        <div class="step-body step-body-s"><h3>Receive ranked buyer introductions</h3><p>Six-dimension scoring delivers your best-fit buyers — ranked and explained in your preferred language. No pay-to-rank, ever.</p></div>
+      </div>
+      <div class="step-row">
+        <span class="step-n-s">03</span>
+        <div class="step-body step-body-s"><h3>Close deals in-platform</h3><p>Deal Room, quote builder, AI Negotiation Coach, e-signature. From introduction to signed agreement without switching tools.</p></div>
+      </div>
+    </div>
+  </div>
+  <div class="how-b">
+    <div class="how-sec-label-b">For Buyers — How it works</div>
+    <div class="steps-col">
+      <div class="step-row">
+        <span class="step-n-b">01</span>
+        <div class="step-body step-body-b"><h3>Post your sourcing request</h3><p>Describe what you need — category, volume, certifications, target market. Gracera maps it to the right supplier segments automatically.</p></div>
+      </div>
+      <div class="step-row">
+        <span class="step-n-b">02</span>
+        <div class="step-body step-body-b"><h3>Receive ranked supplier matches</h3><p>AI-scored introductions arrive within hours, each with a plain-language explanation of why the supplier fits your requirements.</p></div>
+      </div>
+      <div class="step-row">
+        <span class="step-n-b">03</span>
+        <div class="step-body step-body-b"><h3>Negotiate and close in-platform</h3><p>RFQ templates, shared Deal Room, counter-offer loops, and e-signature. Every step from first contact to signed contract, in one place.</p></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<footer>
+  <div class="ft-s">
+    <a href="#" class="ft-logo">gracera<span>.</span>ai</a>
+    <ul class="ft-links">
+      <li><a href="#">How it works</a></li>
+      <li><a href="#">For Suppliers</a></li>
+      <li><a href="#">Pricing</a></li>
+    </ul>
+  </div>
+  <div class="ft-b">
+    <ul class="ft-links">
+      <li><a href="#">Privacy</a></li>
+      <li><a href="#">Terms</a></li>
+      <li><a href="#">Contact</a></li>
+    </ul>
+    <p class="ft-copy">© 2026 Gracera. All rights reserved.</p>
+  </div>
+</footer>
+
+<script>
+(function () {
+  const sc = document.getElementById('sc-split');
+  if (!sc) return;
+  let fired = false;
+  const obs = new IntersectionObserver(e => {
+    if (e[0].isIntersecting && !fired) {
+      fired = true;
+      setTimeout(() => {
+        sc.querySelectorAll('.df').forEach(el => el.style.width = el.dataset.p + '%');
+      }, 200);
+      obs.disconnect();
+    }
+  }, { threshold: 0.3 });
+  obs.observe(sc);
+})();
+</script>

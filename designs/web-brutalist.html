@@ -1,0 +1,239 @@
+<title>Gracera — Direct</title>
+<meta name="description" content="Gracera: AI-scored B2B trade introductions. No directory. No pay-to-rank.">
+<style>
+:root{
+  --black:#000000;
+  --white:#ffffff;
+  --teal:#22C55E;
+  --orange:#F97316;
+  --gray:#F2F2F2;
+  --mid:#888888;
+  --bw:2px;
+  --max-w:74rem;
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth}
+body{background:var(--white);color:var(--black);font-family:system-ui,-apple-system,'Helvetica Neue',Arial,sans-serif;line-height:1.5;-webkit-font-smoothing:antialiased}
+.container{max-width:var(--max-w);margin:0 auto;padding:0 1.5rem}
+a{color:inherit}
+
+/* NAV */
+nav{border-bottom:var(--bw) solid var(--black);position:sticky;top:0;z-index:100;background:var(--white)}
+.nav-i{max-width:var(--max-w);margin:0 auto;padding:0 1.5rem;height:56px;display:flex;align-items:stretch;gap:0}
+.logo{text-decoration:none;color:var(--black);font-size:1.0625rem;font-weight:900;letter-spacing:-.04em;display:flex;align-items:center;gap:.375rem;padding-right:2rem;border-right:var(--bw) solid var(--black)}
+.logo-dot{color:var(--teal)}
+.nav-links{display:flex;list-style:none;margin-left:auto}
+.nav-links a{font-size:.75rem;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--black);text-decoration:none;display:flex;align-items:center;padding:0 1.25rem;border-left:var(--bw) solid var(--black);transition:background .1s}
+.nav-links a:hover{background:var(--gray)}
+.btn-nav-o{font-size:.75rem;font-weight:900;letter-spacing:.06em;text-transform:uppercase;color:var(--white);background:var(--orange);text-decoration:none;display:flex;align-items:center;padding:0 1.5rem;border-left:var(--bw) solid var(--black)}
+.btn-nav-o:hover{background:#EA6C0D}
+
+/* HERO */
+.hero{border-bottom:var(--bw) solid var(--black)}
+.hero-top{padding:3.5rem 0 3rem;border-bottom:var(--bw) solid var(--black)}
+.eyebrow{font-size:.6875rem;font-weight:900;letter-spacing:.18em;text-transform:uppercase;color:var(--teal);margin-bottom:1.125rem}
+h1{font-size:clamp(3rem,7vw,5.5rem);font-weight:900;line-height:.96;letter-spacing:-.06em;color:var(--black);text-transform:uppercase;margin-bottom:1.5rem}
+.hero-sub{font-size:1.0625rem;line-height:1.65;color:#333;max-width:52ch;margin-bottom:2.5rem}
+.cta-row{display:flex;gap:0;flex-wrap:wrap}
+.btn-b{font-size:.875rem;font-weight:900;letter-spacing:.08em;text-transform:uppercase;text-decoration:none;padding:.875rem 2rem;border:var(--bw) solid var(--black);display:inline-flex;align-items:center;transition:all .1s}
+.btn-b-teal{color:var(--white);background:var(--teal);border-color:var(--teal)}
+.btn-b-teal:hover{background:#15803D;border-color:#15803D}
+.btn-b-orange{color:var(--white);background:var(--orange);border-color:var(--orange);margin-left:-2px}
+.btn-b-orange:hover{background:#EA6C0D;border-color:#EA6C0D}
+.hero-bottom{display:grid;grid-template-columns:repeat(4,1fr);border-top:none}
+.hero-stat{padding:1.5rem;border-right:var(--bw) solid var(--black)}
+.hero-stat:last-child{border-right:none}
+.hs-val{font-size:2.5rem;font-weight:900;letter-spacing:-.06em;line-height:1;color:var(--black);font-variant-numeric:tabular-nums}
+.hs-val sup{font-size:.45em;vertical-align:super;color:var(--teal)}
+.hs-label{font-size:.625rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--mid);margin-top:.25rem}
+
+/* HOW IT WORKS — teal block */
+.how{background:var(--teal);padding:4rem 0;border-top:var(--bw) solid var(--black);border-bottom:var(--bw) solid var(--black)}
+.how-label{font-size:.6875rem;font-weight:900;letter-spacing:.18em;text-transform:uppercase;color:rgba(255,255,255,.6);margin-bottom:1.5rem}
+.how h2{font-size:clamp(2rem,4vw,3.25rem);font-weight:900;line-height:1.0;letter-spacing:-.05em;text-transform:uppercase;color:var(--white);margin-bottom:3rem}
+.steps-g{display:grid;grid-template-columns:repeat(3,1fr);gap:0;border:var(--bw) solid rgba(255,255,255,.3)}
+.step{padding:2rem 1.75rem;border-right:var(--bw) solid rgba(255,255,255,.3)}
+.step:last-child{border-right:none}
+.step-n{font-size:3rem;font-weight:900;letter-spacing:-.06em;line-height:1;color:rgba(255,255,255,.2);font-variant-numeric:tabular-nums;margin-bottom:1rem}
+.step h3{font-size:1.0625rem;font-weight:900;letter-spacing:-.02em;text-transform:uppercase;color:var(--white);margin-bottom:.625rem;line-height:1.25}
+.step p{font-size:.875rem;line-height:1.65;color:rgba(255,255,255,.75)}
+
+/* SCORE BLOCK */
+.score-sec{padding:4rem 0;border-bottom:var(--bw) solid var(--black)}
+.score-g{display:grid;grid-template-columns:1fr 1fr;gap:0;border:var(--bw) solid var(--black)}
+.score-lhs{padding:2.5rem 2rem;border-right:var(--bw) solid var(--black)}
+.score-label{font-size:.6875rem;font-weight:900;letter-spacing:.18em;text-transform:uppercase;color:var(--teal);margin-bottom:1rem}
+.score-lhs h2{font-size:clamp(1.75rem,3vw,2.5rem);font-weight:900;letter-spacing:-.05em;text-transform:uppercase;line-height:1.1;color:var(--black);margin-bottom:1rem;text-wrap:balance}
+.score-lhs p{font-size:.9375rem;line-height:1.7;color:#333}
+.score-rhs{padding:2.5rem 2rem}
+.score-pair{display:flex;align-items:center;justify-content:space-between;border:var(--bw) solid var(--black);padding:.875rem;margin-bottom:1.5rem}
+.sp-names{font-size:.8125rem;font-weight:700}
+.sp-arrow{color:var(--mid)}
+.sp-score{font-size:1.75rem;font-weight:900;letter-spacing:-.05em;color:var(--teal);font-variant-numeric:tabular-nums}
+.dims-brut{display:flex;flex-direction:column;gap:.625rem}
+.dim-b{display:grid;grid-template-columns:120px 1fr 40px;align-items:center;gap:.875rem}
+.dn-b{font-size:.6875rem;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--mid)}
+.dt-b{height:6px;background:var(--gray);border:1px solid var(--black)}
+.df-b{height:100%;background:var(--black);width:0;transition:width 1s cubic-bezier(.22,.61,.36,1)}
+.dp-b{font-size:.75rem;font-weight:900;color:var(--black);font-variant-numeric:tabular-nums}
+
+/* CTA */
+.cta-sec{display:grid;grid-template-columns:1fr 1fr;border-bottom:var(--bw) solid var(--black)}
+.cta-p{padding:3rem 2.5rem;border-right:var(--bw) solid var(--black)}
+.cta-p:last-child{border-right:none}
+.cta-label{font-size:.6875rem;font-weight:900;letter-spacing:.18em;text-transform:uppercase;margin-bottom:1rem}
+.cta-p h2{font-size:1.75rem;font-weight:900;letter-spacing:-.05em;text-transform:uppercase;line-height:1.1;color:var(--black);margin-bottom:.75rem;text-wrap:balance}
+.cta-p p{font-size:.9375rem;line-height:1.7;color:#333;margin-bottom:2rem;max-width:32ch}
+.btn-cta-t{font-size:.8125rem;font-weight:900;letter-spacing:.08em;text-transform:uppercase;text-decoration:none;padding:.75rem 1.5rem;border:var(--bw) solid var(--teal);color:var(--white);background:var(--teal);display:inline-block;transition:all .1s}
+.btn-cta-t:hover{background:#15803D;border-color:#15803D}
+.btn-cta-o{font-size:.8125rem;font-weight:900;letter-spacing:.08em;text-transform:uppercase;text-decoration:none;padding:.75rem 1.5rem;border:var(--bw) solid var(--orange);color:var(--white);background:var(--orange);display:inline-block;transition:all .1s}
+.btn-cta-o:hover{background:#EA6C0D;border-color:#EA6C0D}
+.cta-note{font-size:.6875rem;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--mid);margin-top:.75rem}
+
+/* FOOTER */
+footer{border-top:var(--bw) solid var(--black);padding:1.5rem}
+.ft-r{max-width:var(--max-w);margin:0 auto;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:1rem}
+.ft-logo{text-decoration:none;color:var(--black);font-size:.9375rem;font-weight:900;letter-spacing:-.04em}
+.ft-links{display:flex;gap:0;list-style:none}
+.ft-links a{font-size:.6875rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--mid);text-decoration:none;padding:0 1rem;border-right:1px solid var(--mid);transition:color .1s}
+.ft-links a:hover{color:var(--black)}
+.ft-links li:last-child a{border-right:none;padding-right:0}
+.ft-copy{font-size:.6875rem;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--mid)}
+
+@media(max-width:900px){
+  .nav-links{display:none}
+  h1{font-size:clamp(2.5rem,7vw,4rem)}
+  .hero-bottom{grid-template-columns:repeat(2,1fr)}
+  .hero-stat:nth-child(2){border-right:none}
+  .steps-g{grid-template-columns:1fr;border:none}
+  .step{border:var(--bw) solid rgba(255,255,255,.3);border-bottom:none}
+  .step:last-child{border-bottom:var(--bw) solid rgba(255,255,255,.3)}
+  .score-g,.cta-sec{grid-template-columns:1fr}
+  .score-lhs{border-right:none;border-bottom:var(--bw) solid var(--black)}
+  .cta-p{border-right:none;border-bottom:var(--bw) solid var(--black)}
+  .cta-p:last-child{border-bottom:none}
+}
+@media(prefers-reduced-motion:reduce){.df-b{transition:none}}
+</style>
+
+<nav>
+  <div class="nav-i">
+    <a href="#" class="logo">GRACERA<span class="logo-dot">.</span>AI</a>
+    <ul class="nav-links">
+      <li><a href="#">How It Works</a></li>
+      <li><a href="#">Suppliers</a></li>
+      <li><a href="#">Buyers</a></li>
+      <li><a href="#">Pricing</a></li>
+    </ul>
+    <a href="#" class="btn-nav-o">Get Started</a>
+  </div>
+</nav>
+
+<section class="hero">
+  <div class="container">
+    <div class="hero-top">
+      <div class="eyebrow">AI-Powered B2B Trade Matching</div>
+      <h1>Find your best<br>trading partner.</h1>
+      <p class="hero-sub">Gracera's AI scores every supplier–buyer pairing across 6 dimensions and delivers ranked introductions — with a plain-language reason for each. No directories. No pay-to-rank. Just your best matches.</p>
+      <div class="cta-row">
+        <a href="#" class="btn-b btn-b-teal">I'm a Supplier</a>
+        <a href="#" class="btn-b btn-b-orange">I'm a Buyer</a>
+      </div>
+    </div>
+    <div class="hero-bottom">
+      <div class="hero-stat"><div class="hs-val">6<sup>×</sup></div><div class="hs-label">Matching Dimensions</div></div>
+      <div class="hero-stat"><div class="hs-val">15</div><div class="hs-label">B2B Verticals</div></div>
+      <div class="hero-stat"><div class="hs-val">40<sup>+</sup></div><div class="hs-label">Countries</div></div>
+      <div class="hero-stat"><div class="hs-val">0</div><div class="hs-label">Pay-to-rank</div></div>
+    </div>
+  </div>
+</section>
+
+<section class="how">
+  <div class="container">
+    <div class="how-label">Process</div>
+    <h2>Three steps.<br>One platform.</h2>
+    <div class="steps-g">
+      <div class="step">
+        <div class="step-n">01</div>
+        <h3>Build Your Profile</h3>
+        <p>Upload your catalog. AI extracts categories, MOQ, certifications, and target markets. KYB verification in 24 hours. Profile live immediately.</p>
+      </div>
+      <div class="step">
+        <div class="step-n">02</div>
+        <h3>Get Ranked Matches</h3>
+        <p>Six-dimension scoring runs on every profile and sourcing request. Your best counterparts, ranked and explained — in your language.</p>
+      </div>
+      <div class="step">
+        <div class="step-n">03</div>
+        <h3>Close the Deal</h3>
+        <p>RFQ templates, Deal Room, AI Negotiation Coach, e-signature. From first introduction to signed agreement — in-platform.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="score-sec">
+  <div class="container">
+    <div class="score-g">
+      <div class="score-lhs">
+        <div class="score-label">AI Matching Engine</div>
+        <h2>Every intro comes with a score and a reason.</h2>
+        <p>Six dimensions. Weighted scoring. Plain-language rationale in the buyer's preferred language. Not a directory, not a black box — every match is explained.</p>
+      </div>
+      <div class="score-rhs" id="sc-brut">
+        <div class="score-pair">
+          <div class="sp-names">Jangdok Foods (KR) <span class="sp-arrow">→</span> Lone Star Specialty (US)</div>
+          <div class="sp-score">89%</div>
+        </div>
+        <div class="dims-brut">
+          <div class="dim-b"><span class="dn-b">Category</span><div class="dt-b"><div class="df-b" data-p="96"></div></div><span class="dp-b">96%</span></div>
+          <div class="dim-b"><span class="dn-b">Geography</span><div class="dt-b"><div class="df-b" data-p="88"></div></div><span class="dp-b">88%</span></div>
+          <div class="dim-b"><span class="dn-b">Scale</span><div class="dt-b"><div class="df-b" data-p="92"></div></div><span class="dp-b">92%</span></div>
+          <div class="dim-b"><span class="dn-b">Certifications</span><div class="dt-b"><div class="df-b" data-p="85"></div></div><span class="dp-b">85%</span></div>
+          <div class="dim-b"><span class="dn-b">Customer Fit</span><div class="dt-b"><div class="df-b" data-p="90"></div></div><span class="dp-b">90%</span></div>
+          <div class="dim-b"><span class="dn-b">Language</span><div class="dt-b"><div class="df-b" data-p="82"></div></div><span class="dp-b">82%</span></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<div class="cta-sec">
+  <div class="cta-p">
+    <div class="cta-label" style="color:var(--teal)">For Suppliers</div>
+    <h2>Reach verified buyers worldwide.</h2>
+    <p>Upload your catalog, complete your profile, and start receiving ranked buyer introductions within 24 hours of verification.</p>
+    <a href="#" class="btn-cta-t">List as a supplier — free</a>
+    <p class="cta-note">3 AI matches/month on free tier</p>
+  </div>
+  <div class="cta-p">
+    <div class="cta-label" style="color:var(--orange)">For Buyers</div>
+    <h2>Post once. Get ranked matches.</h2>
+    <p>Describe what you need. Gracera surfaces ranked supplier matches within hours. No credit card required to start.</p>
+    <a href="#" class="btn-cta-o">Post a sourcing request — free</a>
+    <p class="cta-note">5 AI match suggestions on free tier</p>
+  </div>
+</div>
+
+<footer>
+  <div class="ft-r">
+    <a href="#" class="ft-logo">GRACERA.AI</a>
+    <ul class="ft-links">
+      <li><a href="#">How it works</a></li>
+      <li><a href="#">Pricing</a></li>
+      <li><a href="#">Privacy</a></li>
+      <li><a href="#">Terms</a></li>
+    </ul>
+    <p class="ft-copy">© 2026 Gracera</p>
+  </div>
+</footer>
+
+<script>
+(function(){
+  const sc=document.getElementById('sc-brut');if(!sc)return;
+  let fired=false;
+  const obs=new IntersectionObserver(e=>{if(e[0].isIntersecting&&!fired){fired=true;setTimeout(()=>{sc.querySelectorAll('.df-b').forEach(el=>el.style.width=el.dataset.p+'%')},200);obs.disconnect();}},{threshold:.3});
+  obs.observe(sc);
+})();
+</script>

@@ -1,0 +1,357 @@
+<title>Gracera — Observatory</title>
+<meta name="description" content="Gracera connects global suppliers and buyers through AI-scored introductions.">
+<style>
+:root {
+  --bg:       #06090F;
+  --surface:  #0C1522;
+  --surface2: #111E2E;
+  --border:   rgba(255,255,255,0.07);
+  --teal:     #22C55E;
+  --teal-dim: rgba(34,197,94,0.18);
+  --teal-glow:rgba(34,197,94,0.55);
+  --orange:   #F97316;
+  --text:     #DDE4ED;
+  --muted:    #4A5A6E;
+  --faint:    #2A3A4E;
+  --max-w:    72rem;
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth}
+body{background:var(--bg);color:var(--text);font-family:system-ui,-apple-system,sans-serif;line-height:1.6;-webkit-font-smoothing:antialiased}
+.container{max-width:var(--max-w);margin:0 auto;padding:0 1.5rem}
+
+/* NAV */
+nav{position:sticky;top:0;z-index:100;background:rgba(6,9,15,0.85);backdrop-filter:blur(16px);border-bottom:1px solid var(--border)}
+.nav-i{max-width:var(--max-w);margin:0 auto;padding:0 1.5rem;height:60px;display:flex;align-items:center;gap:2rem}
+.logo{text-decoration:none;color:var(--text);font-size:1rem;font-weight:800;letter-spacing:-0.03em;display:flex;align-items:center;gap:.5rem}
+.lm{width:28px;height:28px;background:var(--teal);border-radius:4px;display:flex;align-items:center;justify-content:center}
+.lm svg{width:14px;height:14px}
+.nav-links{margin-left:auto;display:flex;gap:2rem;list-style:none}
+.nav-links a{font-size:.8125rem;color:var(--muted);text-decoration:none;transition:color .15s}
+.nav-links a:hover{color:var(--text)}
+.nav-a{display:flex;gap:.5rem;align-items:center;margin-left:1.5rem}
+.btn-g{font-size:.8125rem;font-weight:500;color:var(--muted);text-decoration:none;padding:.4rem .875rem;border-radius:4px;transition:background .15s}
+.btn-g:hover{background:var(--surface2)}
+.btn-o{font-size:.8125rem;font-weight:600;color:#fff;background:var(--orange);padding:.4375rem 1rem;border-radius:4px;text-decoration:none;transition:opacity .15s}
+.btn-o:hover{opacity:.88}
+
+/* HERO */
+.hero{padding:5.5rem 0 4rem;position:relative;overflow:hidden}
+.hero::before{content:'';position:absolute;top:-120px;left:-80px;width:500px;height:500px;background:radial-gradient(circle,rgba(34,197,94,.12) 0%,transparent 70%);pointer-events:none}
+.hero-g{display:grid;grid-template-columns:1fr 440px;gap:4rem;align-items:center}
+.eyebrow{display:inline-flex;align-items:center;gap:.375rem;font-size:.6875rem;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--teal);background:rgba(34,197,94,.1);border:1px solid rgba(34,197,94,.25);padding:.3rem .75rem;border-radius:2px;margin-bottom:1.375rem}
+h1{font-family:Georgia,'Times New Roman',serif;font-size:clamp(2.5rem,4.5vw,3.5rem);font-weight:700;line-height:1.1;letter-spacing:-.025em;color:#fff;text-wrap:balance;margin-bottom:1.25rem}
+h1 em{font-style:italic;color:var(--teal)}
+.sub{font-size:1.0625rem;line-height:1.75;color:var(--muted);max-width:46ch;margin-bottom:2.25rem}
+.ctas{display:flex;gap:.75rem;flex-wrap:wrap;margin-bottom:2.5rem}
+.btn-teal{font-size:.875rem;font-weight:600;color:#fff;background:var(--teal);padding:.6875rem 1.375rem;border-radius:4px;text-decoration:none;transition:opacity .15s;display:inline-flex;align-items:center;gap:.375rem}
+.btn-teal:hover{opacity:.85}
+.btn-ghost-teal{font-size:.875rem;font-weight:600;color:var(--teal);border:1px solid rgba(34,197,94,.35);padding:.6875rem 1.375rem;border-radius:4px;text-decoration:none;transition:all .15s}
+.btn-ghost-teal:hover{background:rgba(34,197,94,.08)}
+.trust{display:flex;gap:1.5rem;flex-wrap:wrap}
+.trust-i{font-size:.75rem;color:var(--muted);display:flex;align-items:center;gap:.375rem}
+.trust-i::before{content:'';width:5px;height:5px;border-radius:50%;background:var(--teal);flex-shrink:0}
+.hero-canvas-wrap{position:relative;border:1px solid var(--border);border-radius:10px;overflow:hidden;background:var(--surface)}
+#cv1{display:block;width:100%;height:380px}
+
+/* STATS */
+.stats{padding:3rem 0;border-top:1px solid var(--border);border-bottom:1px solid var(--border)}
+.stats-g{display:grid;grid-template-columns:repeat(4,1fr);gap:0}
+.stat{padding:0 2rem;border-right:1px solid var(--border);text-align:center}
+.stat:last-child{border-right:none}
+.sv{font-size:2.625rem;font-weight:800;letter-spacing:-.04em;color:#fff;font-variant-numeric:tabular-nums;line-height:1}
+.sv sup{font-size:.45em;vertical-align:super;color:var(--teal)}
+.sl{font-size:.6875rem;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);margin-top:.375rem}
+
+/* MATCHING */
+.match-sec{padding:6rem 0}
+.sec-label{font-size:.6875rem;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--teal);margin-bottom:.625rem}
+.sec-h{font-family:Georgia,'Times New Roman',serif;font-size:clamp(1.75rem,3vw,2.5rem);font-weight:700;letter-spacing:-.025em;color:#fff;line-height:1.2;text-wrap:balance;margin-bottom:.875rem}
+.sec-p{font-size:1rem;line-height:1.75;color:var(--muted);max-width:44ch}
+.match-g{display:grid;grid-template-columns:1fr 400px;gap:4rem;align-items:start}
+.score-card{background:var(--surface);border:1px solid var(--border);border-radius:10px;overflow:hidden;box-shadow:0 0 40px rgba(34,197,94,.08)}
+.sc-top{padding:1.125rem 1.375rem;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between}
+.pair{display:flex;align-items:center;gap:.625rem}
+.av{width:28px;height:28px;border-radius:50%;font-size:.625rem;font-weight:800;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.avs{background:rgba(34,197,94,.2);color:var(--teal)}
+.avb{background:rgba(249,115,22,.15);color:#F97316}
+.aname{display:flex;flex-direction:column}
+.acomp{font-size:.8125rem;font-weight:700;color:#fff}
+.acountry{font-size:.6875rem;color:var(--muted)}
+.arr{color:var(--faint);padding:0 .125rem;font-size:.75rem}
+.pct-badge{font-size:.75rem;font-weight:700;color:var(--teal);background:rgba(34,197,94,.15);border:1px solid rgba(34,197,94,.25);padding:.25rem .625rem;border-radius:2px;font-variant-numeric:tabular-nums}
+.dims{padding:1.25rem 1.375rem;display:flex;flex-direction:column;gap:.875rem}
+.dim{display:grid;grid-template-columns:110px 1fr 36px;align-items:center;gap:.875rem}
+.dn{font-size:.75rem;font-weight:600;color:var(--muted)}
+.dt{height:3px;background:var(--surface2);border-radius:2px;overflow:hidden}
+.df{height:100%;background:var(--teal);border-radius:2px;width:0;transition:width 1.2s cubic-bezier(.22,.61,.36,1)}
+.dp{font-size:.75rem;font-weight:700;color:var(--text);text-align:right;font-variant-numeric:tabular-nums}
+.rationale{padding:1rem 1.375rem;background:#040810;border-top:1px solid var(--border)}
+.rl{font-size:.5625rem;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);margin-bottom:.4rem}
+.rt{font-size:.8125rem;line-height:1.65;color:var(--muted);font-style:italic}
+.bullets{list-style:none;margin-top:2rem;display:flex;flex-direction:column;gap:.75rem}
+.bullets li{display:flex;align-items:flex-start;gap:.625rem;font-size:.875rem;color:var(--muted);line-height:1.55}
+.bd{width:5px;height:5px;border-radius:50%;background:var(--teal);flex-shrink:0;margin-top:.45rem}
+
+/* STEPS */
+.steps-sec{padding:5.5rem 0;border-top:1px solid var(--border)}
+.steps-g{display:grid;grid-template-columns:repeat(3,1fr);gap:1px;background:var(--border);border:1px solid var(--border);border-radius:10px;overflow:hidden;margin-top:3rem}
+.step{background:var(--surface);padding:2.25rem 2rem}
+.sn{font-size:.6875rem;font-weight:700;letter-spacing:.1em;color:var(--teal);margin-bottom:1rem;font-variant-numeric:tabular-nums}
+.step h3{font-size:1rem;font-weight:700;letter-spacing:-.015em;color:#fff;margin-bottom:.5rem;line-height:1.35}
+.step p{font-size:.8125rem;line-height:1.65;color:var(--muted)}
+
+/* CTA */
+.cta-sec{padding:5.5rem 0}
+.cta-g{display:grid;grid-template-columns:1fr 1fr;gap:1px;background:var(--border);border:1px solid var(--border);border-radius:10px;overflow:hidden}
+.cta-p{background:var(--surface);padding:3rem 2.5rem}
+.cta-p .sec-label{margin-bottom:.875rem}
+.cta-p h2{font-family:Georgia,'Times New Roman',serif;font-size:1.625rem;font-weight:700;color:#fff;line-height:1.25;letter-spacing:-.02em;margin-bottom:.75rem;text-wrap:balance}
+.cta-p p{font-size:.9375rem;line-height:1.7;color:var(--muted);margin-bottom:1.75rem;max-width:32ch}
+.csub{font-size:.75rem;color:var(--muted);margin-top:.75rem}
+.btn-o-dark{font-size:.875rem;font-weight:600;color:#fff;background:var(--orange);padding:.6875rem 1.375rem;border-radius:4px;text-decoration:none;transition:opacity .15s}
+.btn-o-dark:hover{opacity:.88}
+
+/* FOOTER */
+footer{background:#040810;padding:2.5rem 0;border-top:1px solid var(--border)}
+.ft-r{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:1.25rem}
+.ft-logo{text-decoration:none;color:#fff;font-size:.9375rem;font-weight:800;letter-spacing:-.03em;display:flex;align-items:center;gap:.5rem}
+.ft-lm{width:24px;height:24px;background:var(--teal);border-radius:3px;display:flex;align-items:center;justify-content:center}
+.ft-links{display:flex;gap:1.5rem;list-style:none}
+.ft-links a{font-size:.8125rem;color:var(--muted);text-decoration:none;transition:color .15s}
+.ft-links a:hover{color:var(--text)}
+.ft-copy{font-size:.75rem;color:var(--faint)}
+
+@media(max-width:900px){.hero-g{grid-template-columns:1fr}.hero-canvas-wrap{display:none}.stats-g{grid-template-columns:repeat(2,1fr)}.stats-g .stat:nth-child(2){border-right:none}.match-g{grid-template-columns:1fr}.steps-g{grid-template-columns:1fr}.cta-g{grid-template-columns:1fr}.nav-links{display:none}}
+@media(prefers-reduced-motion:reduce){.df{transition:none}}
+</style>
+
+<nav>
+  <div class="nav-i">
+    <a href="#" class="logo">
+      <span class="lm"><svg viewBox="0 0 14 14" fill="none"><circle cx="4" cy="4" r="2" fill="white" opacity=".9"/><circle cx="10" cy="4" r="2" fill="white" opacity=".6"/><circle cx="4" cy="10" r="2" fill="white" opacity=".6"/><circle cx="10" cy="10" r="2" fill="white" opacity=".3"/></svg></span>
+      gracera<span style="color:var(--teal)">.</span>ai
+    </a>
+    <ul class="nav-links">
+      <li><a href="#">How it works</a></li>
+      <li><a href="#">For Suppliers</a></li>
+      <li><a href="#">For Buyers</a></li>
+      <li><a href="#">Pricing</a></li>
+    </ul>
+    <div class="nav-a">
+      <a href="#" class="btn-g">Sign in</a>
+      <a href="#" class="btn-o">Get started</a>
+    </div>
+  </div>
+</nav>
+
+<section class="hero">
+  <div class="container">
+    <div class="hero-g">
+      <div>
+        <div class="eyebrow">AI-Powered B2B Trade Intelligence</div>
+        <h1>The world's suppliers meet<br>the world's <em>best-fit buyers.</em></h1>
+        <p class="sub">Gracera's matching engine scores every supplier–buyer pairing across 6 dimensions and surfaces ranked introductions — with a plain-language explanation for each.</p>
+        <div class="ctas">
+          <a href="#" class="btn-teal">List as a supplier</a>
+          <a href="#" class="btn-o" style="font-size:.875rem;font-weight:600;padding:.6875rem 1.375rem;border-radius:4px;text-decoration:none">Post a sourcing request</a>
+        </div>
+        <div class="trust">
+          <span class="trust-i">No pay-to-rank</span>
+          <span class="trust-i">KYB verified businesses</span>
+          <span class="trust-i">15 B2B verticals</span>
+          <span class="trust-i">40+ countries</span>
+        </div>
+      </div>
+      <div class="hero-canvas-wrap">
+        <canvas id="cv1"></canvas>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="stats">
+  <div class="container">
+    <div class="stats-g">
+      <div class="stat"><div class="sv">6<sup>×</sup></div><div class="sl">Matching Dimensions</div></div>
+      <div class="stat"><div class="sv">15</div><div class="sl">B2B Verticals</div></div>
+      <div class="stat"><div class="sv">40<sup>+</sup></div><div class="sl">Countries</div></div>
+      <div class="stat"><div class="sv">0</div><div class="sl">Pay-to-rank Slots</div></div>
+    </div>
+  </div>
+</section>
+
+<section class="match-sec">
+  <div class="container">
+    <div class="match-g">
+      <div>
+        <p class="sec-label">AI Matching Engine</p>
+        <h2 class="sec-h">Every introduction comes with a score and a reason</h2>
+        <p class="sec-p">The matching agent doesn't just rank — it explains. Each introduction shows exactly why the pairing scored well, in the buyer's preferred language.</p>
+        <ul class="bullets">
+          <li><span class="bd"></span>Category and sub-category alignment weighted by specificity</li>
+          <li><span class="bd"></span>Certifications verified against your market's requirements</li>
+          <li><span class="bd"></span>Production scale matched to actual order volume</li>
+          <li><span class="bd"></span>Customer-type fit, not just category overlap</li>
+          <li><span class="bd"></span>Language and communication capacity scored</li>
+        </ul>
+      </div>
+      <div>
+        <div class="score-card" id="sc1">
+          <div class="sc-top">
+            <div class="pair">
+              <div class="av avs">JF</div>
+              <div class="aname"><span class="acomp">Jangdok Foods</span><span class="acountry">Supplier · South Korea</span></div>
+              <span class="arr">→</span>
+              <div class="av avb">LS</div>
+              <div class="aname"><span class="acomp">Lone Star Specialty</span><span class="acountry">Buyer · United States</span></div>
+            </div>
+            <div class="pct-badge">89%</div>
+          </div>
+          <div class="dims">
+            <div class="dim"><span class="dn">Category</span><div class="dt"><div class="df" data-p="96"></div></div><span class="dp">96%</span></div>
+            <div class="dim"><span class="dn">Geography</span><div class="dt"><div class="df" data-p="88"></div></div><span class="dp">88%</span></div>
+            <div class="dim"><span class="dn">Scale</span><div class="dt"><div class="df" data-p="92"></div></div><span class="dp">92%</span></div>
+            <div class="dim"><span class="dn">Certifications</span><div class="dt"><div class="df" data-p="85"></div></div><span class="dp">85%</span></div>
+            <div class="dim"><span class="dn">Customer Fit</span><div class="dt"><div class="df" data-p="90"></div></div><span class="dp">90%</span></div>
+            <div class="dim"><span class="dn">Language</span><div class="dt"><div class="df" data-p="82"></div></div><span class="dp">82%</span></div>
+          </div>
+          <div class="rationale">
+            <div class="rl">AI Rationale</div>
+            <p class="rt">"Strong category alignment in Korean fermented condiments. Jangdok holds FDA and HACCP certification covering US import requirements. MOQ of 500 units aligns with Lone Star's pilot order range."</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="steps-sec">
+  <div class="container">
+    <p class="sec-label">How it works</p>
+    <h2 class="sec-h">Three steps from profile to closed deal</h2>
+    <div class="steps-g">
+      <div class="step"><div class="sn">01 — PROFILE</div><h3>Build your verified business profile</h3><p>Upload your product catalog. Gracera's AI extracts categories, MOQ, certifications, and target markets automatically. Live in minutes.</p></div>
+      <div class="step"><div class="sn">02 — MATCH</div><h3>AI scores and ranks your best counterparts</h3><p>Six-dimension weighted scoring runs on every publish and sourcing request. Ranked introductions with plain-language rationale in the buyer's language.</p></div>
+      <div class="step"><div class="sn">03 — DEAL</div><h3>Close in-platform from RFQ to signed agreement</h3><p>RFQ templates, quote builder, Deal Room, AI Negotiation Coach, and e-signature — from introduction to contract without leaving the platform.</p></div>
+    </div>
+  </div>
+</section>
+
+<section class="cta-sec">
+  <div class="container">
+    <div class="cta-g">
+      <div class="cta-p">
+        <p class="sec-label">For suppliers</p>
+        <h2>List your company. Reach verified buyers globally.</h2>
+        <p>Upload your catalog, complete your profile, and start receiving ranked buyer introductions within 24 hours of verification.</p>
+        <a href="#" class="btn-teal">List as a supplier — it's free</a>
+        <p class="csub">Free tier includes 3 AI matches/month.</p>
+      </div>
+      <div class="cta-p">
+        <p class="sec-label" style="color:var(--orange)">For buyers</p>
+        <h2>Post your sourcing request. Let AI find the right supplier.</h2>
+        <p>Describe what you need. Gracera surfaces ranked supplier matches within hours. No credit card required to start.</p>
+        <a href="#" class="btn-o-dark">Post a sourcing request — it's free</a>
+        <p class="csub">Free tier includes 5 AI match suggestions.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <div class="container">
+    <div class="ft-r">
+      <a href="#" class="ft-logo"><span class="ft-lm"><svg width="12" height="12" viewBox="0 0 14 14" fill="none"><circle cx="4" cy="4" r="2" fill="white" opacity=".9"/><circle cx="10" cy="4" r="2" fill="white" opacity=".6"/><circle cx="4" cy="10" r="2" fill="white" opacity=".6"/><circle cx="10" cy="10" r="2" fill="white" opacity=".3"/></svg></span>gracera<span style="color:var(--teal)">.</span>ai</a>
+      <ul class="ft-links"><li><a href="#">How it works</a></li><li><a href="#">Pricing</a></li><li><a href="#">Privacy</a></li><li><a href="#">Terms</a></li></ul>
+      <p class="ft-copy">© 2026 Gracera. All rights reserved.</p>
+    </div>
+  </div>
+</footer>
+
+<script>
+(function(){
+  const c=document.getElementById('cv1');
+  if(!c)return;
+  const dpr=Math.min(window.devicePixelRatio||1,2);
+  let W,H,ctx;
+  function resize(){W=c.offsetWidth;H=c.offsetHeight;c.width=W*dpr;c.height=H*dpr;ctx=c.getContext('2d');ctx.scale(dpr,dpr)}
+  resize();
+  const suppliers=[{y:.2,code:'KR'},{y:.4,code:'CN'},{y:.6,code:'BD'},{y:.8,code:'TW'}];
+  const buyers=[{y:.22,code:'US'},{y:.42,code:'DE'},{y:.62,code:'GB'},{y:.78,code:'NL'}];
+  const active=[{si:0,bi:0},{si:2,bi:2}];
+  let sigs=active.map((a,i)=>({ai:i,prog:i*0.4,phase:'toAI'}));
+  let t=0;
+  function draw(){
+    ctx.clearRect(0,0,W,H);
+    ctx.fillStyle='#0C1522';ctx.fillRect(0,0,W,H);
+    const sx=W*.15,ax=W*.5,bx=W*.85,cy=H*.5;
+    // lines
+    suppliers.forEach((s,i)=>{
+      const isA=active.some(a=>a.si===i);
+      ctx.beginPath();ctx.moveTo(sx,H*s.y);ctx.lineTo(ax,cy);
+      ctx.strokeStyle=isA?'rgba(34,197,94,.3)':'rgba(255,255,255,.04)';
+      ctx.lineWidth=isA?1.5:1;ctx.setLineDash(isA?[]:[3,5]);ctx.stroke();ctx.setLineDash([]);
+    });
+    buyers.forEach((b,i)=>{
+      const isA=active.some(a=>a.bi===i);
+      ctx.beginPath();ctx.moveTo(ax,cy);ctx.lineTo(bx,H*b.y);
+      ctx.strokeStyle=isA?'rgba(34,197,94,.3)':'rgba(255,255,255,.04)';
+      ctx.lineWidth=isA?1.5:1;ctx.setLineDash(isA?[]:[3,5]);ctx.stroke();ctx.setLineDash([]);
+    });
+    // supplier nodes
+    suppliers.forEach((s,i)=>{
+      const isA=active.some(a=>a.si===i);
+      const ny=H*s.y,r=20;
+      if(isA){const g=ctx.createRadialGradient(sx,ny,r,sx,ny,r+12);g.addColorStop(0,'rgba(34,197,94,.25)');g.addColorStop(1,'transparent');ctx.beginPath();ctx.arc(sx,ny,r+12,0,Math.PI*2);ctx.fillStyle=g;ctx.fill();}
+      ctx.beginPath();ctx.arc(sx,ny,r,0,Math.PI*2);ctx.fillStyle='#111E2E';ctx.fill();
+      ctx.strokeStyle=isA?'#22C55E':'rgba(255,255,255,.1)';ctx.lineWidth=isA?1.5:1;ctx.stroke();
+      ctx.font='700 10px system-ui';ctx.fillStyle=isA?'#22C55E':'#4A5A6E';ctx.textAlign='center';ctx.textBaseline='middle';ctx.fillText(s.code,sx,ny);
+    });
+    buyers.forEach((b,i)=>{
+      const isA=active.some(a=>a.bi===i);
+      const ny=H*b.y,r=20;
+      if(isA){const g=ctx.createRadialGradient(bx,ny,r,bx,ny,r+12);g.addColorStop(0,'rgba(249,115,22,.18)');g.addColorStop(1,'transparent');ctx.beginPath();ctx.arc(bx,ny,r+12,0,Math.PI*2);ctx.fillStyle=g;ctx.fill();}
+      ctx.beginPath();ctx.arc(bx,ny,r,0,Math.PI*2);ctx.fillStyle='#111E2E';ctx.fill();
+      ctx.strokeStyle=isA?'#F97316':'rgba(255,255,255,.1)';ctx.lineWidth=isA?1.5:1;ctx.stroke();
+      ctx.font='700 10px system-ui';ctx.fillStyle=isA?'#F97316':'#4A5A6E';ctx.textAlign='center';ctx.textBaseline='middle';ctx.fillText(b.code,bx,ny);
+    });
+    // AI node
+    const pulse=Math.sin(t*.035)*.4+.6;
+    ctx.beginPath();ctx.arc(ax,cy,42+Math.sin(t*.035)*3,0,Math.PI*2);ctx.strokeStyle=`rgba(34,197,94,${.12*pulse})`;ctx.lineWidth=1;ctx.stroke();
+    ctx.beginPath();ctx.arc(ax,cy,34,0,Math.PI*2);ctx.strokeStyle=`rgba(34,197,94,${.3*pulse})`;ctx.lineWidth=1.5;ctx.stroke();
+    ctx.beginPath();ctx.arc(ax,cy,28,0,Math.PI*2);ctx.fillStyle='#060914';ctx.fill();
+    ctx.font='700 8.5px system-ui';ctx.fillStyle='rgba(255,255,255,.5)';ctx.textAlign='center';ctx.textBaseline='middle';ctx.fillText('GRACERA',ax,cy-6);
+    ctx.font='800 11px system-ui';ctx.fillStyle='#22C55E';ctx.fillText('AI',ax,cy+6);
+    // signals
+    sigs=sigs.map(sig=>{
+      const a=active[sig.ai];
+      const sy2=H*suppliers[a.si].y,by2=H*buyers[a.bi].y;
+      const p=sig.prog,spd=.008;
+      if(sig.phase==='toAI'){
+        const px=sx+(ax-sx)*p,py=sy2+(cy-sy2)*p;
+        const tx2=sx+(ax-sx)*Math.max(0,p-.12),ty2=sy2+(cy-sy2)*Math.max(0,p-.12);
+        ctx.beginPath();ctx.moveTo(tx2,ty2);ctx.lineTo(px,py);ctx.strokeStyle='rgba(34,197,94,.6)';ctx.lineWidth=2;ctx.stroke();
+        ctx.beginPath();ctx.arc(px,py,3,0,Math.PI*2);ctx.fillStyle='#22C55E';ctx.fill();
+        sig.prog+=spd;if(sig.prog>=1)return{...sig,prog:0,phase:'toBuyer'};
+      } else {
+        const px=ax+(bx-ax)*p,py=cy+(by2-cy)*p;
+        const tx2=ax+(bx-ax)*Math.max(0,p-.12),ty2=cy+(by2-cy)*Math.max(0,p-.12);
+        ctx.beginPath();ctx.moveTo(tx2,ty2);ctx.lineTo(px,py);ctx.strokeStyle='rgba(249,115,22,.6)';ctx.lineWidth=2;ctx.stroke();
+        ctx.beginPath();ctx.arc(px,py,3,0,Math.PI*2);ctx.fillStyle='#F97316';ctx.fill();
+        sig.prog+=spd;if(sig.prog>=1)return{...sig,prog:0,phase:'toAI'};
+      }
+      return sig;
+    });
+    t++;requestAnimationFrame(draw);
+  }
+  draw();
+  window.addEventListener('resize',resize);
+})();
+(function(){
+  const sc=document.getElementById('sc1');if(!sc)return;
+  let fired=false;
+  const obs=new IntersectionObserver(e=>{if(e[0].isIntersecting&&!fired){fired=true;setTimeout(()=>{sc.querySelectorAll('.df').forEach(el=>el.style.width=el.dataset.p+'%')},200);obs.disconnect();}},{threshold:.3});
+  obs.observe(sc);
+})();
+</script>

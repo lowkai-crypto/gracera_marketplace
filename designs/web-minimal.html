@@ -1,0 +1,236 @@
+<title>Gracera</title>
+<meta name="description" content="AI-scored introductions for global B2B trade.">
+<style>
+:root{
+  --bg:#F8F8F6;
+  --white:#FFFFFF;
+  --ink:#1A1A1A;
+  --ink2:#3D3D3D;
+  --muted:#8C8C8C;
+  --hair:#E4E4DF;
+  --teal:#22C55E;
+  --orange:#F97316;
+  --max-w:64rem;
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth}
+body{background:var(--bg);color:var(--ink);font-family:system-ui,-apple-system,'Helvetica Neue',Arial,sans-serif;line-height:1.7;-webkit-font-smoothing:antialiased}
+.container{max-width:var(--max-w);margin:0 auto;padding:0 2.5rem}
+
+/* NAV */
+nav{padding:2rem 0;border-bottom:1px solid var(--hair)}
+.nav-i{max-width:var(--max-w);margin:0 auto;padding:0 2.5rem;display:flex;align-items:center}
+.logo{text-decoration:none;color:var(--ink);font-size:.875rem;font-weight:600;letter-spacing:.02em}
+.logo-dot{color:var(--teal)}
+.nav-links{margin-left:auto;display:flex;gap:2.5rem;list-style:none}
+.nav-links a{font-size:.75rem;font-weight:400;color:var(--muted);text-decoration:none;transition:color .2s}
+.nav-links a:hover{color:var(--ink)}
+.nav-a{margin-left:3rem;display:flex;gap:1.25rem;align-items:center}
+.link-plain{font-size:.75rem;font-weight:400;color:var(--muted);text-decoration:none;transition:color .2s}
+.link-plain:hover{color:var(--ink)}
+.btn-min{font-size:.75rem;font-weight:500;color:var(--white);background:var(--teal);padding:.4375rem 1.125rem;border-radius:2px;text-decoration:none;transition:opacity .2s}
+.btn-min:hover{opacity:.82}
+
+/* HERO — extreme whitespace */
+.hero{padding:8rem 0 7rem}
+.hero-inner{max-width:52rem}
+.hero-tag{font-size:.625rem;font-weight:600;letter-spacing:.15em;text-transform:uppercase;color:var(--teal);margin-bottom:2.5rem}
+h1{font-size:clamp(2.25rem,4vw,3.25rem);font-weight:300;line-height:1.2;letter-spacing:-.025em;color:var(--ink);text-wrap:balance;margin-bottom:2.5rem}
+h1 strong{font-weight:700}
+.hero-sub{font-size:1.0625rem;line-height:1.85;color:var(--muted);max-width:44ch;font-weight:300;margin-bottom:4rem}
+.cta-min{display:flex;gap:1.5rem;align-items:center}
+.btn-primary{font-size:.8125rem;font-weight:500;color:var(--white);background:var(--orange);padding:.6875rem 1.5rem;border-radius:2px;text-decoration:none;transition:opacity .2s}
+.btn-primary:hover{opacity:.88}
+.btn-secondary{font-size:.8125rem;font-weight:400;color:var(--teal);text-decoration:none;display:flex;align-items:center;gap:.375rem;transition:opacity .2s}
+.btn-secondary:hover{opacity:.7}
+.btn-secondary::after{content:'→';font-size:.875rem}
+
+/* DIVIDER */
+.divider{border:none;border-top:1px solid var(--hair);margin:0}
+
+/* STATS — inline, understated */
+.stats{padding:4rem 0}
+.stats-row{display:flex;gap:0;align-items:stretch}
+.stat{flex:1;padding:0 2.5rem 0 0;margin-right:2.5rem;border-right:1px solid var(--hair)}
+.stat:last-child{border-right:none;margin-right:0;padding-right:0}
+.sv{font-size:2rem;font-weight:300;letter-spacing:-.04em;color:var(--ink);font-variant-numeric:tabular-nums;line-height:1}
+.sv sup{font-size:.5em;vertical-align:super;color:var(--teal);font-weight:600}
+.sl{font-size:.6875rem;font-weight:400;color:var(--muted);margin-top:.375rem}
+
+/* MATCHING — generous space around score card */
+.match-sec{padding:7rem 0;border-top:1px solid var(--hair)}
+.match-g{display:grid;grid-template-columns:1fr 380px;gap:6rem;align-items:start}
+.sec-tag{font-size:.625rem;font-weight:600;letter-spacing:.15em;text-transform:uppercase;color:var(--teal);margin-bottom:1.75rem}
+.sec-h{font-size:clamp(1.5rem,2.5vw,2.125rem);font-weight:300;letter-spacing:-.025em;line-height:1.3;color:var(--ink);margin-bottom:1.5rem;text-wrap:balance}
+.sec-h strong{font-weight:600}
+.sec-p{font-size:.9375rem;line-height:1.85;color:var(--muted);font-weight:300;max-width:40ch}
+.score-card-min{background:var(--white);border:1px solid var(--hair);overflow:hidden}
+.sc-header{padding:1.25rem 1.5rem;border-bottom:1px solid var(--hair);display:flex;align-items:center;justify-content:space-between}
+.sc-names{font-size:.75rem;font-weight:500;color:var(--ink2)}
+.sc-names .arr{color:var(--hair);margin:0 .5rem}
+.sc-pct{font-size:.75rem;font-weight:600;color:var(--teal);font-variant-numeric:tabular-nums;letter-spacing:.01em}
+.dims-min{padding:1.5rem;display:flex;flex-direction:column;gap:1.125rem}
+.dim-m{display:grid;grid-template-columns:100px 1fr 32px;align-items:center;gap:.875rem}
+.dn-m{font-size:.6875rem;font-weight:400;color:var(--muted);letter-spacing:.03em}
+.dt-m{height:1px;background:var(--hair);position:relative}
+.df-m{position:absolute;top:-1px;left:0;height:3px;background:var(--teal);width:0;transition:width 1.3s cubic-bezier(.22,.61,.36,1)}
+.dp-m{font-size:.6875rem;font-weight:500;color:var(--ink2);text-align:right;font-variant-numeric:tabular-nums}
+.rationale-min{padding:1.125rem 1.5rem;border-top:1px solid var(--hair);background:var(--bg)}
+.rl-min{font-size:.5625rem;font-weight:600;letter-spacing:.15em;text-transform:uppercase;color:var(--muted);margin-bottom:.5rem}
+.rt-min{font-size:.75rem;line-height:1.7;color:var(--muted);font-style:italic}
+
+/* PROCESS */
+.process{padding:7rem 0;border-top:1px solid var(--hair)}
+.proc-g{display:grid;grid-template-columns:1fr 1fr 1fr;gap:4rem;margin-top:4rem}
+.proc-n{font-size:.625rem;font-weight:600;letter-spacing:.15em;text-transform:uppercase;color:var(--teal);margin-bottom:1.25rem;font-variant-numeric:tabular-nums}
+.proc h3{font-size:1rem;font-weight:500;letter-spacing:-.015em;color:var(--ink);margin-bottom:.75rem;line-height:1.4}
+.proc p{font-size:.875rem;line-height:1.85;color:var(--muted);font-weight:300}
+
+/* CTA */
+.cta-sec{padding:7rem 0;border-top:1px solid var(--hair)}
+.cta-g{display:grid;grid-template-columns:1fr 1fr;gap:5rem}
+.cta-col .sec-tag{margin-bottom:1.25rem}
+.cta-col h2{font-size:1.375rem;font-weight:300;letter-spacing:-.025em;line-height:1.35;color:var(--ink);margin-bottom:1rem;text-wrap:balance}
+.cta-col h2 strong{font-weight:600}
+.cta-col p{font-size:.875rem;line-height:1.85;color:var(--muted);font-weight:300;margin-bottom:2rem}
+.cta-note{font-size:.6875rem;color:var(--muted);margin-top:.625rem}
+
+/* FOOTER */
+footer{border-top:1px solid var(--hair);padding:3rem 0}
+.ft-r{max-width:var(--max-w);margin:0 auto;padding:0 2.5rem;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:1.5rem}
+.ft-logo{text-decoration:none;color:var(--muted);font-size:.75rem;font-weight:500;letter-spacing:.02em}
+.ft-links{display:flex;gap:2rem;list-style:none}
+.ft-links a{font-size:.6875rem;font-weight:400;color:var(--muted);text-decoration:none;transition:color .2s}
+.ft-links a:hover{color:var(--ink)}
+.ft-copy{font-size:.625rem;color:var(--hair);letter-spacing:.05em}
+
+@media(max-width:860px){.nav-links,.nav-a{display:none}.match-g,.proc-g,.cta-g{grid-template-columns:1fr}.stats-row{flex-direction:column;gap:2.5rem}.stat{border-right:none;border-bottom:1px solid var(--hair);padding-bottom:2.5rem;margin-right:0}}
+@media(prefers-reduced-motion:reduce){.df-m{transition:none}}
+</style>
+
+<nav>
+  <div class="nav-i">
+    <a href="#" class="logo">gracera<span class="logo-dot">.</span>ai</a>
+    <ul class="nav-links">
+      <li><a href="#">How it works</a></li>
+      <li><a href="#">For suppliers</a></li>
+      <li><a href="#">For buyers</a></li>
+      <li><a href="#">Pricing</a></li>
+    </ul>
+    <div class="nav-a">
+      <a href="#" class="link-plain">Sign in</a>
+      <a href="#" class="btn-min">Get started</a>
+    </div>
+  </div>
+</nav>
+
+<section class="hero">
+  <div class="container">
+    <div class="hero-inner">
+      <div class="hero-tag">AI-Powered B2B Trade Matching</div>
+      <h1>Stop browsing directories.<br>Start getting <strong>ranked introductions</strong> from an AI that understands your business.</h1>
+      <p class="hero-sub">Gracera scores supplier–buyer compatibility across 6 dimensions — category, geography, scale, certifications, customer fit, and language — then surfaces your best matches with a reason for each.</p>
+      <div class="cta-min">
+        <a href="#" class="btn-primary">Post a sourcing request</a>
+        <a href="#" class="btn-secondary">List as a supplier</a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<hr class="divider">
+
+<section class="stats">
+  <div class="container">
+    <div class="stats-row">
+      <div class="stat"><div class="sv">6<sup>×</sup></div><div class="sl">Matching dimensions</div></div>
+      <div class="stat"><div class="sv">15</div><div class="sl">B2B verticals</div></div>
+      <div class="stat"><div class="sv">40<sup>+</sup></div><div class="sl">Countries</div></div>
+      <div class="stat"><div class="sv">0</div><div class="sl">Pay-to-rank positions</div></div>
+    </div>
+  </div>
+</section>
+
+<section class="match-sec">
+  <div class="container">
+    <div class="match-g">
+      <div>
+        <p class="sec-tag">AI Matching Engine</p>
+        <h2 class="sec-h">Every introduction comes with a score <strong>and a reason.</strong></h2>
+        <p class="sec-p">The matching agent doesn't just rank — it explains. Each introduction shows exactly why the pairing scored well, in the buyer's preferred language.</p>
+      </div>
+      <div class="score-card-min" id="sc-min">
+        <div class="sc-header">
+          <span class="sc-names">Jangdok Foods<span class="arr">→</span>Lone Star Specialty</span>
+          <span class="sc-pct">89% match</span>
+        </div>
+        <div class="dims-min">
+          <div class="dim-m"><span class="dn-m">Category</span><div class="dt-m"><div class="df-m" data-p="96"></div></div><span class="dp-m">96%</span></div>
+          <div class="dim-m"><span class="dn-m">Geography</span><div class="dt-m"><div class="df-m" data-p="88"></div></div><span class="dp-m">88%</span></div>
+          <div class="dim-m"><span class="dn-m">Scale</span><div class="dt-m"><div class="df-m" data-p="92"></div></div><span class="dp-m">92%</span></div>
+          <div class="dim-m"><span class="dn-m">Certifications</span><div class="dt-m"><div class="df-m" data-p="85"></div></div><span class="dp-m">85%</span></div>
+          <div class="dim-m"><span class="dn-m">Customer Fit</span><div class="dt-m"><div class="df-m" data-p="90"></div></div><span class="dp-m">90%</span></div>
+          <div class="dim-m"><span class="dn-m">Language</span><div class="dt-m"><div class="df-m" data-p="82"></div></div><span class="dp-m">82%</span></div>
+        </div>
+        <div class="rationale-min">
+          <div class="rl-min">Rationale</div>
+          <p class="rt-min">"Strong category alignment in Korean fermented condiments. FDA and HACCP certification confirmed. MOQ aligns with pilot order range. English communication capacity confirmed."</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="process">
+  <div class="container">
+    <p class="sec-tag">How it works</p>
+    <div class="proc-g">
+      <div class="proc"><div class="proc-n">01 — Profile</div><h3>Build your verified business profile</h3><p>Upload your catalog. AI extracts categories, MOQ, certifications, and target markets. KYB verification completes in 24 hours. Your profile is live immediately after.</p></div>
+      <div class="proc"><div class="proc-n">02 — Match</div><h3>Receive ranked introductions with rationale</h3><p>Weighted scoring across 6 dimensions runs continuously. Your best-fit counterparts, ranked and explained — in your preferred language.</p></div>
+      <div class="proc"><div class="proc-n">03 — Deal</div><h3>Close the deal entirely in-platform</h3><p>RFQ, Deal Room, AI Negotiation Coach, e-signature. From the first introduction to the signed agreement — without switching tools.</p></div>
+    </div>
+  </div>
+</section>
+
+<section class="cta-sec">
+  <div class="container">
+    <div class="cta-g">
+      <div class="cta-col">
+        <p class="sec-tag">For suppliers</p>
+        <h2>List your company. Reach <strong>verified buyers</strong> globally.</h2>
+        <p>Upload your catalog, complete your profile, and start receiving ranked buyer introductions within 24 hours of verification. Free to start.</p>
+        <a href="#" class="btn-min">List as a supplier</a>
+        <p class="cta-note">Free tier — 3 AI matches/month</p>
+      </div>
+      <div class="cta-col">
+        <p class="sec-tag" style="color:var(--orange)">For buyers</p>
+        <h2>Post your sourcing request. Let AI <strong>find the right supplier.</strong></h2>
+        <p>Describe what you need — category, volume, certifications, target market. Gracera surfaces ranked supplier matches within hours. No credit card required.</p>
+        <a href="#" class="btn-primary">Post a sourcing request</a>
+        <p class="cta-note">Free tier — 5 AI match suggestions</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <div class="ft-r">
+    <a href="#" class="ft-logo">gracera.ai</a>
+    <ul class="ft-links">
+      <li><a href="#">How it works</a></li>
+      <li><a href="#">Pricing</a></li>
+      <li><a href="#">Privacy</a></li>
+      <li><a href="#">Terms</a></li>
+    </ul>
+    <p class="ft-copy">© 2026 GRACERA</p>
+  </div>
+</footer>
+
+<script>
+(function(){
+  const sc=document.getElementById('sc-min');if(!sc)return;
+  let fired=false;
+  const obs=new IntersectionObserver(e=>{if(e[0].isIntersecting&&!fired){fired=true;setTimeout(()=>{sc.querySelectorAll('.df-m').forEach(el=>el.style.width=el.dataset.p+'%')},300);obs.disconnect();}},{threshold:.3});
+  obs.observe(sc);
+})();
+</script>

@@ -1,0 +1,400 @@
+<title>Gracera — Lattice</title>
+<meta name="description" content="Gracera: AI-scored B2B trade introductions. The matching lattice.">
+<style>
+:root{
+  --teal:#22C55E;
+  --teal-light:#DCFCE7;
+  --teal-dark:#15803D;
+  --orange:#F97316;
+  --orange-light:#FFEDD5;
+  --black:#0B0F14;
+  --white:#FFFFFF;
+  --off:#F8F9FB;
+  --gray-100:#F0F2F5;
+  --gray-200:#DDE2EA;
+  --gray-400:#8A96A6;
+  --gray-600:#4A5568;
+  --max-w:76rem;
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth}
+body{background:var(--white);color:var(--black);font-family:system-ui,-apple-system,'Helvetica Neue',Arial,sans-serif;line-height:1.6;-webkit-font-smoothing:antialiased;overflow-x:hidden}
+.container{max-width:var(--max-w);margin:0 auto;padding:0 2rem}
+
+/* NAV */
+nav{position:sticky;top:0;z-index:100;background:rgba(255,255,255,.95);backdrop-filter:blur(16px);border-bottom:1px solid var(--gray-200)}
+.nav-i{max-width:var(--max-w);margin:0 auto;padding:0 2rem;height:60px;display:flex;align-items:center;gap:2rem}
+.logo{text-decoration:none;color:var(--black);font-size:.9375rem;font-weight:800;letter-spacing:-.03em}
+.logo-dot{color:var(--teal)}
+.nav-links{margin-left:auto;display:flex;gap:2rem;list-style:none}
+.nav-links a{font-size:.8125rem;font-weight:500;color:var(--gray-400);text-decoration:none;transition:color .15s}
+.nav-links a:hover{color:var(--black)}
+.nav-a{display:flex;gap:.625rem;align-items:center;margin-left:1.5rem}
+.btn-g{font-size:.8125rem;font-weight:500;color:var(--gray-600);text-decoration:none;padding:.4375rem .875rem;border-radius:6px;transition:background .15s}
+.btn-g:hover{background:var(--gray-100)}
+.btn-o{font-size:.8125rem;font-weight:600;color:var(--white);background:var(--orange);padding:.4375rem 1.125rem;border-radius:6px;text-decoration:none;transition:opacity .15s}
+.btn-o:hover{opacity:.88}
+
+/* HERO — full canvas background */
+.hero{position:relative;overflow:hidden;min-height:80vh;display:flex;align-items:center}
+#cv-geo{position:absolute;inset:0;width:100%;height:100%;display:block}
+.hero-content{position:relative;z-index:1;padding:5rem 0;width:100%}
+.hero-inner{max-width:var(--max-w);margin:0 auto;padding:0 2rem}
+.hero-box{max-width:560px;background:rgba(255,255,255,.92);backdrop-filter:blur(12px);border:1px solid rgba(255,255,255,.7);border-radius:16px;padding:3rem;box-shadow:0 8px 40px rgba(11,15,20,.1)}
+.hero-tag{font-size:.625rem;font-weight:700;letter-spacing:.15em;text-transform:uppercase;color:var(--teal);margin-bottom:1.125rem}
+h1{font-size:clamp(2rem,3.5vw,2.875rem);font-weight:800;line-height:1.12;letter-spacing:-.04em;color:var(--black);text-wrap:balance;margin-bottom:1rem}
+h1 em{font-style:normal;color:var(--teal)}
+.hero-sub{font-size:1rem;line-height:1.7;color:var(--gray-600);max-width:44ch;margin-bottom:2rem;font-weight:400}
+.ctas{display:flex;gap:.75rem;flex-wrap:wrap;margin-bottom:2rem}
+.btn-teal{font-size:.8125rem;font-weight:600;color:var(--white);background:var(--teal);padding:.6875rem 1.375rem;border-radius:6px;text-decoration:none;transition:opacity .15s;display:inline-flex;align-items:center;gap:.375rem}
+.btn-teal:hover{opacity:.85}
+.btn-orange{font-size:.8125rem;font-weight:600;color:var(--white);background:var(--orange);padding:.6875rem 1.375rem;border-radius:6px;text-decoration:none;transition:opacity .15s}
+.btn-orange:hover{opacity:.85}
+.trust{display:flex;gap:1.25rem;flex-wrap:wrap}
+.trust-i{font-size:.6875rem;font-weight:500;color:var(--gray-400);display:flex;align-items:center;gap:.3rem}
+.trust-i::before{content:'';width:4px;height:4px;border-radius:50%;background:var(--teal)}
+
+/* SPLIT PANELS */
+.split{display:grid;grid-template-columns:1fr 1fr;border-top:1px solid var(--gray-200)}
+.split-s{background:rgba(34,197,94,.04);border-right:1px solid var(--gray-200);padding:4rem 3rem}
+.split-b{padding:4rem 3rem}
+.split-label{font-size:.5625rem;font-weight:700;letter-spacing:.15em;text-transform:uppercase;margin-bottom:1.5rem;display:flex;align-items:center;gap:.625rem}
+.split-label-s{color:var(--teal)}
+.split-label-b{color:var(--orange)}
+.split-label::before{content:'';width:8px;height:8px;border-radius:50%;background:currentColor}
+.split-h{font-size:1.5rem;font-weight:700;letter-spacing:-.03em;line-height:1.2;color:var(--black);margin-bottom:.875rem;text-wrap:balance}
+.split-p{font-size:.9375rem;line-height:1.75;color:var(--gray-600);max-width:34ch;margin-bottom:2rem;font-weight:400}
+.split-features{list-style:none;display:flex;flex-direction:column;gap:.625rem;margin-bottom:2rem}
+.split-features li{font-size:.875rem;color:var(--gray-600);display:flex;align-items:flex-start;gap:.5rem;line-height:1.5}
+.sf-dot-s{color:var(--teal)}
+.sf-dot-b{color:var(--orange)}
+.btn-split-s{font-size:.8125rem;font-weight:600;color:var(--white);background:var(--teal);padding:.6875rem 1.375rem;border-radius:6px;text-decoration:none;display:inline-block;transition:opacity .15s}
+.btn-split-s:hover{opacity:.85}
+.btn-split-b{font-size:.8125rem;font-weight:600;color:var(--white);background:var(--orange);padding:.6875rem 1.375rem;border-radius:6px;text-decoration:none;display:inline-block;transition:opacity .15s}
+.btn-split-b:hover{opacity:.85}
+.split-note{font-size:.6875rem;color:var(--gray-400);margin-top:.625rem}
+
+/* STATS */
+.stats-band{background:var(--black);padding:3rem 0}
+.stats-g{display:grid;grid-template-columns:repeat(4,1fr);gap:0}
+.stat{padding:0 2rem;border-right:1px solid rgba(255,255,255,.07);text-align:center}
+.stat:last-child{border-right:none}
+.sv{font-size:2.75rem;font-weight:800;letter-spacing:-.045em;color:var(--white);line-height:1;font-variant-numeric:tabular-nums}
+.sv sup{font-size:.45em;vertical-align:super;color:var(--teal)}
+.sl{font-size:.5625rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--gray-400);margin-top:.375rem}
+
+/* HOW IT WORKS */
+.how{padding:5.5rem 0;border-top:1px solid var(--gray-200)}
+.how-g{display:grid;grid-template-columns:repeat(3,1fr);gap:1px;background:var(--gray-200);border:1px solid var(--gray-200);border-radius:12px;overflow:hidden;margin-top:3rem}
+.how-col{background:var(--white);padding:2.25rem 2rem}
+.how-n{font-size:.625rem;font-weight:700;letter-spacing:.1em;color:var(--teal);font-variant-numeric:tabular-nums;margin-bottom:1rem}
+.how-col h3{font-size:1.0625rem;font-weight:700;letter-spacing:-.02em;line-height:1.3;color:var(--black);margin-bottom:.5rem}
+.how-col p{font-size:.875rem;line-height:1.65;color:var(--gray-400)}
+
+/* SCORE */
+.score-sec{padding:5.5rem 0;background:var(--off);border-top:1px solid var(--gray-200);border-bottom:1px solid var(--gray-200)}
+.score-g{display:grid;grid-template-columns:1fr 420px;gap:4.5rem;align-items:start}
+.sec-label{font-size:.5625rem;font-weight:700;letter-spacing:.15em;text-transform:uppercase;color:var(--teal);margin-bottom:.75rem}
+.sec-h{font-size:clamp(1.625rem,3vw,2.25rem);font-weight:700;letter-spacing:-.03em;line-height:1.2;color:var(--black);margin-bottom:1rem;text-wrap:balance}
+.sec-p{font-size:1rem;line-height:1.75;color:var(--gray-600);max-width:42ch}
+.score-card{background:var(--white);border:1px solid var(--gray-200);border-radius:10px;overflow:hidden;box-shadow:0 2px 16px rgba(11,15,20,.06)}
+.sc-top{padding:1.125rem 1.375rem;border-bottom:1px solid var(--gray-100);display:flex;align-items:center;justify-content:space-between}
+.sc-pair{display:flex;align-items:center;gap:.5rem}
+.av{width:26px;height:26px;border-radius:50%;font-size:.5625rem;font-weight:700;display:flex;align-items:center;justify-content:center}
+.avs{background:var(--teal-light);color:var(--teal-dark)}
+.avb{background:var(--orange-light);color:#C2410C}
+.aname{font-size:.6875rem;font-weight:700;color:var(--black)}
+.acountry{font-size:.5625rem;color:var(--gray-400)}
+.arr{color:var(--gray-200);padding:0 .125rem}
+.pct-badge{font-size:.6875rem;font-weight:700;color:var(--teal-dark);background:var(--teal-light);padding:.2rem .5rem;border-radius:4px;font-variant-numeric:tabular-nums}
+.dims{padding:1.25rem 1.375rem;display:flex;flex-direction:column;gap:.75rem}
+.dim{display:grid;grid-template-columns:100px 1fr 34px;align-items:center;gap:.75rem}
+.dn{font-size:.6875rem;font-weight:600;color:var(--gray-400)}
+.dt{height:4px;background:var(--gray-100);border-radius:2px;overflow:hidden}
+.df{height:100%;background:var(--teal);border-radius:2px;width:0;transition:width 1.2s cubic-bezier(.22,.61,.36,1)}
+.dp{font-size:.6875rem;font-weight:700;color:var(--black);text-align:right;font-variant-numeric:tabular-nums}
+.rationale{padding:1rem 1.375rem;background:var(--gray-100);border-top:1px solid var(--gray-200)}
+.rl{font-size:.5rem;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--gray-400);margin-bottom:.375rem}
+.rt{font-size:.75rem;line-height:1.65;color:var(--gray-600);font-style:italic}
+
+/* FOOTER */
+footer{background:var(--black);padding:2.5rem 0;border-top:1px solid rgba(255,255,255,.04)}
+.ft-r{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:1.25rem}
+.ft-logo{text-decoration:none;color:var(--white);font-size:.9375rem;font-weight:800;letter-spacing:-.03em}
+.ft-logo span{color:var(--teal)}
+.ft-links{display:flex;gap:1.5rem;list-style:none}
+.ft-links a{font-size:.75rem;color:var(--gray-400);text-decoration:none;font-weight:500;transition:color .15s}
+.ft-links a:hover{color:var(--white)}
+.ft-copy{font-size:.625rem;color:#2A3344}
+
+@media(max-width:900px){
+  .nav-links{display:none}
+  .hero{min-height:60vh}
+  .hero-box{max-width:100%}
+  .split{grid-template-columns:1fr}
+  .split-s{border-right:none;border-bottom:1px solid var(--gray-200)}
+  .stats-g{grid-template-columns:repeat(2,1fr)}
+  .stats-g .stat:nth-child(2){border-right:none}
+  .how-g{grid-template-columns:1fr}
+  .score-g{grid-template-columns:1fr}
+}
+@media(prefers-reduced-motion:reduce){.df{transition:none}}
+</style>
+
+<nav>
+  <div class="nav-i">
+    <a href="#" class="logo">gracera<span class="logo-dot">.</span>ai</a>
+    <ul class="nav-links">
+      <li><a href="#">How it works</a></li>
+      <li><a href="#">For Suppliers</a></li>
+      <li><a href="#">For Buyers</a></li>
+      <li><a href="#">Pricing</a></li>
+    </ul>
+    <div class="nav-a">
+      <a href="#" class="btn-g">Sign in</a>
+      <a href="#" class="btn-o">Get started free</a>
+    </div>
+  </div>
+</nav>
+
+<section class="hero">
+  <canvas id="cv-geo" aria-hidden="true"></canvas>
+  <div class="hero-content">
+    <div class="hero-inner">
+      <div class="hero-box">
+        <div class="hero-tag">AI-Powered B2B Trade Matching</div>
+        <h1>The lattice that connects global suppliers and <em>their best-fit buyers.</em></h1>
+        <p class="hero-sub">Gracera scores every supplier–buyer pairing across 6 dimensions and surfaces ranked introductions — with a plain-language explanation for each.</p>
+        <div class="ctas">
+          <a href="#" class="btn-teal">List as a supplier</a>
+          <a href="#" class="btn-orange">Post a sourcing request</a>
+        </div>
+        <div class="trust">
+          <span class="trust-i">No pay-to-rank</span>
+          <span class="trust-i">KYB verified</span>
+          <span class="trust-i">15 verticals</span>
+          <span class="trust-i">40+ countries</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<div class="split">
+  <div class="split-s">
+    <div class="split-label split-label-s">For suppliers</div>
+    <h2 class="split-h">Build your pipeline. Reach verified buyers globally.</h2>
+    <p class="split-p">Upload your catalog. Complete your profile. Start receiving ranked buyer introductions within 24 hours of verification.</p>
+    <ul class="split-features">
+      <li><span class="sf-dot-s">→</span>RAG-powered catalog auto-population</li>
+      <li><span class="sf-dot-s">→</span>KYB business verification in 24 hours</li>
+      <li><span class="sf-dot-s">→</span>Ranked buyer introductions with rationale</li>
+      <li><span class="sf-dot-s">→</span>Deal Room and e-signature in-platform</li>
+    </ul>
+    <a href="#" class="btn-split-s">List as a supplier — it's free</a>
+    <p class="split-note">Free tier includes 3 AI matches/month</p>
+  </div>
+  <div class="split-b">
+    <div class="split-label split-label-b">For buyers</div>
+    <h2 class="split-h">Post once. Receive ranked supplier matches within hours.</h2>
+    <p class="split-p">Describe what you need. Gracera surfaces your best-fit suppliers — ranked and explained — without a directory or a broker.</p>
+    <ul class="split-features">
+      <li><span class="sf-dot-b">→</span>Sourcing request with category and volume</li>
+      <li><span class="sf-dot-b">→</span>AI-ranked supplier matches with rationale</li>
+      <li><span class="sf-dot-b">→</span>Certification and compliance pre-verified</li>
+      <li><span class="sf-dot-b">→</span>RFQ, quote, and negotiation in one platform</li>
+    </ul>
+    <a href="#" class="btn-split-b">Post a sourcing request — it's free</a>
+    <p class="split-note">Free tier includes 5 AI match suggestions</p>
+  </div>
+</div>
+
+<section class="stats-band">
+  <div class="container">
+    <div class="stats-g">
+      <div class="stat"><div class="sv">6<sup>×</sup></div><div class="sl">Matching Dimensions</div></div>
+      <div class="stat"><div class="sv">15</div><div class="sl">B2B Verticals</div></div>
+      <div class="stat"><div class="sv">40<sup>+</sup></div><div class="sl">Countries</div></div>
+      <div class="stat"><div class="sv">0</div><div class="sl">Pay-to-rank Positions</div></div>
+    </div>
+  </div>
+</section>
+
+<section class="how">
+  <div class="container">
+    <p class="sec-label">How it works</p>
+    <h2 class="sec-h">Three steps from profile to closed deal</h2>
+    <div class="how-g">
+      <div class="how-col"><div class="how-n">01 — Profile</div><h3>Build your verified profile</h3><p>Upload your catalog. AI extracts categories, MOQ, certifications, and target markets. KYB verification in 24h.</p></div>
+      <div class="how-col"><div class="how-n">02 — Match</div><h3>Receive ranked introductions</h3><p>Six-dimension scoring runs on every profile and sourcing request. Ranked and explained — in your preferred language.</p></div>
+      <div class="how-col"><div class="how-n">03 — Deal</div><h3>Close in-platform</h3><p>RFQ, Deal Room, AI Negotiation Coach, e-signature. From introduction to signed agreement without switching tools.</p></div>
+    </div>
+  </div>
+</section>
+
+<section class="score-sec">
+  <div class="container">
+    <div class="score-g">
+      <div>
+        <p class="sec-label">AI Matching Engine</p>
+        <h2 class="sec-h">Every introduction scored across 6 dimensions. Every result explained.</h2>
+        <p class="sec-p">The matching agent doesn't just rank — it explains. Each introduction shows exactly why the pairing scored well, in the buyer's preferred language.</p>
+      </div>
+      <div class="score-card" id="sc-geo">
+        <div class="sc-top">
+          <div class="sc-pair">
+            <div class="av avs">JF</div>
+            <div><div class="aname">Jangdok Foods</div><div class="acountry">Supplier · South Korea</div></div>
+            <span class="arr">→</span>
+            <div class="av avb">LS</div>
+            <div><div class="aname">Lone Star Specialty</div><div class="acountry">Buyer · United States</div></div>
+          </div>
+          <div class="pct-badge">89%</div>
+        </div>
+        <div class="dims">
+          <div class="dim"><span class="dn">Category</span><div class="dt"><div class="df" data-p="96"></div></div><span class="dp">96%</span></div>
+          <div class="dim"><span class="dn">Geography</span><div class="dt"><div class="df" data-p="88"></div></div><span class="dp">88%</span></div>
+          <div class="dim"><span class="dn">Scale</span><div class="dt"><div class="df" data-p="92"></div></div><span class="dp">92%</span></div>
+          <div class="dim"><span class="dn">Certifications</span><div class="dt"><div class="df" data-p="85"></div></div><span class="dp">85%</span></div>
+          <div class="dim"><span class="dn">Customer Fit</span><div class="dt"><div class="df" data-p="90"></div></div><span class="dp">90%</span></div>
+          <div class="dim"><span class="dn">Language</span><div class="dt"><div class="df" data-p="82"></div></div><span class="dp">82%</span></div>
+        </div>
+        <div class="rationale">
+          <div class="rl">AI Rationale</div>
+          <p class="rt">"Strong category alignment in Korean fermented condiments. FDA and HACCP certifications confirmed. MOQ aligns with pilot order range. English communication capacity confirmed."</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <div class="container">
+    <div class="ft-r">
+      <a href="#" class="ft-logo">gracera<span>.</span>ai</a>
+      <ul class="ft-links"><li><a href="#">How it works</a></li><li><a href="#">Pricing</a></li><li><a href="#">Privacy</a></li><li><a href="#">Terms</a></li></ul>
+      <p class="ft-copy">© 2026 Gracera. All rights reserved.</p>
+    </div>
+  </div>
+</footer>
+
+<script>
+// Hexagonal lattice canvas
+(function(){
+  const c=document.getElementById('cv-geo');
+  if(!c)return;
+  const dpr=Math.min(window.devicePixelRatio||1,2);
+  let W,H,ctx;
+  function resize(){
+    W=c.offsetWidth;H=c.offsetHeight;
+    c.width=W*dpr;c.height=H*dpr;
+    ctx=c.getContext('2d');ctx.scale(dpr,dpr);
+  }
+  resize();
+  window.addEventListener('resize',resize);
+  const TEAL='#22C55E',ORANGE='#F97316';
+  let t=0;
+  // Hex grid
+  const S=48; // hex size
+  const HW=S*Math.sqrt(3);
+  const HH=S*2;
+  function hexCenter(col,row){
+    const x=col*HW+(row%2===0?0:HW/2);
+    const y=row*(HH*.75);
+    return{x,y};
+  }
+  function hexPath(cx,cy,r,ctx){
+    ctx.beginPath();
+    for(let i=0;i<6;i++){
+      const a=Math.PI/180*(60*i-30);
+      const x=cx+r*Math.cos(a),y=cy+r*Math.sin(a);
+      i===0?ctx.moveTo(x,y):ctx.lineTo(x,y);
+    }
+    ctx.closePath();
+  }
+  // Nodes to highlight (supplier left, buyer right, AI center)
+  const HIGHLIGHT_S=[[1,2],[1,4],[2,1],[2,5]];
+  const HIGHLIGHT_B=[[8,2],[8,4],[7,1],[7,5]];
+  const CENTER={col:4,row:3};
+  function isHighlight(col,row,list){return list.some(([c2,r2])=>c2===col&&r2===row)}
+  function draw(){
+    ctx.clearRect(0,0,W,H);
+    // background
+    const bg=ctx.createLinearGradient(0,0,W,H);
+    bg.addColorStop(0,'#F0FDF4');bg.addColorStop(.5,'#F8FAFF');bg.addColorStop(1,'#FEF3EC');
+    ctx.fillStyle=bg;ctx.fillRect(0,0,W,H);
+    // compute rows/cols to fill screen
+    const cols=Math.ceil(W/HW)+2;
+    const rows=Math.ceil(H/(HH*.75))+2;
+    const offX=-HW,offY=-HH;
+    for(let row=0;row<rows;row++){
+      for(let col=0;col<cols;col++){
+        const{x,y}=hexCenter(col,row);
+        const px=x+offX,py=y+offY;
+        const isS=isHighlight(col,row,HIGHLIGHT_S);
+        const isB=isHighlight(col,row,HIGHLIGHT_B);
+        const isC=col===CENTER.col&&row===CENTER.row;
+        const pulse=Math.sin(t*.025+col*.4+row*.3)*.3+.7;
+        hexPath(px,py,S-.75,ctx);
+        if(isC){
+          ctx.fillStyle='rgba(11,15,20,.92)';ctx.fill();
+          ctx.strokeStyle='rgba(34,197,94,.8)';ctx.lineWidth=1.5;ctx.stroke();
+        } else if(isS){
+          ctx.fillStyle=`rgba(220,252,231,${.6*pulse})`;ctx.fill();
+          ctx.strokeStyle='rgba(34,197,94,.4)';ctx.lineWidth=1;ctx.stroke();
+        } else if(isB){
+          ctx.fillStyle=`rgba(255,237,213,${.6*pulse})`;ctx.fill();
+          ctx.strokeStyle='rgba(249,115,22,.4)';ctx.lineWidth=1;ctx.stroke();
+        } else {
+          ctx.fillStyle=`rgba(240,242,245,${.4*pulse})`;ctx.fill();
+          ctx.strokeStyle='rgba(220,226,234,.6)';ctx.lineWidth=.75;ctx.stroke();
+        }
+        // label center node
+        if(isC){
+          ctx.font='600 9px system-ui';ctx.fillStyle='rgba(255,255,255,.5)';ctx.textAlign='center';ctx.textBaseline='middle';ctx.fillText('gracera',px,py-6);
+          ctx.font='700 11px system-ui';ctx.fillStyle=TEAL;ctx.fillText('AI',px,py+6);
+        }
+        if(isS){
+          const codes=['KR','CN','BD','TW'];
+          const idx=HIGHLIGHT_S.findIndex(([c2,r2])=>c2===col&&r2===row);
+          if(idx>=0){ctx.font='700 9px system-ui';ctx.fillStyle=TEAL;ctx.textAlign='center';ctx.textBaseline='middle';ctx.fillText(codes[idx],px,py);}
+        }
+        if(isB){
+          const codes=['US','DE','GB','NL'];
+          const idx=HIGHLIGHT_B.findIndex(([c2,r2])=>c2===col&&r2===row);
+          if(idx>=0){ctx.font='700 9px system-ui';ctx.fillStyle=ORANGE;ctx.textAlign='center';ctx.textBaseline='middle';ctx.fillText(codes[idx],px,py);}
+        }
+      }
+    }
+    // draw connection lines from S nodes to center to B nodes
+    const cc=hexCenter(CENTER.col,CENTER.row);
+    const cpx=cc.x+offX,cpy=cc.y+offY;
+    HIGHLIGHT_S.forEach(([col,row])=>{
+      const{x,y}=hexCenter(col,row);
+      const prog=(Math.sin(t*.02+col)*.5+.5);
+      ctx.beginPath();ctx.moveTo(x+offX,y+offY);ctx.lineTo(cpx,cpy);
+      ctx.strokeStyle=`rgba(34,197,94,${.3*prog})`;ctx.lineWidth=1.5;ctx.setLineDash([]);ctx.stroke();
+      // signal dot
+      const sdx=(x+offX)+(cpx-(x+offX))*prog,sdy=(y+offY)+(cpy-(y+offY))*prog;
+      ctx.beginPath();ctx.arc(sdx,sdy,3.5,0,Math.PI*2);ctx.fillStyle=TEAL;ctx.fill();
+    });
+    HIGHLIGHT_B.forEach(([col,row])=>{
+      const{x,y}=hexCenter(col,row);
+      const prog=(Math.sin(t*.02+row+1)*.5+.5);
+      ctx.beginPath();ctx.moveTo(cpx,cpy);ctx.lineTo(x+offX,y+offY);
+      ctx.strokeStyle=`rgba(249,115,22,${.3*prog})`;ctx.lineWidth=1.5;ctx.stroke();
+      const ddx=cpx+(x+offX-cpx)*prog,ddy=cpy+(y+offY-cpy)*prog;
+      ctx.beginPath();ctx.arc(ddx,ddy,3.5,0,Math.PI*2);ctx.fillStyle=ORANGE;ctx.fill();
+    });
+    t++;requestAnimationFrame(draw);
+  }
+  draw();
+})();
+// Score bars
+(function(){
+  const sc=document.getElementById('sc-geo');if(!sc)return;
+  let fired=false;
+  const obs=new IntersectionObserver(e=>{if(e[0].isIntersecting&&!fired){fired=true;setTimeout(()=>{sc.querySelectorAll('.df').forEach(el=>el.style.width=el.dataset.p+'%')},200);obs.disconnect();}},{threshold:.3});
+  obs.observe(sc);
+})();
+</script>
