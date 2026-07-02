@@ -6,10 +6,29 @@ on:
       - main
 
 jobs:
-  deploy:
+  deploy-designs:
     runs-on: ubuntu-latest
+    if: github.event_name == 'push'
     steps:
-      - name: Trigger Coolify deploy
+      - name: Deploy gracera-designs
         run: |
-          curl -fsSL -X POST "${{ secrets.COOLIFY_WEBHOOK_URL }}" \
+          curl -fsSL -X POST "https://coolify.skystarcloud.com/api/v1/applications/mff3hw9yg8pzx10dimxpgn29/restart" \
+            -H "Authorization: Bearer ${{ secrets.COOLIFY_API_KEY }}"
+
+  deploy-web:
+    runs-on: ubuntu-latest
+    if: github.event_name == 'push'
+    steps:
+      - name: Deploy gracera-web
+        run: |
+          curl -fsSL -X POST "https://coolify.skystarcloud.com/api/v1/applications/t11s5jxfxqzq1vbtv1qllvmd/restart" \
+            -H "Authorization: Bearer ${{ secrets.COOLIFY_API_KEY }}"
+
+  deploy-ai-service:
+    runs-on: ubuntu-latest
+    if: github.event_name == 'push'
+    steps:
+      - name: Deploy gracera-ai-service
+        run: |
+          curl -fsSL -X POST "https://coolify.skystarcloud.com/api/v1/applications/vq6mn522jtzg2f1800ay6364/restart" \
             -H "Authorization: Bearer ${{ secrets.COOLIFY_API_KEY }}"
