@@ -106,17 +106,12 @@ h2{font-size:clamp(1.75rem,3vw,2.375rem);font-weight:700;letter-spacing:-.03em;l
 .how-card h3{font-size:1.0625rem;font-weight:700;letter-spacing:-.02em;line-height:1.3;color:var(--ink);margin-bottom:.625rem}
 .how-card p{font-size:.875rem;line-height:1.7;color:var(--muted)}
 
-/* VERTICALS */
-.verticals{padding:6rem 0;border-bottom:1px solid var(--warm-200)}
-.vert-header{text-align:center;max-width:46ch;margin:0 auto 3.5rem}
-.vert-p{font-size:1rem;line-height:1.8;color:var(--muted);margin-top:.875rem}
-.vert-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:1.25rem}
-.vert-card{border-radius:var(--r);overflow:hidden;position:relative;aspect-ratio:4/3;display:block}
-.vert-card img{width:100%;height:100%;object-fit:cover;transition:transform .45s ease;display:block}
-.vert-card:hover img{transform:scale(1.05)}
-.vert-overlay{position:absolute;inset:0;background:linear-gradient(to top,rgba(36,24,16,.72) 0%,rgba(36,24,16,.1) 55%,transparent 100%);display:flex;align-items:flex-end;padding:1.25rem}
-.vert-label{font-size:.9375rem;font-weight:700;color:#fff;letter-spacing:-.01em;line-height:1.3}
-.vert-count{font-size:.6875rem;color:rgba(255,255,255,.55);margin-top:.25rem}
+/* ILLUSTRATED SCENE */
+.illus-sec{padding:6rem 0;border-bottom:1px solid var(--warm-200)}
+.illus-hd{text-align:center;max-width:52ch;margin:0 auto 3rem}
+.illus-p{font-size:1rem;line-height:1.8;color:var(--muted);margin-top:.875rem}
+.illus-wrap{background:var(--surface);border:1px solid var(--warm-200);border-radius:var(--r-lg);overflow:hidden;box-shadow:0 4px 24px rgba(36,24,16,.05)}
+.illus-wrap svg{display:block;width:100%}
 
 /* CTA */
 .cta-sec{padding:5.5rem 0}
@@ -148,7 +143,7 @@ footer{background:var(--ink);padding:2.75rem 0}
   .stats{grid-template-columns:repeat(2,1fr);margin:0 1rem;padding:2.5rem}
   .stat-w:nth-child(2){border-right:none}
   .stat-w:nth-child(n+3){border-top:1px solid rgba(255,255,255,.08);padding-top:2rem;margin-top:0}
-  .story-g,.how-g,.cta-g,.vert-grid{grid-template-columns:1fr}
+  .story-g,.how-g,.cta-g{grid-template-columns:1fr}
   .nav-links{display:none}
 }
 @media(prefers-reduced-motion:reduce){.df-w{transition:none}}
@@ -205,38 +200,171 @@ footer{background:var(--ink);padding:2.75rem 0}
   </div>
 </div>
 
-<section class="verticals">
+<section class="illus-sec">
   <div class="container">
-    <div class="vert-header">
-      <div class="sec-pill">Active Verticals</div>
-      <h2>15 B2B verticals, one platform</h2>
-      <p class="vert-p">From Korean fermented foods to Taiwanese electronics — Gracera spans the categories that matter to global SME trade.</p>
+    <div class="illus-hd">
+      <div class="sec-pill">The Gracera World</div>
+      <h2>Suppliers and buyers, connected by AI</h2>
+      <p class="illus-p">Verified factories and manufacturers on one side. Importers, distributors, and SME buyers on the other. Gracera AI in the middle — scoring every match across 6 dimensions.</p>
     </div>
-    <div class="vert-grid">
-      <div class="vert-card">
-        <img src="https://images.unsplash.com/photo-1504674900247-0877df9cc836?auto=format&fit=crop&w=640&h=480&q=80" alt="Food & Beverage" loading="lazy">
-        <div class="vert-overlay"><div><div class="vert-label">Food & Beverage</div><div class="vert-count">1,240+ suppliers</div></div></div>
-      </div>
-      <div class="vert-card">
-        <img src="https://images.unsplash.com/photo-1558618666-fcd25c85cd64?auto=format&fit=crop&w=640&h=480&q=80" alt="Textiles & Apparel" loading="lazy">
-        <div class="vert-overlay"><div><div class="vert-label">Textiles & Apparel</div><div class="vert-count">890+ suppliers</div></div></div>
-      </div>
-      <div class="vert-card">
-        <img src="https://images.unsplash.com/photo-1518770660439-4636190af475?auto=format&fit=crop&w=640&h=480&q=80" alt="Electronics & Components" loading="lazy">
-        <div class="vert-overlay"><div><div class="vert-label">Electronics & Components</div><div class="vert-count">760+ suppliers</div></div></div>
-      </div>
-      <div class="vert-card">
-        <img src="https://images.unsplash.com/photo-1581091019981-56e37eb3d80a?auto=format&fit=crop&w=640&h=480&q=80" alt="Industrial Machinery" loading="lazy">
-        <div class="vert-overlay"><div><div class="vert-label">Industrial Machinery</div><div class="vert-count">540+ suppliers</div></div></div>
-      </div>
-      <div class="vert-card">
-        <img src="https://images.unsplash.com/photo-1532187863486-abf9dbad1b69?auto=format&fit=crop&w=640&h=480&q=80" alt="Chemicals & Pharma" loading="lazy">
-        <div class="vert-overlay"><div><div class="vert-label">Chemicals & Pharma</div><div class="vert-count">320+ suppliers</div></div></div>
-      </div>
-      <div class="vert-card">
-        <img src="https://images.unsplash.com/photo-1542838132-92c53300491e?auto=format&fit=crop&w=640&h=480&q=80" alt="Consumer Goods" loading="lazy">
-        <div class="vert-overlay"><div><div class="vert-label">Consumer Goods</div><div class="vert-count">680+ suppliers</div></div></div>
-      </div>
+    <div class="illus-wrap">
+      <svg viewBox="0 0 1100 420" width="100%" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <!-- Sky -->
+        <rect width="1100" height="420" fill="#FEF9F4"/>
+        <!-- Ground -->
+        <rect x="0" y="348" width="1100" height="72" fill="#E8D9C6"/>
+        <rect x="0" y="348" width="1100" height="5" fill="#D4C0A6"/>
+        <!-- Clouds -->
+        <ellipse cx="290" cy="58" rx="52" ry="18" fill="white" opacity=".7"/>
+        <ellipse cx="334" cy="48" rx="40" ry="16" fill="white" opacity=".55"/>
+        <ellipse cx="810" cy="66" rx="46" ry="17" fill="white" opacity=".65"/>
+        <ellipse cx="858" cy="55" rx="36" ry="15" fill="white" opacity=".5"/>
+
+        <!-- ── SUPPLIER SIDE ── -->
+        <!-- Country badges -->
+        <rect x="22" y="46" width="34" height="22" rx="6" fill="rgba(34,197,94,.16)"/>
+        <text x="39" y="61" text-anchor="middle" font-size="10" font-weight="700" fill="#166534" font-family="system-ui,sans-serif">KR</text>
+        <rect x="64" y="46" width="34" height="22" rx="6" fill="rgba(34,197,94,.11)"/>
+        <text x="81" y="61" text-anchor="middle" font-size="10" font-weight="700" fill="#166534" font-family="system-ui,sans-serif">CN</text>
+        <rect x="106" y="46" width="34" height="22" rx="6" fill="rgba(34,197,94,.07)"/>
+        <text x="123" y="61" text-anchor="middle" font-size="10" font-weight="700" fill="#166534" font-family="system-ui,sans-serif">BD</text>
+        <!-- Supplier label -->
+        <rect x="36" y="82" width="108" height="26" rx="13" fill="rgba(34,197,94,.12)" stroke="rgba(34,197,94,.22)" stroke-width="1"/>
+        <text x="90" y="100" text-anchor="middle" font-size="11.5" font-weight="700" fill="#22C55E" font-family="system-ui,sans-serif">SUPPLIER</text>
+        <!-- Factory main building -->
+        <rect x="22" y="126" width="182" height="222" rx="4" fill="#F0E6D6" stroke="#D4C0A6" stroke-width="1.5"/>
+        <rect x="22" y="114" width="182" height="16" rx="4" fill="#D4C0A6"/>
+        <rect x="34" y="108" width="158" height="10" rx="2" fill="#C4AE94"/>
+        <!-- Factory windows 3×3 -->
+        <rect x="40" y="148" width="34" height="26" rx="3" fill="#B8D0C8" stroke="#A8BEB6" stroke-width="1"/>
+        <rect x="88" y="148" width="34" height="26" rx="3" fill="#B8D0C8" stroke="#A8BEB6" stroke-width="1"/>
+        <rect x="136" y="148" width="34" height="26" rx="3" fill="#B8D0C8" stroke="#A8BEB6" stroke-width="1"/>
+        <rect x="40" y="190" width="34" height="26" rx="3" fill="#B8D0C8" stroke="#A8BEB6" stroke-width="1"/>
+        <rect x="88" y="190" width="34" height="26" rx="3" fill="#B8D0C8" stroke="#A8BEB6" stroke-width="1"/>
+        <rect x="136" y="190" width="34" height="26" rx="3" fill="#B8D0C8" stroke="#A8BEB6" stroke-width="1"/>
+        <rect x="40" y="232" width="34" height="26" rx="3" fill="#B8D0C8" stroke="#A8BEB6" stroke-width="1"/>
+        <rect x="88" y="232" width="34" height="26" rx="3" fill="#B8D0C8" stroke="#A8BEB6" stroke-width="1"/>
+        <rect x="136" y="232" width="34" height="26" rx="3" fill="#B8D0C8" stroke="#A8BEB6" stroke-width="1"/>
+        <!-- Factory door -->
+        <rect x="75" y="290" width="56" height="58" rx="2" fill="#C4AE94"/>
+        <line x1="103" y1="290" x2="103" y2="348" stroke="#B09880" stroke-width="1.5"/>
+        <!-- Chimney 1 -->
+        <rect x="56" y="70" width="18" height="48" rx="2" fill="#C4AE94"/>
+        <rect x="53" y="66" width="24" height="8" rx="2" fill="#B8A090"/>
+        <circle cx="65" cy="58" r="11" fill="rgba(255,255,255,.55)"/>
+        <circle cx="59" cy="46" r="9" fill="rgba(255,255,255,.38)"/>
+        <circle cx="66" cy="36" r="7" fill="rgba(255,255,255,.2)"/>
+        <!-- Chimney 2 -->
+        <rect x="126" y="82" width="15" height="36" rx="2" fill="#C4AE94"/>
+        <rect x="123" y="78" width="21" height="7" rx="2" fill="#B8A090"/>
+        <circle cx="133" cy="72" r="9" fill="rgba(255,255,255,.5)"/>
+        <circle cx="127" cy="62" r="7" fill="rgba(255,255,255,.32)"/>
+        <!-- Warehouse (secondary) -->
+        <rect x="214" y="202" width="128" height="146" rx="4" fill="#EAE0D2" stroke="#D4C0A6" stroke-width="1.5"/>
+        <rect x="214" y="190" width="128" height="16" rx="4" fill="#D4C0A6"/>
+        <rect x="220" y="216" width="36" height="28" rx="3" fill="#B8D0C8" stroke="#A8BEB6" stroke-width="1"/>
+        <rect x="280" y="216" width="36" height="28" rx="3" fill="#B8D0C8" stroke="#A8BEB6" stroke-width="1"/>
+        <!-- Garage doors -->
+        <rect x="220" y="270" width="44" height="78" rx="2" fill="#C4AE94" stroke="#B09880" stroke-width="1"/>
+        <line x1="220" y1="287" x2="264" y2="287" stroke="#B09880" stroke-width="1"/>
+        <line x1="220" y1="304" x2="264" y2="304" stroke="#B09880" stroke-width="1"/>
+        <line x1="220" y1="321" x2="264" y2="321" stroke="#B09880" stroke-width="1"/>
+        <rect x="278" y="270" width="44" height="78" rx="2" fill="#C4AE94" stroke="#B09880" stroke-width="1"/>
+        <line x1="278" y1="287" x2="322" y2="287" stroke="#B09880" stroke-width="1"/>
+        <line x1="278" y1="304" x2="322" y2="304" stroke="#B09880" stroke-width="1"/>
+        <line x1="278" y1="321" x2="322" y2="321" stroke="#B09880" stroke-width="1"/>
+        <!-- Supplier person -->
+        <circle cx="358" cy="316" r="13" fill="#C4AE94"/>
+        <rect x="347" y="328" width="22" height="20" rx="6" fill="#8C7260"/>
+        <!-- Outbound boxes -->
+        <rect x="354" y="310" width="36" height="30" rx="2" fill="#F97316" opacity=".75"/>
+        <line x1="354" y1="310" x2="390" y2="310" stroke="rgba(255,255,255,.35)" stroke-width="1"/>
+        <line x1="372" y1="310" x2="372" y2="340" stroke="rgba(255,255,255,.35)" stroke-width="1"/>
+        <rect x="408" y="316" width="30" height="26" rx="2" fill="#F97316" opacity=".6"/>
+        <rect x="456" y="314" width="28" height="28" rx="2" fill="#22C55E" opacity=".6"/>
+
+        <!-- ── CONNECTION LINES ── -->
+        <path d="M370 236 C450 188 506 208 538 242" stroke="#22C55E" stroke-width="1.5" stroke-dasharray="7,5" fill="none" opacity=".55"/>
+        <path d="M360 284 C440 262 506 262 538 258" stroke="#22C55E" stroke-width="1.5" stroke-dasharray="7,5" fill="none" opacity=".35"/>
+        <path d="M616 242 C650 202 706 186 752 226" stroke="#F97316" stroke-width="1.5" stroke-dasharray="7,5" fill="none" opacity=".55"/>
+        <path d="M616 258 C654 262 706 268 752 278" stroke="#F97316" stroke-width="1.5" stroke-dasharray="7,5" fill="none" opacity=".35"/>
+
+        <!-- ── GRACERA AI HUB ── -->
+        <circle cx="577" cy="248" r="92" fill="rgba(34,197,94,.04)"/>
+        <circle cx="577" cy="248" r="70" fill="rgba(34,197,94,.06)"/>
+        <circle cx="577" cy="248" r="52" fill="rgba(34,197,94,.09)"/>
+        <circle cx="577" cy="248" r="40" fill="#241810"/>
+        <circle cx="577" cy="248" r="40" fill="none" stroke="rgba(34,197,94,.28)" stroke-width="1.5"/>
+        <text x="577" y="240" text-anchor="middle" font-size="10" fill="rgba(255,255,255,.35)" font-weight="600" font-family="system-ui,sans-serif">gracera</text>
+        <text x="577" y="260" text-anchor="middle" font-size="18" fill="#22C55E" font-weight="800" font-family="system-ui,sans-serif">AI</text>
+        <!-- Score badge -->
+        <rect x="524" y="156" width="106" height="40" rx="20" fill="#22C55E"/>
+        <text x="577" y="176" text-anchor="middle" font-size="12.5" fill="white" font-weight="700" font-family="system-ui,sans-serif">89% match</text>
+        <text x="577" y="190" text-anchor="middle" font-size="9" fill="rgba(255,255,255,.75)" font-family="system-ui,sans-serif">6 dimensions scored</text>
+        <line x1="577" y1="196" x2="577" y2="208" stroke="#22C55E" stroke-width="1.5" stroke-dasharray="3,2"/>
+        <!-- Inbound boxes -->
+        <rect x="638" y="312" width="34" height="30" rx="2" fill="#22C55E" opacity=".7"/>
+        <line x1="638" y1="312" x2="672" y2="312" stroke="rgba(255,255,255,.35)" stroke-width="1"/>
+        <line x1="655" y1="312" x2="655" y2="342" stroke="rgba(255,255,255,.35)" stroke-width="1"/>
+        <rect x="686" y="316" width="30" height="26" rx="2" fill="#22C55E" opacity=".55"/>
+        <rect x="728" y="314" width="28" height="28" rx="2" fill="#F97316" opacity=".65"/>
+
+        <!-- ── BUYER SIDE ── -->
+        <!-- Country badges -->
+        <rect x="992" y="46" width="34" height="22" rx="6" fill="rgba(249,115,22,.18)"/>
+        <text x="1009" y="61" text-anchor="middle" font-size="10" font-weight="700" fill="#9a3412" font-family="system-ui,sans-serif">US</text>
+        <rect x="1034" y="46" width="34" height="22" rx="6" fill="rgba(249,115,22,.12)"/>
+        <text x="1051" y="61" text-anchor="middle" font-size="10" font-weight="700" fill="#9a3412" font-family="system-ui,sans-serif">DE</text>
+        <rect x="1074" y="46" width="34" height="22" rx="6" fill="rgba(249,115,22,.08)"/>
+        <text x="1091" y="61" text-anchor="middle" font-size="10" font-weight="700" fill="#9a3412" font-family="system-ui,sans-serif">GB</text>
+        <!-- Buyer label -->
+        <rect x="948" y="158" width="88" height="26" rx="13" fill="rgba(249,115,22,.12)" stroke="rgba(249,115,22,.22)" stroke-width="1"/>
+        <text x="992" y="176" text-anchor="middle" font-size="11.5" font-weight="700" fill="#F97316" font-family="system-ui,sans-serif">BUYER</text>
+        <!-- Office tower -->
+        <rect x="782" y="88" width="112" height="260" rx="4" fill="#E8F4F0" stroke="#B8D8D0" stroke-width="1.5"/>
+        <rect x="782" y="88" width="112" height="16" rx="4" fill="#22C55E" opacity=".55"/>
+        <rect x="782" y="98" width="112" height="6" fill="#22C55E" opacity=".55"/>
+        <!-- Glass facade strips -->
+        <rect x="794" y="114" width="88" height="9" rx="1" fill="rgba(34,197,94,.18)"/>
+        <rect x="794" y="129" width="88" height="9" rx="1" fill="rgba(34,197,94,.18)"/>
+        <rect x="794" y="144" width="88" height="9" rx="1" fill="rgba(34,197,94,.18)"/>
+        <rect x="794" y="159" width="88" height="9" rx="1" fill="rgba(34,197,94,.18)"/>
+        <rect x="794" y="174" width="88" height="9" rx="1" fill="rgba(34,197,94,.18)"/>
+        <rect x="794" y="189" width="88" height="9" rx="1" fill="rgba(34,197,94,.18)"/>
+        <rect x="794" y="204" width="88" height="9" rx="1" fill="rgba(34,197,94,.18)"/>
+        <rect x="794" y="219" width="88" height="9" rx="1" fill="rgba(34,197,94,.18)"/>
+        <rect x="794" y="234" width="88" height="9" rx="1" fill="rgba(34,197,94,.18)"/>
+        <rect x="794" y="249" width="88" height="9" rx="1" fill="rgba(34,197,94,.18)"/>
+        <rect x="794" y="264" width="88" height="9" rx="1" fill="rgba(34,197,94,.18)"/>
+        <rect x="794" y="279" width="88" height="9" rx="1" fill="rgba(34,197,94,.18)"/>
+        <line x1="838" y1="108" x2="838" y2="348" stroke="rgba(34,197,94,.08)" stroke-width="1"/>
+        <!-- Office entrance -->
+        <rect x="812" y="298" width="52" height="50" rx="2" fill="rgba(34,197,94,.14)" stroke="rgba(34,197,94,.2)" stroke-width="1"/>
+        <line x1="838" y1="298" x2="838" y2="348" stroke="rgba(34,197,94,.2)" stroke-width="1"/>
+        <!-- Retail store -->
+        <rect x="908" y="196" width="170" height="152" rx="4" fill="#FFF3E8" stroke="#F0D0B0" stroke-width="1.5"/>
+        <rect x="908" y="182" width="170" height="18" rx="4" fill="#F97316" opacity=".5"/>
+        <rect x="908" y="192" width="170" height="8" fill="#F97316" opacity=".5"/>
+        <!-- Awning -->
+        <rect x="918" y="200" width="150" height="14" rx="2" fill="#F97316" opacity=".82"/>
+        <line x1="944" y1="200" x2="944" y2="214" stroke="rgba(255,255,255,.3)" stroke-width="7"/>
+        <line x1="976" y1="200" x2="976" y2="214" stroke="rgba(255,255,255,.3)" stroke-width="7"/>
+        <line x1="1008" y1="200" x2="1008" y2="214" stroke="rgba(255,255,255,.3)" stroke-width="7"/>
+        <line x1="1040" y1="200" x2="1040" y2="214" stroke="rgba(255,255,255,.3)" stroke-width="7"/>
+        <!-- Display windows -->
+        <rect x="918" y="222" width="72" height="60" rx="2" fill="rgba(249,115,22,.1)" stroke="rgba(249,115,22,.25)" stroke-width="1.5"/>
+        <line x1="920" y1="224" x2="938" y2="242" stroke="rgba(255,255,255,.45)" stroke-width="1.5"/>
+        <rect x="1004" y="222" width="66" height="60" rx="2" fill="rgba(249,115,22,.1)" stroke="rgba(249,115,22,.25)" stroke-width="1.5"/>
+        <line x1="1006" y1="224" x2="1022" y2="240" stroke="rgba(255,255,255,.45)" stroke-width="1.5"/>
+        <!-- Store door -->
+        <rect x="950" y="292" width="36" height="56" rx="2" fill="rgba(249,115,22,.18)" stroke="rgba(249,115,22,.28)" stroke-width="1"/>
+        <line x1="968" y1="292" x2="968" y2="348" stroke="rgba(249,115,22,.2)" stroke-width="1"/>
+        <!-- Store sign -->
+        <rect x="928" y="214" width="124" height="10" rx="2" fill="rgba(249,115,22,.22)"/>
+        <!-- Buyer person -->
+        <circle cx="760" cy="316" r="13" fill="#C4AE94"/>
+        <rect x="749" y="328" width="22" height="20" rx="6" fill="#8C7260"/>
+      </svg>
     </div>
   </div>
 </section>
