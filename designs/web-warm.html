@@ -42,7 +42,7 @@ nav{position:sticky;top:0;z-index:100;background:rgba(253,248,242,.93);backdrop-
 .btn-warm-cta:hover{opacity:.88}
 
 /* HERO */
-.hero{padding:5rem 0 4.5rem}
+.hero{padding:5rem 0 4.5rem;background-image:radial-gradient(var(--warm-200) 1px,transparent 1px);background-size:28px 28px}
 .hero-g{display:grid;grid-template-columns:1fr 480px;gap:4rem;align-items:center}
 .pill{display:inline-flex;align-items:center;gap:.375rem;font-size:.6875rem;font-weight:600;color:var(--teal);background:var(--teal-bg);padding:.3125rem .875rem;border-radius:100px;margin-bottom:1.5rem}
 .pill-dot{width:6px;height:6px;border-radius:50%;background:var(--teal)}
@@ -81,9 +81,8 @@ h2{font-size:clamp(1.75rem,3vw,2.375rem);font-weight:700;letter-spacing:-.03em;l
 .story-card{background:var(--surface);border:1px solid var(--warm-200);border-radius:var(--r);padding:1.5rem;box-shadow:0 2px 12px rgba(36,24,16,.04)}
 .sc-w-top{display:flex;align-items:center;justify-content:space-between;margin-bottom:.875rem}
 .sc-w-pair{display:flex;align-items:center;gap:.625rem}
-.av-w{width:32px;height:32px;border-radius:50%;font-size:.6875rem;font-weight:700;display:flex;align-items:center;justify-content:center}
-.avs-w{background:var(--teal-bg);color:var(--teal)}
-.avb-w{background:var(--orange-bg);color:var(--orange)}
+.av-w{width:40px;height:40px;border-radius:50%;overflow:hidden;flex-shrink:0}
+.av-w img{width:100%;height:100%;display:block;object-fit:cover}
 .av-name{font-size:.8125rem;font-weight:600;color:var(--ink)}
 .av-country{font-size:.625rem;color:var(--muted)}
 .arr-w{color:var(--warm-300);font-size:.75rem}
@@ -102,7 +101,8 @@ h2{font-size:clamp(1.75rem,3vw,2.375rem);font-weight:700;letter-spacing:-.03em;l
 .how{padding:5.5rem 0;background:var(--warm-100);border-top:1px solid var(--warm-200);border-bottom:1px solid var(--warm-200)}
 .how-g{display:grid;grid-template-columns:repeat(3,1fr);gap:2rem;margin-top:3.5rem}
 .how-card{background:var(--surface);border:1px solid var(--warm-200);border-radius:var(--r);padding:2rem;box-shadow:0 2px 12px rgba(36,24,16,.04)}
-.how-n{font-size:.6875rem;font-weight:700;letter-spacing:.08em;color:var(--teal);font-variant-numeric:tabular-nums;margin-bottom:1rem}
+.how-illus{margin-bottom:1.25rem}
+.how-n{font-size:.6875rem;font-weight:700;letter-spacing:.08em;color:var(--teal);font-variant-numeric:tabular-nums;margin-bottom:.625rem}
 .how-card h3{font-size:1.0625rem;font-weight:700;letter-spacing:-.02em;line-height:1.3;color:var(--ink);margin-bottom:.625rem}
 .how-card p{font-size:.875rem;line-height:1.7;color:var(--muted)}
 
@@ -205,10 +205,10 @@ footer{background:var(--ink);padding:2.75rem 0}
         <div class="story-card">
           <div class="sc-w-top">
             <div class="sc-w-pair">
-              <div class="av-w avs-w">JF</div>
+              <div class="av-w"><img src="https://api.dicebear.com/7.x/initials/svg?seed=Jangdok+Foods&backgroundColor=d1fae5&fontColor=166534&fontSize=38" alt="Jangdok Foods"></div>
               <div><div class="av-name">Jangdok Foods</div><div class="av-country">Supplier · South Korea</div></div>
               <span class="arr-w">→</span>
-              <div class="av-w avb-w">LS</div>
+              <div class="av-w"><img src="https://api.dicebear.com/7.x/initials/svg?seed=Lone+Star+Specialty&backgroundColor=ffedd5&fontColor=9a3412&fontSize=38" alt="Lone Star Specialty"></div>
               <div><div class="av-name">Lone Star Specialty</div><div class="av-country">Buyer · United States</div></div>
             </div>
             <span class="pct-w">89%</span>
@@ -236,9 +236,56 @@ footer{background:var(--ink);padding:2.75rem 0}
     <div class="sec-pill">How it works</div>
     <h2>Three steps from profile to closed deal</h2>
     <div class="how-g">
-      <div class="how-card"><div class="how-n">01 — Profile</div><h3>Build your verified business profile</h3><p>Upload your catalog. AI extracts categories, MOQ, certifications, and target markets. KYB verification in 24 hours. Your profile is live immediately.</p></div>
-      <div class="how-card"><div class="how-n">02 — Match</div><h3>Receive ranked introductions with rationale</h3><p>Six-dimension scoring delivers your best-fit counterparts, ranked and explained — in your preferred language. No black box, no directories.</p></div>
-      <div class="how-card"><div class="how-n">03 — Deal</div><h3>Close the deal entirely in-platform</h3><p>RFQ, Deal Room, AI Negotiation Coach, e-signature. From first introduction to signed agreement without switching tools.</p></div>
+      <div class="how-card">
+        <div class="how-illus">
+          <svg width="48" height="48" viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <rect width="48" height="48" rx="14" fill="var(--teal-bg)"/>
+            <rect x="10" y="8" width="20" height="26" rx="3" fill="white" stroke="var(--warm-200)" stroke-width="1.5"/>
+            <rect x="14" y="14" width="12" height="2" rx="1" fill="var(--warm-300)"/>
+            <rect x="14" y="19" width="9" height="2" rx="1" fill="var(--warm-300)"/>
+            <rect x="14" y="24" width="11" height="2" rx="1" fill="var(--warm-300)"/>
+            <circle cx="33" cy="34" r="9" fill="var(--teal)"/>
+            <path d="M28 34l3.5 3.5 7-7" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+        </div>
+        <div class="how-n">01 — Profile</div>
+        <h3>Build your verified business profile</h3>
+        <p>Upload your catalog. AI extracts categories, MOQ, certifications, and target markets. KYB verification in 24 hours. Your profile is live immediately.</p>
+      </div>
+      <div class="how-card">
+        <div class="how-illus">
+          <svg width="48" height="48" viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <rect width="48" height="48" rx="14" fill="rgba(249,115,22,.08)"/>
+            <circle cx="10" cy="24" r="7" fill="white" stroke="var(--teal)" stroke-width="1.5"/>
+            <circle cx="38" cy="24" r="7" fill="white" stroke="var(--orange)" stroke-width="1.5"/>
+            <circle cx="24" cy="24" r="11" fill="var(--ink)"/>
+            <text x="24" y="28" text-anchor="middle" font-size="7" fill="var(--teal)" font-weight="700" font-family="system-ui,sans-serif">AI</text>
+            <line x1="17" y1="24" x2="13" y2="24" stroke="var(--teal)" stroke-width="1.5" stroke-dasharray="2,2"/>
+            <line x1="31" y1="24" x2="35" y2="24" stroke="var(--orange)" stroke-width="1.5" stroke-dasharray="2,2"/>
+            <rect x="17" y="8" width="14" height="9" rx="4.5" fill="var(--teal)"/>
+            <text x="24" y="16" text-anchor="middle" font-size="6" fill="white" font-weight="700" font-family="system-ui,sans-serif">94%</text>
+          </svg>
+        </div>
+        <div class="how-n">02 — Match</div>
+        <h3>Receive ranked introductions with rationale</h3>
+        <p>Six-dimension scoring delivers your best-fit counterparts, ranked and explained — in your preferred language. No black box, no directories.</p>
+      </div>
+      <div class="how-card">
+        <div class="how-illus">
+          <svg width="48" height="48" viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <rect width="48" height="48" rx="14" fill="var(--teal-bg)"/>
+            <rect x="8" y="6" width="22" height="30" rx="4" fill="white" stroke="var(--warm-200)" stroke-width="1.5"/>
+            <rect x="13" y="13" width="12" height="2" rx="1" fill="var(--warm-300)"/>
+            <rect x="13" y="19" width="9" height="2" rx="1" fill="var(--warm-300)"/>
+            <path d="M13 28 q2.5-5 5 0 q2.5-5 5 0" stroke="var(--teal)" stroke-width="1.5" fill="none" stroke-linecap="round"/>
+            <circle cx="36" cy="36" r="10" fill="var(--teal)"/>
+            <path d="M30 36l4 4 9-9" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+        </div>
+        <div class="how-n">03 — Deal</div>
+        <h3>Close the deal entirely in-platform</h3>
+        <p>RFQ, Deal Room, AI Negotiation Coach, e-signature. From first introduction to signed agreement without switching tools.</p>
+      </div>
     </div>
   </div>
 </section>
