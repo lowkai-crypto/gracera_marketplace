@@ -106,6 +106,18 @@ h2{font-size:clamp(1.75rem,3vw,2.375rem);font-weight:700;letter-spacing:-.03em;l
 .how-card h3{font-size:1.0625rem;font-weight:700;letter-spacing:-.02em;line-height:1.3;color:var(--ink);margin-bottom:.625rem}
 .how-card p{font-size:.875rem;line-height:1.7;color:var(--muted)}
 
+/* VERTICALS */
+.verticals{padding:6rem 0;border-bottom:1px solid var(--warm-200)}
+.vert-header{text-align:center;max-width:46ch;margin:0 auto 3.5rem}
+.vert-p{font-size:1rem;line-height:1.8;color:var(--muted);margin-top:.875rem}
+.vert-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:1.25rem}
+.vert-card{border-radius:var(--r);overflow:hidden;position:relative;aspect-ratio:4/3;display:block}
+.vert-card img{width:100%;height:100%;object-fit:cover;transition:transform .45s ease;display:block}
+.vert-card:hover img{transform:scale(1.05)}
+.vert-overlay{position:absolute;inset:0;background:linear-gradient(to top,rgba(36,24,16,.72) 0%,rgba(36,24,16,.1) 55%,transparent 100%);display:flex;align-items:flex-end;padding:1.25rem}
+.vert-label{font-size:.9375rem;font-weight:700;color:#fff;letter-spacing:-.01em;line-height:1.3}
+.vert-count{font-size:.6875rem;color:rgba(255,255,255,.55);margin-top:.25rem}
+
 /* CTA */
 .cta-sec{padding:5.5rem 0}
 .cta-g{display:grid;grid-template-columns:1fr 1fr;gap:1.5rem}
@@ -136,7 +148,7 @@ footer{background:var(--ink);padding:2.75rem 0}
   .stats{grid-template-columns:repeat(2,1fr);margin:0 1rem;padding:2.5rem}
   .stat-w:nth-child(2){border-right:none}
   .stat-w:nth-child(n+3){border-top:1px solid rgba(255,255,255,.08);padding-top:2rem;margin-top:0}
-  .story-g,.how-g,.cta-g{grid-template-columns:1fr}
+  .story-g,.how-g,.cta-g,.vert-grid{grid-template-columns:1fr}
   .nav-links{display:none}
 }
 @media(prefers-reduced-motion:reduce){.df-w{transition:none}}
@@ -192,6 +204,42 @@ footer{background:var(--ink);padding:2.75rem 0}
     <div class="stat-w"><div class="sv-w">0</div><div class="sl-w">Pay-to-rank positions</div></div>
   </div>
 </div>
+
+<section class="verticals">
+  <div class="container">
+    <div class="vert-header">
+      <div class="sec-pill">Active Verticals</div>
+      <h2>15 B2B verticals, one platform</h2>
+      <p class="vert-p">From Korean fermented foods to Taiwanese electronics — Gracera spans the categories that matter to global SME trade.</p>
+    </div>
+    <div class="vert-grid">
+      <div class="vert-card">
+        <img src="https://images.unsplash.com/photo-1504674900247-0877df9cc836?auto=format&fit=crop&w=640&h=480&q=80" alt="Food & Beverage" loading="lazy">
+        <div class="vert-overlay"><div><div class="vert-label">Food & Beverage</div><div class="vert-count">1,240+ suppliers</div></div></div>
+      </div>
+      <div class="vert-card">
+        <img src="https://images.unsplash.com/photo-1558618666-fcd25c85cd64?auto=format&fit=crop&w=640&h=480&q=80" alt="Textiles & Apparel" loading="lazy">
+        <div class="vert-overlay"><div><div class="vert-label">Textiles & Apparel</div><div class="vert-count">890+ suppliers</div></div></div>
+      </div>
+      <div class="vert-card">
+        <img src="https://images.unsplash.com/photo-1518770660439-4636190af475?auto=format&fit=crop&w=640&h=480&q=80" alt="Electronics & Components" loading="lazy">
+        <div class="vert-overlay"><div><div class="vert-label">Electronics & Components</div><div class="vert-count">760+ suppliers</div></div></div>
+      </div>
+      <div class="vert-card">
+        <img src="https://images.unsplash.com/photo-1581091019981-56e37eb3d80a?auto=format&fit=crop&w=640&h=480&q=80" alt="Industrial Machinery" loading="lazy">
+        <div class="vert-overlay"><div><div class="vert-label">Industrial Machinery</div><div class="vert-count">540+ suppliers</div></div></div>
+      </div>
+      <div class="vert-card">
+        <img src="https://images.unsplash.com/photo-1532187863486-abf9dbad1b69?auto=format&fit=crop&w=640&h=480&q=80" alt="Chemicals & Pharma" loading="lazy">
+        <div class="vert-overlay"><div><div class="vert-label">Chemicals & Pharma</div><div class="vert-count">320+ suppliers</div></div></div>
+      </div>
+      <div class="vert-card">
+        <img src="https://images.unsplash.com/photo-1542838132-92c53300491e?auto=format&fit=crop&w=640&h=480&q=80" alt="Consumer Goods" loading="lazy">
+        <div class="vert-overlay"><div><div class="vert-label">Consumer Goods</div><div class="vert-count">680+ suppliers</div></div></div>
+      </div>
+    </div>
+  </div>
+</section>
 
 <section class="story">
   <div class="container">
