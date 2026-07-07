@@ -6,9 +6,33 @@ on:
       - main
 
 jobs:
-  deploy-designs:
+  changes:
     runs-on: ubuntu-latest
-    if: github.event_name == 'push'
+    outputs:
+      designs: ${{ steps.filter.outputs.designs }}
+      web: ${{ steps.filter.outputs.web }}
+      ai-service: ${{ steps.filter.outputs.ai-service }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dorny/paths-filter@v3
+        id: filter
+        with:
+          filters: |
+            designs:
+              - 'designs/**'
+            web:
+              - 'apps/web/**'
+              - 'packages/**'
+              - 'pnpm-lock.yaml'
+              - 'pnpm-workspace.yaml'
+              - 'package.json'
+            ai-service:
+              - 'apps/ai-service/**'
+
+  deploy-designs:
+    needs: changes
+    runs-on: ubuntu-latest
+    if: needs.changes.outputs.designs == 'true'
     steps:
       - name: Deploy gracera-designs
         run: |
@@ -16,8 +40,9 @@ jobs:
             -H "Authorization: Bearer ${{ secrets.COOLIFY_API_KEY }}"
 
   deploy-web:
+    needs: changes
     runs-on: ubuntu-latest
-    if: github.event_name == 'push'
+    if: needs.changes.outputs.web == 'true'
     steps:
       - name: Deploy gracera-web
         run: |
@@ -25,8 +50,9 @@ jobs:
             -H "Authorization: Bearer ${{ secrets.COOLIFY_API_KEY }}"
 
   deploy-ai-service:
+    needs: changes
     runs-on: ubuntu-latest
-    if: github.event_name == 'push'
+    if: needs.changes.outputs.ai-service == 'true'
     steps:
       - name: Deploy gracera-ai-service
         run: |
