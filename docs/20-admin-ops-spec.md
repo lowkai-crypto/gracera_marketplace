@@ -33,6 +33,7 @@ The admin dashboard (`/admin`) is a separate Next.js route group, protected by r
 | Match Override | `customer_success`, `trust_team` | Manual match injection / suppression |
 | Subscription Management | `customer_success`, `finance_ops` | Active subscriptions, upcoming renewals, failed payments |
 | Impersonation | `customer_success` | Read-only view of any supplier or buyer account |
+| Role & Feature Management | `super_admin` | Platform roles, per-role feature assignment (§13) |
 
 ---
 
@@ -354,6 +355,45 @@ All admin actions, automated platform decisions (match injection, cert expiry, a
 | `created_at` | timestamptz |
 
 Audit logs are retained for 7 years (legal requirement). They are never deleted or updated — only appended.
+
+---
+
+## 13. Platform Role & Feature Management
+
+Manages the `roles` / `features` / `role_features` / `user_roles` tables
+in [09](09-data-model.md) §2 — the platform-facing roles a *user* can
+hold (`supplier`, `buyer`, `admin`, and any added later), as distinct
+from the internal admin-roles enum in §1 above (which governs what an
+*internal staff account* can do inside this dashboard). Holding the
+platform `admin` role does not by itself grant any §1 capability — the
+two checks are independent, specifically so this panel can't be used to
+self-grant broader admin dashboard access than an internal role already
+allows.
+
+**Access:** `super_admin` only.
+
+**UI:** `/admin/roles`
+
+| Action | Effect |
+|--------|--------|
+| Create role | New `roles` row (`slug`, `name`, `description`); `is_system = false` |
+| Edit role | Update `name`/`description`. `slug` is immutable once created (referenced by code paths that check role membership) |
+| Delete role | Blocked if `is_system = true`, or if any `user_roles` rows still reference it — members must be reassigned or removed first |
+| Assign feature to role | Adds a `role_features` row (`feature_id`, `sort_order`); the feature must already exist in the `features` registry — this panel does not create new features, since a feature implies a real route + backend already shipped |
+| Remove feature from role | Deletes the `role_features` row; that sidebar item disappears for every member of the role on their next session refresh |
+| Reorder features | Updates `sort_order` within a category |
+
+The panel shows each role with its currently assigned features listed
+against the full `features` registry, so an admin can see at a glance
+what a role has and doesn't have — e.g. temporarily hiding "Broadcasts"
+from `supplier` platform-wide without touching code, or standing up a
+new role (say, a future `sales_rep` role) with a hand-picked feature set
+copied from `buyer`'s defaults.
+
+Every create/edit/delete/assign action here is written to the audit log
+(§12) with before/after state — this panel changes what capabilities
+real users have access to, so it's treated with the same audit rigor as
+account suspension or manual match override.
 
 ---
 

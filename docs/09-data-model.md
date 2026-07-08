@@ -49,11 +49,93 @@ Core entity relationships for the Gracera Marketplace platform.
 | `email_verified` | boolean | |
 | `password_hash` | string | nullable if SSO |
 | `auth_provider` | enum | local, google, linkedin |
-| `role` | enum | supplier, buyer, both, admin |
+| `role` | enum | **legacy** — supplier, buyer, both, admin. Superseded by `user_roles` (below), which supports holding any number of roles instead of a fixed 4-value set. Retained during migration; see §3 Migration Note. Other docs (05, 06, 10, 22, etc.) still reference this fixed enum and have not yet been swept to `user_roles` — treat `user_roles` as the source of truth going forward. |
 | `preferred_language` | char(2) | ISO 639-1; drives email + UI language per [11](11-internationalization.md) |
 | `created_at` | timestamp | |
 | `last_login_at` | timestamp | |
 | `status` | enum | active, suspended, deleted |
+
+---
+
+### roles
+
+The platform's role registry. Seeded with three system roles at launch —
+`supplier`, `buyer`, `admin` — but not limited to them: an admin with the
+Role & Feature Management capability ([20](20-admin-ops-spec.md) §13) can
+create additional roles later without an engineering change.
+
+| Column | Type | Notes |
+|--------|------|-------|
+| `id` | UUID PK | |
+| `slug` | varchar(40) UNIQUE | e.g. `supplier`, `buyer`, `admin` |
+| `name` | varchar(80) | display name |
+| `description` | text | |
+| `is_system` | boolean | true for `supplier`/`buyer`/`admin` — seeded at launch, cannot be deleted (core to the matching engine, dashboard context switcher, and auth bootstrapping); false for roles created later |
+| `created_at` | timestamp | |
+| `updated_at` | timestamp | |
+
+---
+
+### features
+
+Each row is one addressable capability/destination — in practice, one
+sidebar item from [28](28-portal-navigation.md). Features are code-defined
+(a new feature ships with the route + backend that implements it and a
+migration inserting its row); admins assign existing features to roles,
+they don't invent net-new ones from the UI.
+
+| Column | Type | Notes |
+|--------|------|-------|
+| `id` | UUID PK | |
+| `key` | varchar(60) UNIQUE | e.g. `matches`, `deals`, `ai_brain`, `certifications` |
+| `name` | varchar(80) | display name shown in the sidebar |
+| `description` | text | |
+| `category` | varchar(60) | sidebar grouping |
+| `route` | varchar(120) | frontend path this feature resolves to, e.g. `/matches` |
+| `created_at` | timestamp | |
+
+---
+
+### role_features
+
+Join table — which features render in a role's sidebar. The
+[28](28-portal-navigation.md) Supplier-context and Buyer-context tables
+are the **default** seed data for the `supplier` and `buyer` rows here;
+an admin can add or remove rows to customize any role's portal, including
+the seeded system roles, via [20](20-admin-ops-spec.md) §13.
+
+| Column | Type | Notes |
+|--------|------|-------|
+| `role_id` | UUID FK → roles | |
+| `feature_id` | UUID FK → features | |
+| `sort_order` | integer | sidebar position within its category |
+| `created_at` | timestamp | |
+
+`PRIMARY KEY (role_id, feature_id)`
+
+---
+
+### user_roles
+
+Join table — replaces the fixed `users.role` enum. A user can hold any
+number of roles simultaneously (at launch, realistically 0–3: supplier,
+buyer, admin), and switches between them via the dashboard context
+switcher (§3.1).
+
+| Column | Type | Notes |
+|--------|------|-------|
+| `user_id` | UUID FK → users | |
+| `role_id` | UUID FK → roles | |
+| `created_at` | timestamp | when this role was granted |
+
+`PRIMARY KEY (user_id, role_id)`
+
+**Migration note:** backfill from the legacy `users.role` enum as:
+`supplier` → one `user_roles` row (`supplier`); `buyer` → one row
+(`buyer`); `both` → two rows (`supplier` + `buyer`); `admin` → one row
+(`admin`). The legacy column can be dropped once every reader of it
+(auth token issuance, onboarding routing, the docs listed above) has
+moved to `user_roles`.
 
 ---
 
@@ -419,7 +501,7 @@ Backs tier/billing state for both roles independently — see §3.6.
 |--------|------|-------|
 | `id` | UUID PK | |
 | `user_id` | UUID FK → users | |
-| `role_context` | enum | supplier, buyer — one record per role, never one shared record |
+| `role_id` | UUID FK → roles | one record per held role, never one shared record |
 | `tier` | enum | free, pro, enterprise |
 | `status` | enum | active, past_due, canceled |
 | `payment_method` | enum | card, wire |
@@ -437,7 +519,7 @@ Backs tier/billing state for both roles independently — see §3.6.
 |--------|------|-------|
 | `id` | UUID PK | |
 | `user_id` | UUID FK → users | |
-| `role_context` | enum | supplier, buyer — coaching is context-specific per §3.4 |
+| `role_id` | UUID FK → roles | coaching is context-specific per §3.4 |
 | `mode` | enum | chat, growth_advisor |
 | `title` | string | auto-generated from first message |
 | `created_at` | timestamp | |
@@ -490,27 +572,53 @@ reconciliation ([15](15-monetization.md) §4).
 
 ---
 
-## 3. Dual-Role Accounts
+## 3. Multi-Role Accounts
 
-When `users.role = 'both'`, the user holds two independent profiles under one login: a `supplier_profile` and a `buyer_profile`. Each is created, managed, verified, and matched independently.
+Roles are not a fixed 4-value enum on `users` — they're rows in
+`user_roles` (§2), each pointing at a `roles` entry. At launch there are
+three system roles — `supplier`, `buyer`, `admin` — but the model doesn't
+assume exactly two or three: a user can hold any number of roles, and
+[20](20-admin-ops-spec.md) §13 lets an admin add roles beyond these three
+later without a schema change. A user holding the `supplier` and `buyer`
+roles has two independent profiles under one login — a `supplier_profile`
+and a `buyer_profile` — each created, managed, verified, and matched
+independently. `admin` is different in kind: it doesn't have a profile or
+a matching identity, it grants access to the internal admin dashboard
+([20](20-admin-ops-spec.md)), gated additionally by the internal
+admin-roles enum in that doc's §1 (`super_admin`, `trust_team`, etc.) —
+holding the platform `admin` role and holding a specific internal
+capability are two separate checks, so granting `admin` doesn't
+automatically hand out every admin capability.
 
 ### 3.1 Context Switcher
 
-The platform maintains an `active_context` per session, stored server-side and toggled via a persistent control in the top navigation:
+The platform maintains an `active_role_id` per session, stored
+server-side and toggled via a persistent control in the top navigation.
+The switcher renders one entry per row the user holds in `user_roles` —
+not a hardcoded two-item dropdown — so it grows automatically as roles
+are added. The sidebar for the active role is whatever `role_features`
+(§2) currently assigns to it; [28](28-portal-navigation.md)'s Supplier
+and Buyer tables are the default seed data for those two roles, not a
+hardcoded frontend list.
 
-| `active_context` | Dashboard shown | Actions available |
-|-----------------|-----------------|-------------------|
-| `supplier` | Supplier matches, introductions, deals as supplier, profile analytics | Respond to introductions, manage product lines, issue broadcasts, use Growth Strategy Engine |
-| `buyer` | Buyer matches, sourcing requests, deals as buyer, price compass | Post sourcing requests, accept introductions as buyer, issue RFQs, use Negotiation Coach as buyer |
-
-Switching context does not interrupt active deals — each context's deals continue independently. A user in a Deal Room as a supplier sees that deal under the supplier context; their buyer-context deals are accessible by switching.
+Switching context does not interrupt active deals — each role's deals
+continue independently. A user in a Deal Room under the `supplier` role
+sees that deal there; their `buyer`-role deals are accessible by
+switching.
 
 ### 3.2 Registration Flow
 
-A user can become dual-role in two ways:
+A user can hold more than one role in two ways:
 
-1. **At signup:** Select "I'm both a supplier and a buyer" → the onboarding wizard runs the supplier profile builder first, then the buyer profile builder. Each builder can be skipped and completed later.
-2. **Role upgrade:** A user registered as supplier or buyer can add the second role via Settings → "Add [buyer/supplier] profile." The existing profile is unchanged; a new profile is created.
+1. **At signup:** Select every role that applies (e.g. "I'm both a
+   supplier and a buyer") → the onboarding wizard runs each selected
+   role's profile builder in turn. Each builder can be skipped and
+   completed later. (`admin` is never self-selected at signup — it's
+   granted internally.)
+2. **Role upgrade:** A user can add another role later via Settings →
+   "Add [role] profile," listing whichever roles they don't already hold.
+   Adding a role does not touch the profiles tied to roles they already
+   have.
 
 ### 3.3 Matching Engine Behavior
 
@@ -522,31 +630,36 @@ The matching engine treats each profile in complete isolation:
 
 ### 3.4 Deals
 
-A dual-role user may simultaneously hold active deals in both contexts:
+A user holding both `supplier` and `buyer` may simultaneously hold active
+deals under each:
 - Deals as a **supplier**: responding to buyer RFQs, managing Deal Room as the selling party
 - Deals as a **buyer**: issuing RFQs to other suppliers, managing Deal Room as the buying party
 
-Each deal is associated with exactly one role at creation — that role cannot be changed mid-deal. The Negotiation Coach coaching is context-specific (supplier coaching for supplier deals, buyer coaching for buyer deals).
+Each deal is associated with exactly one role at creation — that role cannot be changed mid-deal. Negotiation Coach coaching is role-specific (supplier coaching for supplier deals, buyer coaching for buyer deals).
 
 ### 3.5 Notifications
 
-All notifications arrive in a unified inbox, each tagged with the context they belong to:
+All notifications arrive in a unified inbox, each tagged with the role
+they belong to:
 
 ```
 [Supplier] New match: TechCorp is sourcing aluminum enclosures
 [Buyer] Quote received from ShinwaChem on your sourcing request
 ```
 
-The inbox can be filtered by context (All / Supplier / Buyer).
+The inbox can be filtered by role (All, plus one filter per role the user
+holds).
 
 ### 3.6 Subscriptions
 
 Subscriptions are managed per role independently via the `subscriptions`
-table (§2): a dual-role user holds two rows — one `role_context = supplier`,
-one `role_context = buyer` — each with its own `tier` and billing state. A
-**Dual-Role Bundle** discount of 15% applies (`dual_role_bundle = true`)
-when subscribing to Pro on both sides simultaneously. Enterprise dual-role
-pricing is negotiated.
+table (§2): a user holds one row per role they've subscribed
+(`role_id = supplier`'s row, `role_id = buyer`'s row, etc.), each with its
+own `tier` and billing state. A **Dual-Role Bundle** discount of 15%
+applies (`dual_role_bundle = true`) specifically when subscribing to Pro
+on both the `supplier` and `buyer` roles simultaneously — it's a named
+pricing SKU for that one combination, not a general N-role discount.
+Enterprise dual-role pricing is negotiated.
 
 ---
 

@@ -1,11 +1,20 @@
 # Portal Navigation (Sidebar Spec)
 
-Defines the dashboard sidebar contents for each account context. Per
+Defines the dashboard sidebar contents per role. Per
 [Data Model](09-data-model.md) §3.1, this is **one shell with a top-nav
-context switcher** (`[Supplier ▼]` / `[Buyer ▼]`) for dual-role accounts —
-not two separate portal codebases. The tables below are "sidebar items
-when Supplier context is active" and "sidebar items when Buyer context is
-active."
+role switcher**, not one codebase per role — the switcher renders one
+entry per role a user holds (`user_roles`) and shows that role's
+`role_features` in the sidebar. The tables below are the **default seed
+data** for the `supplier` and `buyer` system roles' `role_features` rows
+— not a hardcoded frontend list. An admin can customize either role's
+assigned features away from these defaults, or stand up an entirely new
+role with its own set, via [Admin Ops](20-admin-ops-spec.md) §13.
+
+The platform's third launch role, `admin`, doesn't get a sidebar table
+here — its portal is the internal admin dashboard, fully speced in
+[Admin Ops](20-admin-ops-spec.md) §§1–13, and it isn't a `role_features`
+consumer in the same sense (internal admin capabilities are gated by a
+separate internal admin-roles enum, [20](20-admin-ops-spec.md) §1).
 
 Each item cites the doc section that defines the underlying feature. Build
 status is tracked separately in [Roadmap](13-roadmap.md); this doc is IA
