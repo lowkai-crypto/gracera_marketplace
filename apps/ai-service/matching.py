@@ -79,11 +79,22 @@ async def score_match(
     except anthropic.APIError as exc:
         raise ValueError(f"Claude API request failed: {exc}") from exc
 
-    text = response.content[0].text
+    text = _strip_code_fence(response.content[0].text)
     try:
         return json.loads(text)
     except json.JSONDecodeError as exc:
         raise ValueError(f"Claude returned non-JSON output: {text!r}") from exc
+
+
+def _strip_code_fence(text: str) -> str:
+    """Claude sometimes wraps JSON output in a ```json ... ``` fence despite
+    being told not to. Strip it if present."""
+    text = text.strip()
+    if text.startswith("```"):
+        text = text.split("\n", 1)[1] if "\n" in text else text[3:]
+        if text.endswith("```"):
+            text = text[: -len("```")]
+    return text.strip()
 
 
 def compose_final_score(semantic_score: float, bonuses: MatchBonusInputs) -> tuple[float, list[str]]:

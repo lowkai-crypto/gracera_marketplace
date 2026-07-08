@@ -3,7 +3,7 @@ import json
 import pytest
 from fastapi.testclient import TestClient
 
-from matching import compose_final_score, quality_label
+from matching import _strip_code_fence, compose_final_score, quality_label
 from models import MatchBonusInputs
 
 SAMPLE_SUPPLIER = {
@@ -161,3 +161,29 @@ def test_score_endpoint_non_json_claude_response(monkeypatch):
         json={"supplier": SAMPLE_SUPPLIER, "buyer": SAMPLE_BUYER},
     )
     assert resp.status_code == 502
+
+
+class TestStripCodeFence:
+    def test_plain_json_untouched(self):
+        assert _strip_code_fence('{"a": 1}') == '{"a": 1}'
+
+    def test_strips_json_fence(self):
+        fenced = '```json\n{"a": 1}\n```'
+        assert _strip_code_fence(fenced) == '{"a": 1}'
+
+    def test_strips_bare_fence(self):
+        fenced = '```\n{"a": 1}\n```'
+        assert _strip_code_fence(fenced) == '{"a": 1}'
+
+
+def test_score_endpoint_handles_fenced_claude_response(monkeypatch):
+    fenced = "```json\n" + json.dumps(CLAUDE_RESPONSE) + "\n```"
+    monkeypatch.setattr("matching._client", lambda: FakeClient(fenced))
+    from main import app
+
+    resp = TestClient(app).post(
+        "/match/score",
+        json={"supplier": SAMPLE_SUPPLIER, "buyer": SAMPLE_BUYER},
+    )
+    assert resp.status_code == 200
+    assert resp.json()["semantic_score"] == 89
