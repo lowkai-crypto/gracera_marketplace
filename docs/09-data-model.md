@@ -50,6 +50,7 @@ Core entity relationships for the Gracera Marketplace platform.
 | `password_hash` | string | nullable if SSO |
 | `auth_provider` | enum | local, google, linkedin |
 | `role` | enum | supplier, buyer, both, admin |
+| `preferred_language` | char(2) | ISO 639-1; drives email + UI language per [11](11-internationalization.md) |
 | `created_at` | timestamp | |
 | `last_login_at` | timestamp | |
 | `status` | enum | active, suspended, deleted |
@@ -410,6 +411,85 @@ CREATE INDEX ON categories (slug);
 
 ---
 
+### subscriptions
+
+Backs tier/billing state for both roles independently — see §3.6.
+
+| Column | Type | Notes |
+|--------|------|-------|
+| `id` | UUID PK | |
+| `user_id` | UUID FK → users | |
+| `role_context` | enum | supplier, buyer — one record per role, never one shared record |
+| `tier` | enum | free, pro, enterprise |
+| `status` | enum | active, past_due, canceled |
+| `payment_method` | enum | card, wire |
+| `current_period_end` | timestamp | |
+| `wire_confirmation_status` | enum | nullable; pending, confirmed, rejected — set only when `payment_method = wire`; reconciled via the [20](20-admin-ops-spec.md) wire transfer queue |
+| `dual_role_bundle` | boolean | true if this tier was purchased under the 15% dual-role bundle discount (§3.6) |
+| `created_at` | timestamp | |
+| `updated_at` | timestamp | |
+
+---
+
+### ai_brain_conversations
+
+| Column | Type | Notes |
+|--------|------|-------|
+| `id` | UUID PK | |
+| `user_id` | UUID FK → users | |
+| `role_context` | enum | supplier, buyer — coaching is context-specific per §3.4 |
+| `mode` | enum | chat, growth_advisor |
+| `title` | string | auto-generated from first message |
+| `created_at` | timestamp | |
+| `updated_at` | timestamp | |
+
+### ai_brain_messages
+
+| Column | Type | Notes |
+|--------|------|-------|
+| `id` | UUID PK | |
+| `conversation_id` | UUID FK → ai_brain_conversations | |
+| `role` | enum | user, assistant |
+| `body` | text | |
+| `context_snapshot` | jsonb | nullable; the prompt-cached profile/match/deal context block used for this turn, per [04](04-ai-agent-design.md) §7 |
+| `created_at` | timestamp | |
+
+---
+
+### referrals
+
+Logs the click/handoff for every partner referral surfaced at Deal Room
+entry ([08](08-deal-workflow.md)), for UX tracking and commission
+reconciliation ([15](15-monetization.md) §4).
+
+| Column | Type | Notes |
+|--------|------|-------|
+| `id` | UUID PK | |
+| `deal_id` | UUID FK | |
+| `initiated_by_user_id` | UUID FK | |
+| `referral_type` | enum | trade_finance, logistics, buyer_protection, esignature, inspection, translator |
+| `partner` | string | e.g. `docusign`, `qima`, the factoring provider name |
+| `status` | enum | clicked, in_progress, completed, declined |
+| `external_reference` | string | nullable; partner-side ID used for webhook reconciliation |
+| `commission_amount_usd` | decimal | nullable; populated when the partner reports a funded/completed transaction |
+| `created_at` | timestamp | |
+| `completed_at` | timestamp | nullable |
+
+---
+
+### notification_preferences
+
+| Column | Type | Notes |
+|--------|------|-------|
+| `id` | UUID PK | |
+| `user_id` | UUID FK → users | UNIQUE |
+| `email_digest_frequency` | enum | realtime, daily, weekly, off |
+| `channel_prefs` | jsonb | per-notification-type opt-in/out, e.g. `{"new_match": true, "new_message": true, "broadcast": false}` — types defined in [21](21-notifications-email-spec.md) |
+| `created_at` | timestamp | |
+| `updated_at` | timestamp | |
+
+---
+
 ## 3. Dual-Role Accounts
 
 When `users.role = 'both'`, the user holds two independent profiles under one login: a `supplier_profile` and a `buyer_profile`. Each is created, managed, verified, and matched independently.
@@ -461,7 +541,12 @@ The inbox can be filtered by context (All / Supplier / Buyer).
 
 ### 3.6 Subscriptions
 
-Subscriptions are managed per role independently. A dual-role user holds two subscription records — one governing supplier features, one governing buyer features. A **Dual-Role Bundle** discount of 15% applies when subscribing to Pro on both sides simultaneously. Enterprise dual-role pricing is negotiated.
+Subscriptions are managed per role independently via the `subscriptions`
+table (§2): a dual-role user holds two rows — one `role_context = supplier`,
+one `role_context = buyer` — each with its own `tier` and billing state. A
+**Dual-Role Bundle** discount of 15% applies (`dual_role_bundle = true`)
+when subscribing to Pro on both sides simultaneously. Enterprise dual-role
+pricing is negotiated.
 
 ---
 
