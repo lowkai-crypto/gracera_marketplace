@@ -132,7 +132,9 @@ Returns matches for the authenticated user's profile. Sorted by `final_score` de
 ```
 
 ### POST /matches/{id}/accept
-Accept an introduction. If both parties have accepted, a Deal is created automatically.
+Accept an introduction. If both parties have accepted, a Deal is created automatically — this
+side effect ships with the Deals feature, not with Matches v0; until then, the response includes
+`bothAccepted: true` and no `deals` row exists yet.
 
 ### POST /matches/{id}/reject
 Reject with optional reason:

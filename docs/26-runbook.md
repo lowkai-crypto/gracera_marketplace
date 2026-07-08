@@ -272,6 +272,7 @@ The following background jobs run on schedule and must be monitored:
 |-----|----------|-------------|---------------|
 | `cert-expiry-check` | Daily at 00:00 UTC | Sends cert expiry alerts; marks expired certs | Suppliers miss expiry warnings |
 | `availability-reset` | Weekly on Monday 06:00 UTC | Nudges and resets stale availability signals | Stale "Fully Booked" signals degrade match quality |
+| `run-matching` | Every 6 hours (v0 approximation of the docs/07 §7 daily-batch trigger) | Scores new supplier↔sourcing-request pairs and writes `matches` rows; triggered via `.github/workflows/run-matching.yml` hitting `POST /api/internal/run-matching` | New matches stop appearing; no user-facing error, just staleness |
 | `match-digest` | Daily at configured times | Sends daily match digest emails to users | Users miss new matches |
 | `subscription-renewal` | Daily at 02:00 UTC | Charges Stripe for renewing subscriptions | Revenue impact; users incorrectly downgraded |
 | `wire-transfer-reminder` | Daily at 09:00 UTC | Reminds users with pending wire transfers | Wire transfers age without user action |

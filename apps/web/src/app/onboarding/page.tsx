@@ -102,9 +102,14 @@ export default function OnboardingPage() {
                       <span className={styles.pctW}>{supplierProfile.completenessScore}% complete</span>
                       <span className={styles.helpText}>Status: {supplierProfile.profileStatus}</span>
                     </div>
-                    <Link href="/onboarding/supplier" className={styles.btnTealWarm}>
-                      Edit profile
-                    </Link>
+                    <div style={{ display: "flex", gap: "0.75rem" }}>
+                      <Link href="/onboarding/supplier" className={styles.btnTealWarm}>
+                        Edit profile
+                      </Link>
+                      <Link href="/matches" className={styles.helpText}>
+                        View matches
+                      </Link>
+                    </div>
                   </div>
                 ) : (
                   <div className={styles.formSection}>
@@ -143,6 +148,9 @@ export default function OnboardingPage() {
                         className={styles.btnTealWarm}
                       >
                         Post another sourcing request
+                      </Link>
+                      <Link href="/matches" className={styles.helpText}>
+                        View matches
                       </Link>
                     </div>
                     {sourcingRequests.length > 0 && (

@@ -74,3 +74,19 @@ export async function requireAuth(request: Request): Promise<TokenPayload> {
     throw new AuthError("Invalid or expired access token");
   }
 }
+
+/**
+ * Gates internal-only routes meant to be called by a scheduler, not a
+ * logged-in user (e.g. `POST /api/internal/run-matching`) — mirrors
+ * `apps/ai-service/internal_auth.py::require_internal_secret`. If
+ * `INTERNAL_JOB_SECRET` isn't configured (e.g. local dev), the check is
+ * skipped rather than locking the route out of itself; it must be set in
+ * any environment reachable from the internet.
+ */
+export function requireInternalSecret(request: Request): void {
+  const expected = process.env.INTERNAL_JOB_SECRET;
+  if (!expected) return;
+  if (request.headers.get("x-internal-secret") !== expected) {
+    throw new AuthError("Missing or invalid internal secret");
+  }
+}

@@ -157,27 +157,45 @@ data model doc and are referenced by name below:
 - **Phase:** 1 (M1.1, current form) → real version rides in with Phase 2.
 
 #### Matches
-- **Status:** not built. `apps/ai-service` is a stateless single-pair
-  scorer only — no `matches` table, no batch job populating it.
-- **Data model:** add `matches` table per [09](09-data-model.md),
-  including its `source`/`injected_by_user_id`/`admin_rationale`
-  columns (needed by Match Override, Admin-only below, not just AI
-  matches).
-- **Backend:** batch job running the [07](07-matching-algorithm.md)
-  pipeline across active supplier profiles × open sourcing requests,
-  **excluding any pair in `match_suppressions` and any profile with
-  `match_hold = true`** before writing candidate rows — otherwise Match
-  Override (Admin-only, below) has no actual effect on what gets
-  surfaced; writing `matches` rows; `GET /matches?profile_type=&profile_id=`,
-  `POST /matches/{id}/accept`, `POST /matches/{id}/reject` — all already
-  contracted in [10](10-api-reference.md). Match accept-by-both-parties
-  auto-creates a `deals` row per that same doc.
-- **Frontend:** `/matches` list, match card with score + expandable
-  rationale, accept/reject actions.
+- **Status:** built (v0). Batch job at `POST /api/internal/run-matching`,
+  scheduled every 6 hours via `.github/workflows/run-matching.yml`
+  (`workflow_dispatch` also supported for manual runs) — a v0
+  approximation of docs/07's "daily batch" trigger, not the
+  publish/update-triggered immediate re-matching, which needs a queue
+  this doesn't have yet.
+- **Data model:** `matches` table built **without** its
+  `source`/`injected_by_user_id`/`admin_rationale` columns — those stay
+  deferred until Match Override (Admin-only, below) actually exists;
+  adding them now would be dead columns. Two columns not originally in
+  [09](09-data-model.md)'s shape were added because the reject endpoint
+  needed somewhere to put its reason: `supplier_rejection_reason` /
+  `buyer_rejection_reason`.
+- **Backend:** the batch job pre-filters with
+  `packages/db/src/matching.ts::passesHardFilters` (category, geography,
+  excluded countries, MOQ — docs/07 §2; **not** checking
+  `match_suppressions`/`match_hold`, since nothing can populate those
+  tables until Match Override ships), dedupes against existing `matches`
+  rows, then calls `apps/ai-service`'s `/match/score` (now protected by
+  the internal secret, since it's real infrastructure now, not a manual
+  dev-testing endpoint) with the completeness/verification bonuses it's
+  able to compute; `GET /api/matches`, `POST /api/matches/{id}/accept`,
+  `POST /api/matches/{id}/reject` implemented per
+  [10](10-api-reference.md) — **except** mutual accept does not yet
+  create a `deals` row (see docs/10's note on this).
+- **Frontend:** `/matches` page — mirrors the existing role-stacking
+  pattern from `onboarding/page.tsx`; score badge, expandable dimension
+  rationale, accept/reject with a reason picker. Linked from
+  `onboarding/page.tsx`'s summary cards.
 - **Depends on:** at least one active supplier profile and one open
-  sourcing request to score against.
+  sourcing request that pass the hard filter to score against.
+- **Explicitly not done in this v0**: Elasticsearch/pgvector Stage 1/1b
+  (neither exists in the live stack), sanctioned country-pair blocking
+  (no sanctions list exists anywhere yet), `activity_recency`/
+  `feedback_adjustment` bonuses, §5 downstream customer segmentation,
+  daily digest emails, server-side top-10 truncation, MOQ unit
+  conversion, and non-English rationale.
 - **Phase:** 1 (M1.2, daily digest) → 2 (M2.1, real-time + vector
-  supplement).
+  supplement — still open).
 
 #### Deals
 - **Status:** not built — no `deals`/`messages`/`rfqs`/`quotes` tables

@@ -301,6 +301,8 @@ otherwise no one could ever grant the first one.
 | `ai_rationale` | jsonb | dimension scores + summary |
 | `supplier_status` | enum | pending, accepted, rejected |
 | `buyer_status` | enum | pending, accepted, rejected |
+| `supplier_rejection_reason` | enum | nullable; wrong_category, wrong_volume, already_connected, other — set only when `supplier_status = rejected`; feeds [07](07-matching-algorithm.md) §8 feedback signals |
+| `buyer_rejection_reason` | enum | nullable; same values, set only when `buyer_status = rejected` |
 | `source` | enum | ai, admin_injected — see [20](20-admin-ops-spec.md) §6.1 |
 | `injected_by_user_id` | UUID FK → users | nullable; set only when `source = admin_injected` |
 | `admin_rationale` | text | nullable; the admin's custom rationale ([20](20-admin-ops-spec.md) §6.1 requires this be shown to both parties — rendered on the match card in place of `ai_rationale` when `source = admin_injected`) |

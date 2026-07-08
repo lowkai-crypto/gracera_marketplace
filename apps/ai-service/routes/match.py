@@ -1,9 +1,10 @@
-from fastapi import APIRouter, HTTPException
+from fastapi import APIRouter, Depends, HTTPException
 
+from internal_auth import require_internal_secret
 from matching import compose_final_score, parse_dimensions, quality_label, score_match
 from models import MatchScoreRequest, MatchScoreResponse
 
-router = APIRouter(prefix="/match", tags=["match"])
+router = APIRouter(prefix="/match", tags=["match"], dependencies=[Depends(require_internal_secret)])
 
 
 @router.post("/score", response_model=MatchScoreResponse)

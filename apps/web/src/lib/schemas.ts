@@ -152,3 +152,9 @@ export const CreateSourcingRequestSchema = z
 export const UpdateSourcingRequestSchema = z.object(SourcingRequestFields).partial().extend({
   status: z.enum(["open", "paused", "closed", "fulfilled"]).optional(),
 });
+
+// ── Matches ─────────────────────────────────────────────────────────────
+
+export const RejectMatchSchema = z.object({
+  reason: z.enum(["wrong_category", "wrong_volume", "already_connected", "other"]).optional(),
+});

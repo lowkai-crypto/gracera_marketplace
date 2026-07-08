@@ -153,6 +153,27 @@ def test_score_endpoint_validation_error(client):
     assert response.status_code == 422
 
 
+def test_score_endpoint_internal_secret_enforced_when_configured(client, monkeypatch):
+    monkeypatch.setattr("internal_auth.settings.ai_service_secret", "shh")
+
+    resp_no_header = client.post("/match/score", json={"supplier": SAMPLE_SUPPLIER, "buyer": SAMPLE_BUYER})
+    assert resp_no_header.status_code == 401
+
+    resp_wrong = client.post(
+        "/match/score",
+        json={"supplier": SAMPLE_SUPPLIER, "buyer": SAMPLE_BUYER},
+        headers={"x-internal-secret": "wrong"},
+    )
+    assert resp_wrong.status_code == 401
+
+    resp_right = client.post(
+        "/match/score",
+        json={"supplier": SAMPLE_SUPPLIER, "buyer": SAMPLE_BUYER},
+        headers={"x-internal-secret": "shh"},
+    )
+    assert resp_right.status_code == 200
+
+
 def test_score_endpoint_non_json_claude_response(monkeypatch):
     monkeypatch.setattr("matching.get_client", lambda: FakeClient("not json"))
     from main import app

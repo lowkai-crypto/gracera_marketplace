@@ -2,6 +2,7 @@ import {
   boolean,
   char,
   integer,
+  jsonb,
   pgEnum,
   pgTable,
   real,
@@ -53,6 +54,13 @@ export const orderFrequencyEnum = pgEnum("order_frequency", [
   "quarterly",
   "annual",
   "ongoing",
+]);
+export const matchPartyStatusEnum = pgEnum("match_party_status", ["pending", "accepted", "rejected"]);
+export const matchRejectionReasonEnum = pgEnum("match_rejection_reason", [
+  "wrong_category",
+  "wrong_volume",
+  "already_connected",
+  "other",
 ]);
 
 // ── users ─────────────────────────────────────────────────────────────────
@@ -236,6 +244,33 @@ export const sourcingRequests = pgTable("sourcing_requests", {
   updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow(),
 });
 
+// ── matches ──────────────────────────────────────────────────────────────
+// docs/07-matching-algorithm.md + docs/09. `source`/`injectedByUserId`/
+// `adminRationale` deferred — meaningless until Match Override exists.
+
+export const matches = pgTable("matches", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  supplierProfileId: uuid("supplier_profile_id")
+    .notNull()
+    .references(() => supplierProfiles.id),
+  buyerProfileId: uuid("buyer_profile_id")
+    .notNull()
+    .references(() => buyerProfiles.id),
+  sourcingRequestId: uuid("sourcing_request_id").references(() => sourcingRequests.id),
+
+  aiScore: real("ai_score").notNull(),
+  finalScore: real("final_score").notNull(),
+  aiRationale: jsonb("ai_rationale").notNull(),
+
+  supplierStatus: matchPartyStatusEnum("supplier_status").notNull().default("pending"),
+  buyerStatus: matchPartyStatusEnum("buyer_status").notNull().default("pending"),
+  supplierRejectionReason: matchRejectionReasonEnum("supplier_rejection_reason"),
+  buyerRejectionReason: matchRejectionReasonEnum("buyer_rejection_reason"),
+
+  createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+  expiresAt: timestamp("expires_at", { withTimezone: true }).notNull(),
+});
+
 export type User = typeof users.$inferSelect;
 export type NewUser = typeof users.$inferInsert;
 export type SupplierProfile = typeof supplierProfiles.$inferSelect;
@@ -246,3 +281,5 @@ export type BuyerProfile = typeof buyerProfiles.$inferSelect;
 export type NewBuyerProfile = typeof buyerProfiles.$inferInsert;
 export type SourcingRequest = typeof sourcingRequests.$inferSelect;
 export type NewSourcingRequest = typeof sourcingRequests.$inferInsert;
+export type Match = typeof matches.$inferSelect;
+export type NewMatch = typeof matches.$inferInsert;

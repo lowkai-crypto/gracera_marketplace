@@ -1,8 +1,9 @@
-import { beforeEach, describe, expect, it } from "vitest";
+import { afterEach, beforeEach, describe, expect, it } from "vitest";
 import {
   AuthError,
   hashPassword,
   requireAuth,
+  requireInternalSecret,
   signAccessToken,
   signRefreshToken,
   verifyAccessToken,
@@ -71,5 +72,34 @@ describe("requireAuth", () => {
     });
     const payload = await requireAuth(req);
     expect(payload.sub).toBe("user-123");
+  });
+});
+
+describe("requireInternalSecret", () => {
+  const ORIGINAL_SECRET = process.env.INTERNAL_JOB_SECRET;
+  afterEach(() => {
+    process.env.INTERNAL_JOB_SECRET = ORIGINAL_SECRET;
+  });
+
+  it("skips the check when unconfigured", () => {
+    delete process.env.INTERNAL_JOB_SECRET;
+    expect(() => requireInternalSecret(new Request("http://localhost/api/internal/x"))).not.toThrow();
+  });
+
+  it("throws when configured and the header is missing", () => {
+    process.env.INTERNAL_JOB_SECRET = "shh";
+    expect(() => requireInternalSecret(new Request("http://localhost/api/internal/x"))).toThrow(AuthError);
+  });
+
+  it("throws when configured and the header is wrong", () => {
+    process.env.INTERNAL_JOB_SECRET = "shh";
+    const req = new Request("http://localhost/api/internal/x", { headers: { "x-internal-secret": "wrong" } });
+    expect(() => requireInternalSecret(req)).toThrow(AuthError);
+  });
+
+  it("passes when the header matches", () => {
+    process.env.INTERNAL_JOB_SECRET = "shh";
+    const req = new Request("http://localhost/api/internal/x", { headers: { "x-internal-secret": "shh" } });
+    expect(() => requireInternalSecret(req)).not.toThrow();
   });
 });

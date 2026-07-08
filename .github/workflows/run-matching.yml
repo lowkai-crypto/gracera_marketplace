@@ -1,0 +1,18 @@
+name: Run Matching Batch Job
+
+on:
+  schedule:
+    # docs/07-matching-algorithm.md §7 "daily batch" trigger — every 6 hours
+    # for v0 rather than strictly daily, since there's no queue yet to
+    # catch anything faster than this.
+    - cron: "0 */6 * * *"
+  workflow_dispatch: {}
+
+jobs:
+  run-matching:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Trigger matching run
+        run: |
+          curl -fsSL -X POST "https://gracera-dev.skystarcloud.com/api/internal/run-matching" \
+            -H "X-Internal-Secret: ${{ secrets.INTERNAL_JOB_SECRET }}"
