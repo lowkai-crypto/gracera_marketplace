@@ -202,16 +202,17 @@ export default function BuyerOnboardingPage() {
                 </div>
                 <div className={styles.formGroup}>
                   <label className={styles.label}>Buyer type</label>
-                  <div className={styles.roleOptions} style={{ flexWrap: "wrap" }}>
+                  <div className={styles.roleOptions}>
                     {BUYER_TYPES.map((t) => (
-                      <button
-                        key={t}
-                        type="button"
-                        className={`${styles.roleOption} ${buyerType.includes(t) ? styles.roleOptionActive : ""}`}
-                        onClick={() => setBuyerType((v) => toggle(v, t))}
-                      >
+                      <label key={t} className={styles.roleOption}>
+                        <input
+                          type="checkbox"
+                          checked={buyerType.includes(t)}
+                          onChange={() => setBuyerType((v) => toggle(v, t))}
+                          className={styles.roleOptionInput}
+                        />
                         {t}
-                      </button>
+                      </label>
                     ))}
                   </div>
                 </div>

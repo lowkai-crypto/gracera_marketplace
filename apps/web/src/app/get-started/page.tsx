@@ -68,14 +68,17 @@ export default function GetStartedPage() {
                 </label>
                 <div className={styles.roleOptions}>
                   {(["supplier", "buyer", "both"] as Role[]).map((r) => (
-                    <button
-                      key={r}
-                      type="button"
-                      className={`${styles.roleOption} ${role === r ? styles.roleOptionActive : ""}`}
-                      onClick={() => setRole(r)}
-                    >
+                    <label key={r} className={styles.roleOption}>
+                      <input
+                        type="radio"
+                        name="role"
+                        value={r}
+                        checked={role === r}
+                        onChange={() => setRole(r)}
+                        className={styles.roleOptionInput}
+                      />
                       {r === "both" ? "Both" : r === "supplier" ? "Supplier" : "Buyer"}
-                    </button>
+                    </label>
                   ))}
                 </div>
               </div>

@@ -289,16 +289,17 @@ export default function SupplierOnboardingPage() {
                 <div className={styles.formSectionTitle}>Products &amp; Services</div>
                 <div className={styles.formGroup}>
                   <label className={styles.label}>Supplier type</label>
-                  <div className={styles.roleOptions} style={{ flexWrap: "wrap" }}>
+                  <div className={styles.roleOptions}>
                     {SUPPLIER_TYPES.map((t) => (
-                      <button
-                        key={t}
-                        type="button"
-                        className={`${styles.roleOption} ${supplierType.includes(t) ? styles.roleOptionActive : ""}`}
-                        onClick={() => setSupplierType((v) => toggle(v, t))}
-                      >
+                      <label key={t} className={styles.roleOption}>
+                        <input
+                          type="checkbox"
+                          checked={supplierType.includes(t)}
+                          onChange={() => setSupplierType((v) => toggle(v, t))}
+                          className={styles.roleOptionInput}
+                        />
                         {t}
-                      </button>
+                      </label>
                     ))}
                   </div>
                 </div>
@@ -379,31 +380,33 @@ export default function SupplierOnboardingPage() {
                 </div>
                 <div className={styles.formGroup}>
                   <label className={styles.label}>Target customer types</label>
-                  <div className={styles.roleOptions} style={{ flexWrap: "wrap" }}>
+                  <div className={styles.roleOptions}>
                     {CUSTOMER_TYPES.map((t) => (
-                      <button
-                        key={t}
-                        type="button"
-                        className={`${styles.roleOption} ${targetCustomerTypes.includes(t) ? styles.roleOptionActive : ""}`}
-                        onClick={() => setTargetCustomerTypes((v) => toggle(v, t))}
-                      >
+                      <label key={t} className={styles.roleOption}>
+                        <input
+                          type="checkbox"
+                          checked={targetCustomerTypes.includes(t)}
+                          onChange={() => setTargetCustomerTypes((v) => toggle(v, t))}
+                          className={styles.roleOptionInput}
+                        />
                         {t}
-                      </button>
+                      </label>
                     ))}
                   </div>
                 </div>
                 <div className={styles.formGroup}>
                   <label className={styles.label}>Preferred deal types</label>
-                  <div className={styles.roleOptions} style={{ flexWrap: "wrap" }}>
+                  <div className={styles.roleOptions}>
                     {DEAL_TYPES.map((t) => (
-                      <button
-                        key={t}
-                        type="button"
-                        className={`${styles.roleOption} ${preferredDealTypes.includes(t) ? styles.roleOptionActive : ""}`}
-                        onClick={() => setPreferredDealTypes((v) => toggle(v, t))}
-                      >
+                      <label key={t} className={styles.roleOption}>
+                        <input
+                          type="checkbox"
+                          checked={preferredDealTypes.includes(t)}
+                          onChange={() => setPreferredDealTypes((v) => toggle(v, t))}
+                          className={styles.roleOptionInput}
+                        />
                         {t}
-                      </button>
+                      </label>
                     ))}
                   </div>
                 </div>
