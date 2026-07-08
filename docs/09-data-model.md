@@ -56,6 +56,8 @@ Core entity relationships for the Gracera Marketplace platform.
 | `status` | enum | active, suspended, deleted |
 | `suspension_type` | enum | nullable; soft_suspend, hard_suspend, profile_under_review — set only when `status = suspended`; drives the specific enforcement behavior in [20](20-admin-ops-spec.md) §7.2 |
 | `suspension_reason` | text | nullable; free text, logged but never shown to the user (generic notice shown instead per [20](20-admin-ops-spec.md) §7.2) |
+| `mfa_enabled` | boolean | default false. **Mandatory, not optional, for any user holding an `admin_role_assignments` row** ([20](20-admin-ops-spec.md) §1, [12](12-security-and-trust.md)); optional for everyone else. The admin dashboard must refuse to serve a session where this is false for a staff account. |
+| `mfa_secret_encrypted` | string | nullable; TOTP secret, encrypted at rest — never returned by any API response |
 
 ---
 
@@ -299,8 +301,17 @@ otherwise no one could ever grant the first one.
 | `ai_rationale` | jsonb | dimension scores + summary |
 | `supplier_status` | enum | pending, accepted, rejected |
 | `buyer_status` | enum | pending, accepted, rejected |
+| `source` | enum | ai, admin_injected — see [20](20-admin-ops-spec.md) §6.1 |
+| `injected_by_user_id` | UUID FK → users | nullable; set only when `source = admin_injected` |
+| `admin_rationale` | text | nullable; the admin's custom rationale ([20](20-admin-ops-spec.md) §6.1 requires this be shown to both parties — rendered on the match card in place of `ai_rationale` when `source = admin_injected`) |
 | `created_at` | timestamp | when match was generated |
 | `expires_at` | timestamp | match card expires if not acted on |
+
+The batch matching job ([07](07-matching-algorithm.md)) must exclude any
+pair present in `match_suppressions`, and any profile with
+`match_hold = true` (on `supplier_profiles` or `buyer_profiles`), before
+writing candidate rows here — otherwise Match Override (§6) has no
+actual effect on what the AI surfaces.
 
 ---
 
@@ -448,7 +459,7 @@ broadcast campaigns; all land here regardless of entity type.
 | Column | Type | Notes |
 |--------|------|-------|
 | `id` | UUID PK | |
-| `entity_type` | enum | supplier_profile, buyer_profile, message, forum_post, broadcast |
+| `entity_type` | enum | supplier_profile, buyer_profile, message, forum_post, broadcast, review |
 | `entity_id` | UUID | polymorphic — FK target depends on `entity_type` |
 | `reporting_user_id` | UUID FK → users | |
 | `category` | enum | spam, inappropriate_content, impersonation, false_information, other |

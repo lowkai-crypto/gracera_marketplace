@@ -1,6 +1,7 @@
 export * from "./schema";
 export * from "./client";
 export * from "./completeness";
+export * from "./prohibited-goods";
 export { runMigrations } from "./migrate";
 
 // Re-exported so consumers never import drizzle-orm directly — pnpm can

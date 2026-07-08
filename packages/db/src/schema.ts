@@ -45,6 +45,7 @@ export const sourcingRequestStatusEnum = pgEnum("sourcing_request_status", [
   "paused",
   "closed",
   "fulfilled",
+  "pending_moderation",
 ]);
 export const orderFrequencyEnum = pgEnum("order_frequency", [
   "one_time",

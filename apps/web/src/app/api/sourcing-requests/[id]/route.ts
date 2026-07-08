@@ -2,7 +2,14 @@ import { NextResponse } from "next/server";
 
 import { AuthError, requireAuth } from "@/lib/auth";
 import { errorResponse, validationErrorResponse } from "@/lib/api-error";
-import { buyerProfiles, computeSourcingRequestCompleteness, eq, getDb, sourcingRequests } from "@/lib/db";
+import {
+  buyerProfiles,
+  computeSourcingRequestCompleteness,
+  eq,
+  getDb,
+  scanProhibitedGoods,
+  sourcingRequests,
+} from "@/lib/db";
 import { UpdateSourcingRequestSchema } from "@/lib/schemas";
 
 async function loadOwnedRequest(id: string, userId: string) {
@@ -45,10 +52,29 @@ export async function PATCH(request: Request, { params }: { params: Promise<{ id
   const merged = { ...existing, ...parsed.data };
   const completenessScore = computeSourcingRequestCompleteness(merged);
 
+  // docs/20-admin-ops-spec.md §8.3: an edit can reintroduce prohibited
+  // content just as easily as the original publish — rescan on every
+  // update. A flag always forces the hold; clearing the flag does not
+  // automatically release an existing hold (that still needs a human
+  // trust_team review, not just re-editing the text).
+  const flaggedKeywords = scanProhibitedGoods(
+    merged.title,
+    merged.description,
+    merged.productName,
+    merged.qualityRequirements,
+    merged.idealSupplierDescription,
+    merged.dealbreakers,
+  );
+
   const db = getDb();
   const [updated] = await db
     .update(sourcingRequests)
-    .set({ ...parsed.data, completenessScore, updatedAt: new Date() })
+    .set({
+      ...parsed.data,
+      completenessScore,
+      updatedAt: new Date(),
+      ...(flaggedKeywords.length > 0 ? { status: "pending_moderation" as const } : {}),
+    })
     .where(eq(sourcingRequests.id, id))
     .returning();
 

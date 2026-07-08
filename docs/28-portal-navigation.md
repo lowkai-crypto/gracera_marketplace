@@ -83,6 +83,7 @@ only, not a completion record.
 | Role & Feature Management | Platform roles, per-role feature assignment — the table this doc's Supplier/Buyer sections seed | `super_admin` | [20](20-admin-ops-spec.md) §13 |
 | Staff Accounts | Create/edit/delete internal admin accounts and their permission level | `super_admin` | [20](20-admin-ops-spec.md) §1 |
 | Audit Log | Append-only record of every admin action and automated platform decision | `super_admin` | [20](20-admin-ops-spec.md) §12 |
+| Settings | Own account: password, mandatory TOTP MFA enrollment, per-queue SLA-alert notification prefs | any staff member (own account only) | [20](20-admin-ops-spec.md) §1, [12](12-security-and-trust.md) |
 
 Certification expiry monitoring (§10) and availability signal auto-reset
 (§11) are automated background jobs, not sidebar destinations — same
@@ -158,13 +159,16 @@ data model doc and are referenced by name below:
 #### Matches
 - **Status:** not built. `apps/ai-service` is a stateless single-pair
   scorer only — no `matches` table, no batch job populating it.
-- **Data model:** add `matches` table per [09](09-data-model.md)
-  (`supplier_profile_id`, `buyer_profile_id`, `sourcing_request_id`,
-  `ai_score`, `final_score`, `ai_rationale` jsonb, `supplier_status`,
-  `buyer_status`, `created_at`, `expires_at`).
+- **Data model:** add `matches` table per [09](09-data-model.md),
+  including its `source`/`injected_by_user_id`/`admin_rationale`
+  columns (needed by Match Override, Admin-only below, not just AI
+  matches).
 - **Backend:** batch job running the [07](07-matching-algorithm.md)
   pipeline across active supplier profiles × open sourcing requests,
-  writing `matches` rows; `GET /matches?profile_type=&profile_id=`,
+  **excluding any pair in `match_suppressions` and any profile with
+  `match_hold = true`** before writing candidate rows — otherwise Match
+  Override (Admin-only, below) has no actual effect on what gets
+  surfaced; writing `matches` rows; `GET /matches?profile_type=&profile_id=`,
   `POST /matches/{id}/accept`, `POST /matches/{id}/reject` — all already
   contracted in [10](10-api-reference.md). Match accept-by-both-parties
   auto-creates a `deals` row per that same doc.
@@ -188,7 +192,10 @@ data model doc and are referenced by name below:
   `POST /quotes/{id}/accept|counter|decline`); Deal Room referral
   triggers (trade finance, logistics, e-signature, inspection, buyer
   protection, translator) fire "at Deal Room entry" per
-  [08](08-deal-workflow.md).
+  [08](08-deal-workflow.md). Either party can file a dispute against the
+  deal via `POST /deals/{deal_id}/disputes` ([10](10-api-reference.md),
+  [08](08-deal-workflow.md) §7) — the trust-team side is Dispute Queue,
+  Admin-only, below.
 - **Frontend:** `/deals` list filterable by stage, `/deals/{id}` detail
   (thread, RFQ form, side-by-side quote comparison, Deal Room checklist).
 - **Depends on:** Matches (a deal originates from an accepted match).
@@ -246,7 +253,9 @@ data model doc and are referenced by name below:
   for public display; feeds "Verified Deal Network" per
   [13](13-roadmap.md) M2.3.
 - **Frontend:** post-deal review prompt on `deal.stage = closed`,
-  `/reviews` list on the public profile.
+  `/reviews` list on the public profile, with a flag action on each
+  review feeding the Content Moderation flag queue (Admin-only, below —
+  `flags.entity_type = review`).
 - **Depends on:** Deals reaching `closed`.
 - **Phase:** 1 (M1.3, basic) → 2 (M2.3, Verified Deal Network).
 
@@ -332,11 +341,15 @@ data model doc and are referenced by name below:
 - **Status:** not built.
 - **Data model:** new `broadcasts` table (gap, propose: `id`,
   `supplier_profile_id`, `headline`, `body`, `target_segment`,
-  `sent_at`, `recipient_count`).
+  `review_status` [pending, approved, rejected — see Content
+  Moderation, Admin-only, below], `sent_at`, `recipient_count`).
 - **Backend:** `POST /api/broadcasts` — composes + targets a buyer
-  segment (reuses the same category/geography dimensions as matching),
-  triggers email and a temporary recency-score boost per
-  [07](07-matching-algorithm.md).
+  segment (reuses the same category/geography dimensions as matching);
+  does **not** send immediately — enters `review_status = pending` per
+  [20](20-admin-ops-spec.md) §8.2 (automated + manual review for a
+  sender's first 3 campaigns), and only triggers the email +
+  recency-score boost ([07](07-matching-algorithm.md)) once
+  `content_mod` approves.
 - **Frontend:** `/broadcasts` — compose form + send history with
   open/click stats.
 - **Depends on:** Matches (shares its targeting dimensions).
@@ -461,10 +474,17 @@ surfaced by the same Match Override plan:
   locked-down action so that system can't be used to escalate into the
   admin dashboard. The first `super_admin` is bootstrapped via a
   one-time migration/seed, not through the UI (avoids a chicken-and-egg
-  lockout).
+  lockout). Granting the first `admin_role_assignments` row to a user
+  also requires `users.mfa_enabled = true` first
+  ([09](09-data-model.md) §2) — TOTP MFA is mandatory for admin
+  accounts per [20](20-admin-ops-spec.md) §1, not an opt-in setting.
 - **Backend:** `POST/DELETE /api/admin/staff/{userId}/roles` —
-  `super_admin` only.
-- **Frontend:** `/admin/staff`.
+  `super_admin` only, and rejected if the target user hasn't completed
+  MFA enrollment; `POST /api/users/me/mfa/enroll` (self-service TOTP
+  setup, needed before anyone can be granted a role here).
+- **Frontend:** `/admin/staff`; MFA enrollment itself happens on the
+  Admin Settings page below, not here (an admin enrolls their own MFA;
+  `super_admin` only grants the role).
 - **Depends on:** nothing — but every other item in this section
   depends on this existing first.
 - **Phase:** not milestoned in [13](13-roadmap.md); this whole section
@@ -518,10 +538,14 @@ surfaced by the same Match Override plan:
 
 #### Match Override
 - **Status:** not built.
-- **Data model:** `match_suppressions`, and `match_hold` /
+- **Data model:** `match_suppressions`, `matches.source`/
+  `injected_by_user_id`/`admin_rationale`, and `match_hold` /
   `match_hold_expires_at` on both `supplier_profiles` and
   `buyer_profiles` ([09](09-data-model.md) §2, §6.3).
-- **Backend:** `POST /api/admin/matches/inject`,
+- **Backend:** `POST /api/admin/matches/inject` (writes a `matches` row
+  with `source = admin_injected` and the admin's rationale — this is
+  the same table the Matches plan above populates, not a separate
+  mechanism),
   `POST /api/admin/match-suppressions`,
   `PATCH /api/admin/profiles/{id}/match-hold`.
 - **Frontend:** `/admin/match-override`.
@@ -546,9 +570,11 @@ surfaced by the same Match Override plan:
 
 #### Content Moderation
 - **Status:** not built.
-- **Data model:** `flags` ([09](09-data-model.md) §2); broadcast
-  campaign approval ([20](20-admin-ops-spec.md) §8.2) adds a
-  `review_status` column to the (also not-yet-built) `broadcasts` table
+- **Data model:** `flags` ([09](09-data-model.md) §2), including
+  `entity_type = review` — reviews (Shared, above) are user-generated
+  text and need to be flaggable like any other content; broadcast
+  campaign approval ([20](20-admin-ops-spec.md) §8.2) uses the
+  `review_status` column on the (also not-yet-built) `broadcasts` table
   from the Supplier-only plan above.
 - **Backend:** `GET /api/admin/flags`,
   `POST /api/admin/flags/{id}/dismiss|warn|remove|escalate`;
@@ -605,6 +631,27 @@ surfaced by the same Match Override plan:
   show; its value scales with how many other admin actions exist to log.
 - **Phase:** 1 — ship its write path alongside Accounts (§7), the
   first admin mutation to exist.
+
+#### Settings
+- **Status:** not built. Every other item in this section is a queue
+  or a management panel gated by `admin_role_assignments` — this is
+  the one self-service item, parallel to Supplier/Buyer's Settings.
+- **Data model:** `users.mfa_enabled` / `mfa_secret_encrypted`
+  ([09](09-data-model.md) §2); `notification_preferences` (Shared,
+  above) extended with per-queue alert types (e.g. "dispute SLA about
+  to breach," "wire transfer queue backlog") for staff accounts.
+- **Backend:** `POST /api/users/me/mfa/enroll` /
+  `POST /api/users/me/mfa/verify` (TOTP setup, shared with any future
+  non-admin MFA use); `PATCH /api/users/me` for password and
+  notification prefs (same endpoint Supplier/Buyer Settings uses).
+- **Frontend:** `/admin/settings` — MFA enrollment (blocking: an
+  `admin_role_assignments` row cannot be granted until this is
+  complete, per Staff Accounts above), password change, SLA-alert
+  toggles.
+- **Depends on:** nothing to view the page, but every other Admin item
+  is gated on this existing first, transitively through Staff Accounts.
+- **Phase:** 1 — MFA enrollment must exist before Staff Accounts can
+  grant the first real role.
 
 ---
 

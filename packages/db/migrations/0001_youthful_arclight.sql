@@ -1,0 +1,1 @@
+ALTER TYPE "public"."sourcing_request_status" ADD VALUE 'pending_moderation';

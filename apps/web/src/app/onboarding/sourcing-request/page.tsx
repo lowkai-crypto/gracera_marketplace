@@ -39,7 +39,7 @@ function SourcingRequestForm() {
   const [form, setForm] = useState(INITIAL_FORM);
   const [error, setError] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
-  const [result, setResult] = useState<{ id: string; completenessScore: number } | null>(null);
+  const [result, setResult] = useState<{ id: string; completenessScore: number; status: string } | null>(null);
 
   useEffect(() => {
     if (!getSession()) router.replace("/get-started");
@@ -88,7 +88,7 @@ function SourcingRequestForm() {
         setError(body.error?.message ?? "Something went wrong. Please try again.");
         return;
       }
-      setResult({ id: body.id, completenessScore: body.completenessScore });
+      setResult({ id: body.id, completenessScore: body.completenessScore, status: body.status });
     } catch {
       setError("Could not reach the server. Please try again.");
     } finally {
@@ -103,7 +103,15 @@ function SourcingRequestForm() {
           Sourcing request posted. Completeness score:{" "}
           <strong>{result.completenessScore}%</strong>
         </div>
-        <p>Gracera will start surfacing matching suppliers for this request.</p>
+        {result.status === "pending_moderation" ? (
+          <p>
+            This request has been held for a quick review by our trust team
+            before it goes live — this is a standard check, not a decision
+            about your account. You&apos;ll be notified once it publishes.
+          </p>
+        ) : (
+          <p>Gracera will start surfacing matching suppliers for this request.</p>
+        )}
       </div>
     );
   }

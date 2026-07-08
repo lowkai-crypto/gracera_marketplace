@@ -2,7 +2,16 @@ import { NextResponse } from "next/server";
 
 import { AuthError, requireAuth } from "@/lib/auth";
 import { errorResponse, validationErrorResponse } from "@/lib/api-error";
-import { and, buyerProfiles, canPublishSourcingRequest, computeSourcingRequestCompleteness, eq, getDb, sourcingRequests } from "@/lib/db";
+import {
+  and,
+  buyerProfiles,
+  canPublishSourcingRequest,
+  computeSourcingRequestCompleteness,
+  eq,
+  getDb,
+  scanProhibitedGoods,
+  sourcingRequests,
+} from "@/lib/db";
 import { CreateSourcingRequestSchema } from "@/lib/schemas";
 
 export async function GET(request: Request) {
@@ -52,9 +61,26 @@ export async function POST(request: Request) {
 
   const completenessScore = computeSourcingRequestCompleteness(fields);
 
+  // docs/20-admin-ops-spec.md §8.3: scanned against the prohibited goods
+  // list (docs/25 §7.2) at publish time; a match holds the request instead
+  // of publishing it, pending trust_team review.
+  const flaggedKeywords = scanProhibitedGoods(
+    fields.title,
+    fields.description,
+    fields.productName,
+    fields.qualityRequirements,
+    fields.idealSupplierDescription,
+    fields.dealbreakers,
+  );
+
   const [request_] = await db
     .insert(sourcingRequests)
-    .values({ ...fields, buyerProfileId, completenessScore })
+    .values({
+      ...fields,
+      buyerProfileId,
+      completenessScore,
+      status: flaggedKeywords.length > 0 ? "pending_moderation" : "open",
+    })
     .returning();
 
   return NextResponse.json(request_, { status: 201 });
