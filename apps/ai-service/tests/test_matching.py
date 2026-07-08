@@ -3,7 +3,8 @@ import json
 import pytest
 from fastapi.testclient import TestClient
 
-from matching import _strip_code_fence, compose_final_score, quality_label
+from matching import compose_final_score, quality_label
+from claude_util import strip_code_fence
 from models import MatchBonusInputs
 
 SAMPLE_SUPPLIER = {
@@ -116,7 +117,7 @@ CLAUDE_RESPONSE = {
 
 @pytest.fixture
 def client(monkeypatch):
-    monkeypatch.setattr("matching._client", lambda: FakeClient(json.dumps(CLAUDE_RESPONSE)))
+    monkeypatch.setattr("matching.get_client", lambda: FakeClient(json.dumps(CLAUDE_RESPONSE)))
     from main import app
 
     return TestClient(app)
@@ -153,7 +154,7 @@ def test_score_endpoint_validation_error(client):
 
 
 def test_score_endpoint_non_json_claude_response(monkeypatch):
-    monkeypatch.setattr("matching._client", lambda: FakeClient("not json"))
+    monkeypatch.setattr("matching.get_client", lambda: FakeClient("not json"))
     from main import app
 
     resp = TestClient(app).post(
@@ -165,20 +166,20 @@ def test_score_endpoint_non_json_claude_response(monkeypatch):
 
 class TestStripCodeFence:
     def test_plain_json_untouched(self):
-        assert _strip_code_fence('{"a": 1}') == '{"a": 1}'
+        assert strip_code_fence('{"a": 1}') == '{"a": 1}'
 
     def test_strips_json_fence(self):
         fenced = '```json\n{"a": 1}\n```'
-        assert _strip_code_fence(fenced) == '{"a": 1}'
+        assert strip_code_fence(fenced) == '{"a": 1}'
 
     def test_strips_bare_fence(self):
         fenced = '```\n{"a": 1}\n```'
-        assert _strip_code_fence(fenced) == '{"a": 1}'
+        assert strip_code_fence(fenced) == '{"a": 1}'
 
 
 def test_score_endpoint_handles_fenced_claude_response(monkeypatch):
     fenced = "```json\n" + json.dumps(CLAUDE_RESPONSE) + "\n```"
-    monkeypatch.setattr("matching._client", lambda: FakeClient(fenced))
+    monkeypatch.setattr("matching.get_client", lambda: FakeClient(fenced))
     from main import app
 
     resp = TestClient(app).post(

@@ -1,3 +1,5 @@
+from typing import Literal
+
 from pydantic import BaseModel, Field
 
 
@@ -68,3 +70,38 @@ class MatchScoreResponse(BaseModel):
     dimensions: dict[str, DimensionScore]
     summary: str
     bonuses_applied: list[str]
+
+
+class ExtractWebsiteRequest(BaseModel):
+    url: str = Field(..., min_length=1)
+
+
+class ExtractedField(BaseModel):
+    value: str | list[str]
+    confidence: Literal["high", "medium", "low"]
+
+
+# Keys match apps/web's CreateSupplierProfileSchema field names (camelCased
+# by the Next.js proxy route) so the frontend can merge this straight into
+# form state — see docs/22-onboarding-flows.md §2 RAG extraction targets,
+# adapted for a website source (no MOQ/pricing/lead-time — that's rarely
+# public).
+EXTRACTABLE_FIELDS = (
+    "company_name",
+    "display_name",
+    "tagline",
+    "description",
+    "country",
+    "categories",
+    "target_geographies",
+    "languages_spoken",
+    "certifications",
+    "primary_contact_email",
+    "primary_contact_phone",
+)
+
+
+class ExtractWebsiteResponse(BaseModel):
+    source_url: str
+    fields: dict[str, ExtractedField]
+    warnings: list[str] = []

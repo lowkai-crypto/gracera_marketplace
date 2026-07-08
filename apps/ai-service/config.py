@@ -6,6 +6,7 @@ class Settings(BaseSettings):
 
     anthropic_api_key: str = ""
     anthropic_model: str = "claude-sonnet-5"
+    ai_service_secret: str = ""
 
 
 settings = Settings()

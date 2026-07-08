@@ -1,10 +1,12 @@
 from fastapi import FastAPI
 from fastapi.responses import JSONResponse
 
+from routes.extract import router as extract_router
 from routes.match import router as match_router
 
 app = FastAPI(title="Gracera AI Service", version="0.1.0")
 app.include_router(match_router)
+app.include_router(extract_router)
 
 
 @app.get("/health")

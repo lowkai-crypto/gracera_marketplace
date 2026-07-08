@@ -30,6 +30,20 @@ const CONTACT_ROLES = [
   "other",
 ];
 
+const EXTRACTABLE_FIELD_LABELS: Record<string, string> = {
+  companyName: "Company name",
+  displayName: "Display name",
+  tagline: "Tagline",
+  description: "Description",
+  country: "Country",
+  categories: "Categories",
+  targetGeographies: "Target countries",
+  languagesSpoken: "Languages spoken",
+  certifications: "Certifications",
+  primaryContactEmail: "Contact email",
+  primaryContactPhone: "Contact phone",
+};
+
 const INITIAL_FORM = {
   companyName: "",
   displayName: "",
@@ -86,9 +100,59 @@ export default function SupplierOnboardingPage() {
   const [publishState, setPublishState] = useState<"idle" | "publishing" | "published" | "rejected">("idle");
   const [publishReasons, setPublishReasons] = useState<string | null>(null);
 
+  const [websiteUrl, setWebsiteUrl] = useState("");
+  const [extracting, setExtracting] = useState(false);
+  const [extractError, setExtractError] = useState<string | null>(null);
+  const [extractWarnings, setExtractWarnings] = useState<string[]>([]);
+  const [extractInfo, setExtractInfo] = useState<{ sourceUrl: string; needsReview: string[] } | null>(null);
+
   useEffect(() => {
     if (!getSession()) router.replace("/get-started");
   }, [router]);
+
+  async function handleExtract() {
+    if (!websiteUrl) return;
+    setExtracting(true);
+    setExtractError(null);
+    setExtractWarnings([]);
+    setExtractInfo(null);
+    try {
+      const response = await authFetch("/api/onboarding/extract-website", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ url: websiteUrl }),
+      });
+      const body = await response.json();
+      if (!response.ok) {
+        setExtractError(body.error?.message ?? "Could not extract from that URL.");
+        return;
+      }
+
+      const needsReview: string[] = [];
+      setForm((f) => {
+        const next = { ...f };
+        const mutable = next as unknown as Record<string, string | boolean>;
+        for (const [name, extracted] of Object.entries(body.fields ?? {}) as [
+          string,
+          { value: string | string[]; confidence: string },
+        ][]) {
+          if (!(name in next)) continue;
+          const value = Array.isArray(extracted.value) ? extracted.value.join(", ") : extracted.value;
+          mutable[name] = value;
+          if (extracted.confidence !== "high") {
+            needsReview.push(EXTRACTABLE_FIELD_LABELS[name] ?? name);
+          }
+        }
+        return next;
+      });
+      setExtractInfo({ sourceUrl: body.sourceUrl, needsReview });
+      setExtractWarnings(body.warnings ?? []);
+    } catch {
+      setExtractError("Could not reach the server. Please try again.");
+    } finally {
+      setExtracting(false);
+    }
+  }
 
   function field(name: keyof typeof form) {
     return {
@@ -236,6 +300,50 @@ export default function SupplierOnboardingPage() {
             </div>
             <form className={styles.formCard} onSubmit={handleSubmit}>
               {error && <div className={styles.formError}>{error}</div>}
+
+              <div className={styles.formSection}>
+                <div className={styles.formSectionTitle}>Start faster (optional)</div>
+                <p className={styles.helpText} style={{ marginBottom: "0.75rem" }}>
+                  Paste your company website and we&apos;ll pre-fill what we can find.
+                  Websites rarely list MOQ, lead time, or pricing, so you&apos;ll still
+                  want to fill in Products &amp; Services yourself.
+                </p>
+                <div style={{ display: "flex", gap: "0.75rem" }}>
+                  <input
+                    type="url"
+                    placeholder="https://yourcompany.com"
+                    className={styles.input}
+                    value={websiteUrl}
+                    onChange={(e) => setWebsiteUrl(e.target.value)}
+                  />
+                  <button
+                    type="button"
+                    className={styles.btnSubmit}
+                    onClick={handleExtract}
+                    disabled={extracting || !websiteUrl}
+                  >
+                    {extracting ? "Reading..." : "Pre-fill from website"}
+                  </button>
+                </div>
+                {extractError && (
+                  <div className={styles.formError} style={{ marginTop: "0.75rem" }}>
+                    {extractError}
+                  </div>
+                )}
+                {extractWarnings.length > 0 && (
+                  <div className={styles.formError} style={{ marginTop: "0.75rem" }}>
+                    {extractWarnings.join(" ")}
+                  </div>
+                )}
+                {extractInfo && (
+                  <div className={styles.formSuccess} style={{ marginTop: "0.75rem" }}>
+                    Pre-filled from {extractInfo.sourceUrl}.
+                    {extractInfo.needsReview.length > 0 && (
+                      <> Please double-check: {extractInfo.needsReview.join(", ")}.</>
+                    )}
+                  </div>
+                )}
+              </div>
 
               <div className={styles.formSection}>
                 <div className={styles.formSectionTitle}>Company Identity</div>
