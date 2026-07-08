@@ -54,6 +54,11 @@ Register a new user account.
 ### GET /supplier-profiles/{id}
 Returns public supplier profile.
 
+### GET /supplier-profiles/me
+Returns the authenticated user's own supplier profile, including contact
+fields (unlike the public `/{id}` lookup above). 404 if the user doesn't
+have one yet.
+
 ### POST /supplier-profiles
 Create supplier profile (authenticated, supplier role).
 
@@ -71,6 +76,10 @@ Soft-deletes (sets status = deleted).
 
 ### GET /buyer-profiles/{id}
 Returns public buyer profile. Contact details omitted unless match accepted.
+
+### GET /buyer-profiles/me
+Returns the authenticated user's own buyer profile, including contact
+fields. 404 if the user doesn't have one yet.
 
 ### POST /buyer-profiles
 Create buyer profile.

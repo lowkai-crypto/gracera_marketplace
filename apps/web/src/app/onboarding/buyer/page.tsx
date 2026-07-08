@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 
@@ -64,8 +65,39 @@ export default function BuyerOnboardingPage() {
   const [submitting, setSubmitting] = useState(false);
   const [result, setResult] = useState<{ id: string; completenessScore: number } | null>(null);
 
+  const [existingProfileId, setExistingProfileId] = useState<string | null>(null);
+  const [checkingExisting, setCheckingExisting] = useState(true);
+
   useEffect(() => {
-    if (!getSession()) router.replace("/get-started");
+    if (!getSession()) {
+      router.replace("/get-started");
+      return;
+    }
+    authFetch("/api/buyer-profiles/me")
+      .then((res) => (res.ok ? res.json() : null))
+      .then((profile) => {
+        if (!profile) return;
+        setExistingProfileId(profile.id);
+        setForm((f) => ({
+          ...f,
+          companyName: profile.companyName ?? "",
+          displayName: profile.displayName ?? "",
+          country: profile.country ?? "",
+          headquartersCity: profile.headquartersCity ?? "",
+          companySize: profile.companySize ?? f.companySize,
+          businessRegNumber: profile.businessRegNumber ?? "",
+          industry: profile.industry ?? "",
+          annualPurchasingVolume: profile.annualPurchasingVolume ?? "",
+          preferredSupplierCountries: (profile.preferredSupplierCountries ?? []).join(", "),
+          languagesSpoken: (profile.languagesSpoken ?? []).join(", "),
+          primaryContactName: profile.primaryContactName ?? "",
+          primaryContactRole: profile.primaryContactRole ?? f.primaryContactRole,
+          primaryContactEmail: profile.primaryContactEmail ?? "",
+          primaryContactPhone: profile.primaryContactPhone ?? "",
+        }));
+        setBuyerType(profile.buyerType ?? []);
+      })
+      .finally(() => setCheckingExisting(false));
   }, [router]);
 
   function field(name: keyof typeof form) {
@@ -81,8 +113,10 @@ export default function BuyerOnboardingPage() {
     setError(null);
     setSubmitting(true);
     try {
-      const response = await authFetch("/api/buyer-profiles", {
-        method: "POST",
+      const response = await authFetch(
+        existingProfileId ? `/api/buyer-profiles/${existingProfileId}` : "/api/buyer-profiles",
+        {
+        method: existingProfileId ? "PATCH" : "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           companyName: form.companyName,
@@ -125,19 +159,24 @@ export default function BuyerOnboardingPage() {
             <div className={styles.formNarrow}>
               <div className={styles.formCard}>
                 <div className={styles.formSuccess}>
-                  Buyer profile created. Completeness score:{" "}
+                  Buyer profile {existingProfileId ? "updated" : "created"}. Completeness score:{" "}
                   <strong>{result.completenessScore}%</strong>
                 </div>
                 <p style={{ marginBottom: "1rem" }}>
                   Now post what you&apos;re sourcing so Gracera can start
                   matching you with suppliers.
                 </p>
-                <a
-                  href={`/onboarding/sourcing-request?buyerProfileId=${result.id}`}
-                  className={styles.btnOrangeWarm}
-                >
-                  Post a sourcing request
-                </a>
+                <div className={styles.submitRow}>
+                  <a
+                    href={`/onboarding/sourcing-request?buyerProfileId=${result.id}`}
+                    className={styles.btnOrangeWarm}
+                  >
+                    Post a sourcing request
+                  </a>
+                  <Link href="/onboarding" className={styles.helpText}>
+                    Back to onboarding
+                  </Link>
+                </div>
               </div>
             </div>
           </div>
@@ -146,13 +185,17 @@ export default function BuyerOnboardingPage() {
     );
   }
 
+  if (checkingExisting) return null;
+
   return (
     <div className={styles.page}>
       <section className={styles.formSec}>
         <div className={styles.container}>
           <div className={styles.formNarrow}>
             <div className={styles.formIntro}>
-              <h1 className={styles.h1}>Create your buyer profile</h1>
+              <h1 className={styles.h1}>
+                {existingProfileId ? "Edit your buyer profile" : "Create your buyer profile"}
+              </h1>
               <p className={styles.heroSub}>Tell us about your company.</p>
             </div>
             <form className={styles.formCard} onSubmit={handleSubmit}>
@@ -272,7 +315,13 @@ export default function BuyerOnboardingPage() {
 
               <div className={styles.submitRow}>
                 <button type="submit" className={styles.btnSubmit} disabled={submitting}>
-                  {submitting ? "Creating profile..." : "Create profile"}
+                  {submitting
+                    ? existingProfileId
+                      ? "Updating profile..."
+                      : "Creating profile..."
+                    : existingProfileId
+                      ? "Update profile"
+                      : "Create profile"}
                 </button>
               </div>
             </form>

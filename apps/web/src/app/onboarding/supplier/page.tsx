@@ -106,8 +106,58 @@ export default function SupplierOnboardingPage() {
   const [extractWarnings, setExtractWarnings] = useState<string[]>([]);
   const [extractInfo, setExtractInfo] = useState<{ sourceUrl: string; needsReview: string[] } | null>(null);
 
+  const [existingProfileId, setExistingProfileId] = useState<string | null>(null);
+  const [checkingExisting, setCheckingExisting] = useState(true);
+
   useEffect(() => {
-    if (!getSession()) router.replace("/get-started");
+    if (!getSession()) {
+      router.replace("/get-started");
+      return;
+    }
+    authFetch("/api/supplier-profiles/me")
+      .then((res) => (res.ok ? res.json() : null))
+      .then((profile) => {
+        if (!profile) return;
+        setExistingProfileId(profile.id);
+        setForm((f) => ({
+          ...f,
+          companyName: profile.companyName ?? "",
+          displayName: profile.displayName ?? "",
+          country: profile.country ?? "",
+          headquartersCity: profile.headquartersCity ?? "",
+          yearEstablished: profile.yearEstablished != null ? String(profile.yearEstablished) : "",
+          companySize: profile.companySize ?? f.companySize,
+          businessRegNumber: profile.businessRegNumber ?? "",
+          tagline: profile.tagline ?? "",
+          description: profile.description ?? "",
+          categories: (profile.categories ?? []).join(", "),
+          targetGeographies: (profile.targetGeographies ?? []).join(", "),
+          idealCustomerDescription: profile.idealCustomerDescription ?? "",
+          languagesSpoken: (profile.languagesSpoken ?? []).join(", "),
+          annualRevenueRange: profile.annualRevenueRange ?? "",
+          productionCapacityMonthly: profile.productionCapacityMonthly ?? "",
+          qualityControlProcess: profile.qualityControlProcess ?? "",
+          certifications: (profile.certifications ?? []).join(", "),
+          notableCustomers: (profile.notableCustomers ?? []).join(", "),
+          referencesAvailable: !!profile.referencesAvailable,
+          primaryContactName: profile.primaryContactName ?? "",
+          primaryContactRole: profile.primaryContactRole ?? f.primaryContactRole,
+          primaryContactEmail: profile.primaryContactEmail ?? "",
+          primaryContactPhone: profile.primaryContactPhone ?? "",
+          productName: profile.productLines?.[0]?.name ?? "",
+          productDescription: profile.productLines?.[0]?.description ?? "",
+          productUnit: profile.productLines?.[0]?.unit ?? "",
+          productMoq: profile.productLines?.[0]?.moq != null ? String(profile.productLines[0].moq) : "",
+          productMoqUnit: profile.productLines?.[0]?.moqUnit ?? "",
+          productLeadTimeDays:
+            profile.productLines?.[0]?.leadTimeDays != null ? String(profile.productLines[0].leadTimeDays) : "",
+          productSampleAvailable: !!profile.productLines?.[0]?.sampleAvailable,
+        }));
+        setSupplierType(profile.supplierType ?? []);
+        setTargetCustomerTypes(profile.targetCustomerTypes ?? []);
+        setPreferredDealTypes(profile.preferredDealTypes ?? []);
+      })
+      .finally(() => setCheckingExisting(false));
   }, [router]);
 
   async function handleExtract() {
@@ -167,8 +217,10 @@ export default function SupplierOnboardingPage() {
     setError(null);
     setSubmitting(true);
     try {
-      const response = await authFetch("/api/supplier-profiles", {
-        method: "POST",
+      const response = await authFetch(
+        existingProfileId ? `/api/supplier-profiles/${existingProfileId}` : "/api/supplier-profiles",
+        {
+        method: existingProfileId ? "PATCH" : "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           companyName: form.companyName,
@@ -251,7 +303,7 @@ export default function SupplierOnboardingPage() {
             <div className={styles.formNarrow}>
               <div className={styles.formCard}>
                 <div className={styles.formSuccess}>
-                  Supplier profile created. Completeness score:{" "}
+                  Supplier profile {existingProfileId ? "updated" : "created"}. Completeness score:{" "}
                   <strong>{result.completenessScore}%</strong>
                 </div>
                 {publishState === "published" ? (
@@ -287,13 +339,17 @@ export default function SupplierOnboardingPage() {
     );
   }
 
+  if (checkingExisting) return null;
+
   return (
     <div className={styles.page}>
       <section className={styles.formSec}>
         <div className={styles.container}>
           <div className={styles.formNarrow}>
             <div className={styles.formIntro}>
-              <h1 className={styles.h1}>Create your supplier profile</h1>
+              <h1 className={styles.h1}>
+                {existingProfileId ? "Edit your supplier profile" : "Create your supplier profile"}
+              </h1>
               <p className={styles.heroSub}>
                 The more complete your profile, the better your matches.
               </p>
@@ -607,7 +663,13 @@ export default function SupplierOnboardingPage() {
 
               <div className={styles.submitRow}>
                 <button type="submit" className={styles.btnSubmit} disabled={submitting}>
-                  {submitting ? "Creating profile..." : "Create profile"}
+                  {submitting
+                    ? existingProfileId
+                      ? "Updating profile..."
+                      : "Creating profile..."
+                    : existingProfileId
+                      ? "Update profile"
+                      : "Create profile"}
                 </button>
               </div>
             </form>
