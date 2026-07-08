@@ -15,6 +15,16 @@ type CounterpartProfile = {
   tagline?: string | null;
 };
 
+type SourcingRequestSummary = {
+  id: string;
+  title: string | null;
+  category: string | null;
+  productName: string | null;
+  quantityRequired: number | null;
+  quantityUnit: string | null;
+  status: string;
+};
+
 type MatchItem = {
   id: string;
   score: number;
@@ -22,6 +32,7 @@ type MatchItem = {
   summary: string;
   dimensions: Record<string, { score: number; rationale: string }>;
   counterpartProfile: CounterpartProfile | null;
+  sourcingRequest: SourcingRequestSummary | null;
   supplierStatus: "pending" | "accepted" | "rejected";
   buyerStatus: "pending" | "accepted" | "rejected";
   createdAt: string;
@@ -39,6 +50,7 @@ function MatchList({ profileType, profileId }: { profileType: MatchParty; profil
   const [expandedId, setExpandedId] = useState<string | null>(null);
   const [rejectingId, setRejectingId] = useState<string | null>(null);
   const [reason, setReason] = useState(REJECTION_REASONS[0].value);
+  const [error, setError] = useState<string | null>(null);
 
   const load = useCallback(() => {
     authFetch(`/api/matches?profile_type=${profileType}&profile_id=${profileId}`)
@@ -51,7 +63,13 @@ function MatchList({ profileType, profileId }: { profileType: MatchParty; profil
   }, [load]);
 
   async function accept(id: string) {
-    await authFetch(`/api/matches/${id}/accept`, { method: "POST" });
+    setError(null);
+    const res = await authFetch(`/api/matches/${id}/accept`, { method: "POST" });
+    if (!res.ok) {
+      const body = await res.json().catch(() => null);
+      setError(body?.error?.message ?? "Could not accept this match.");
+      return;
+    }
     load();
   }
 
@@ -74,6 +92,7 @@ function MatchList({ profileType, profileId }: { profileType: MatchParty; profil
 
   return (
     <>
+      {error && <div className={styles.formError}>{error}</div>}
       {matches.map((m) => (
         <div key={m.id} className={styles.formSection}>
           <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", gap: "0.75rem" }}>
@@ -83,6 +102,14 @@ function MatchList({ profileType, profileId }: { profileType: MatchParty; profil
             <span className={styles.pctW}>{m.quality}</span>
           </div>
           {m.counterpartProfile?.tagline && <p className={styles.helpText}>{m.counterpartProfile.tagline}</p>}
+          {m.sourcingRequest && (
+            <p className={styles.helpText}>
+              Sourcing: {m.sourcingRequest.productName || m.sourcingRequest.title || m.sourcingRequest.category}
+              {m.sourcingRequest.quantityRequired &&
+                ` — ${m.sourcingRequest.quantityRequired} ${m.sourcingRequest.quantityUnit ?? ""}`}
+              {m.sourcingRequest.status !== "open" && " (no longer open)"}
+            </p>
+          )}
           <p>{m.summary}</p>
           <button
             type="button"

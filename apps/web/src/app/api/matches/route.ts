@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 
 import { AuthError, requireAuth } from "@/lib/auth";
 import { errorResponse } from "@/lib/api-error";
-import { buyerProfiles, eq, getDb, inArray, matches, qualityLabel, supplierProfiles } from "@/lib/db";
+import { buyerProfiles, eq, getDb, inArray, matches, qualityLabel, sourcingRequests, supplierProfiles } from "@/lib/db";
 
 // docs/06 §6 / docs/10: contact fields are hidden until both parties have
 // accepted — same rule as the public supplier/buyer profile GETs, just
@@ -51,11 +51,21 @@ export async function GET(request: Request) {
     : [];
   const counterpartsById = new Map(counterparts.map((c) => [c.id, c]));
 
+  // The score/rationale alone don't tell a supplier *what* is being
+  // requested — without this, they're relying entirely on Claude's one-
+  // sentence summary to know what the buyer actually wants.
+  const sourcingRequestIds = [...new Set(rows.map((m) => m.sourcingRequestId).filter((id): id is string => !!id))];
+  const requests = sourcingRequestIds.length
+    ? await db.select().from(sourcingRequests).where(inArray(sourcingRequests.id, sourcingRequestIds))
+    : [];
+  const requestsById = new Map(requests.map((r) => [r.id, r]));
+
   const sorted = [...rows].sort((a, b) => b.finalScore - a.finalScore);
   const results = sorted.map((m) => {
     const bothAccepted = m.supplierStatus === "accepted" && m.buyerStatus === "accepted";
     const counterpartId = profileType === "supplier" ? m.buyerProfileId : m.supplierProfileId;
     const counterpart = counterpartsById.get(counterpartId);
+    const sourcingRequest = m.sourcingRequestId ? requestsById.get(m.sourcingRequestId) : undefined;
     const rationale = m.aiRationale as { dimensions?: unknown; summary?: string } | null;
     return {
       id: m.id,
@@ -64,6 +74,17 @@ export async function GET(request: Request) {
       summary: rationale?.summary ?? "",
       dimensions: rationale?.dimensions ?? {},
       counterpartProfile: counterpart ? toPublic(counterpart, bothAccepted) : null,
+      sourcingRequest: sourcingRequest
+        ? {
+            id: sourcingRequest.id,
+            title: sourcingRequest.title,
+            category: sourcingRequest.category,
+            productName: sourcingRequest.productName,
+            quantityRequired: sourcingRequest.quantityRequired,
+            quantityUnit: sourcingRequest.quantityUnit,
+            status: sourcingRequest.status,
+          }
+        : null,
       supplierStatus: m.supplierStatus,
       buyerStatus: m.buyerStatus,
       createdAt: m.createdAt,
