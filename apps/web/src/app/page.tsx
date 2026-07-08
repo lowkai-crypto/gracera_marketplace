@@ -1,3 +1,5 @@
+import Link from "next/link";
+
 import HeroNetworkCanvas from "@/components/HeroNetworkCanvas";
 import MatchScoreCard from "@/components/MatchScoreCard";
 import styles from "./warm.module.css";
@@ -7,7 +9,7 @@ export default function Home() {
     <div className={styles.page}>
       <nav className={styles.nav}>
         <div className={styles.navI}>
-          <a href="#" className={styles.logo}>
+          <Link href="/" className={styles.logo}>
             <span className={styles.lm}>
               <svg viewBox="0 0 16 16" fill="none" width={16} height={16}>
                 <circle cx="5" cy="5" r="2.5" fill="white" opacity=".9" />
@@ -17,28 +19,28 @@ export default function Home() {
               </svg>
             </span>
             gracera<span className={styles.logoDot}>.</span>ai
-          </a>
+          </Link>
           <ul className={styles.navLinks}>
             <li>
-              <a href="#">How it works</a>
+              <a href="#how-it-works">How it works</a>
             </li>
             <li>
-              <a href="#">For Suppliers</a>
+              <a href="#for-suppliers">For Suppliers</a>
             </li>
             <li>
-              <a href="#">For Buyers</a>
+              <a href="#for-buyers">For Buyers</a>
             </li>
             <li>
-              <a href="#">Pricing</a>
+              <Link href="/pricing">Pricing</Link>
             </li>
           </ul>
           <div className={styles.navA}>
-            <a href="#" className={styles.btnPlain}>
+            <Link href="/sign-in" className={styles.btnPlain}>
               Sign in
-            </a>
-            <a href="#" className={styles.btnWarmCta}>
+            </Link>
+            <Link href="/get-started" className={styles.btnWarmCta}>
               Get started free
-            </a>
+            </Link>
           </div>
         </div>
       </nav>
@@ -62,12 +64,12 @@ export default function Home() {
                 introduction.
               </p>
               <div className={styles.ctas}>
-                <a href="#" className={styles.btnTealWarm}>
+                <Link href="/get-started" className={styles.btnTealWarm}>
                   List as a supplier
-                </a>
-                <a href="#" className={styles.btnOrangeWarm}>
+                </Link>
+                <Link href="/get-started" className={styles.btnOrangeWarm}>
                   Post a sourcing request
-                </a>
+                </Link>
               </div>
               <div className={styles.trust}>
                 <span className={styles.trustI}>No pay-to-rank</span>
@@ -317,7 +319,7 @@ export default function Home() {
         </div>
       </section>
 
-      <section className={styles.how}>
+      <section id="how-it-works" className={styles.how}>
         <div className={styles.container}>
           <div className={styles.secPill}>How it works</div>
           <h2 className={styles.h2}>Three steps from profile to closed deal</h2>
@@ -582,7 +584,7 @@ export default function Home() {
       <section className={styles.ctaSec}>
         <div className={styles.container}>
           <div className={styles.ctaG}>
-            <div className={`${styles.ctaCard} ${styles.ctaT}`}>
+            <div id="for-suppliers" className={`${styles.ctaCard} ${styles.ctaT}`}>
               <div className={`${styles.pill} ${styles.ctaCardPill}`}>
                 <span className={styles.pillDot} style={{ background: "rgba(255,255,255,.7)" }} />
                 For suppliers
@@ -595,12 +597,12 @@ export default function Home() {
                 receiving ranked buyer introductions within 24 hours of
                 verification.
               </p>
-              <a href="#" className={styles.btnWhite}>
+              <Link href="/get-started" className={styles.btnWhite}>
                 List as a supplier — it&apos;s free
-              </a>
+              </Link>
               <p className={styles.ctaNote}>Free tier · 3 AI matches/month</p>
             </div>
-            <div className={`${styles.ctaCard} ${styles.ctaO}`}>
+            <div id="for-buyers" className={`${styles.ctaCard} ${styles.ctaO}`}>
               <div className={`${styles.pill} ${styles.ctaCardPill}`}>
                 <span className={styles.pillDot} style={{ background: "rgba(255,255,255,.7)" }} />
                 For buyers
@@ -612,9 +614,9 @@ export default function Home() {
                 Describe what you need. Gracera surfaces ranked supplier
                 matches within hours. No credit card required to start.
               </p>
-              <a href="#" className={`${styles.btnWhite} ${styles.btnWhiteO}`}>
+              <Link href="/get-started" className={`${styles.btnWhite} ${styles.btnWhiteO}`}>
                 Post a sourcing request — it&apos;s free
-              </a>
+              </Link>
               <p className={styles.ctaNote}>Free tier · 5 AI match suggestions</p>
             </div>
           </div>
@@ -624,7 +626,7 @@ export default function Home() {
       <footer className={styles.footer}>
         <div className={styles.container}>
           <div className={styles.ftR}>
-            <a href="#" className={styles.ftLogo}>
+            <Link href="/" className={styles.ftLogo}>
               <span className={styles.ftLm}>
                 <svg width="12" height="12" viewBox="0 0 16 16" fill="none">
                   <circle cx="5" cy="5" r="2.5" fill="white" opacity=".9" />
@@ -632,19 +634,19 @@ export default function Home() {
                 </svg>
               </span>
               gracera.ai
-            </a>
+            </Link>
             <ul className={styles.ftLinks}>
               <li>
-                <a href="#">How it works</a>
+                <a href="#how-it-works">How it works</a>
               </li>
               <li>
-                <a href="#">Pricing</a>
+                <Link href="/pricing">Pricing</Link>
               </li>
               <li>
-                <a href="#">Privacy</a>
+                <Link href="/privacy">Privacy</Link>
               </li>
               <li>
-                <a href="#">Terms</a>
+                <Link href="/terms">Terms</Link>
               </li>
             </ul>
             <p className={styles.ftCopy}>© 2026 Gracera. All rights reserved.</p>
