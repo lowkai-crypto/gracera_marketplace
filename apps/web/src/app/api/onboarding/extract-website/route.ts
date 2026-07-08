@@ -50,7 +50,8 @@ export async function POST(request: Request) {
       },
       body: JSON.stringify({ url: parsed.data.url }),
     });
-  } catch {
+  } catch (err) {
+    console.error("[extract-website] fetch to ai-service failed:", err);
     return errorResponse(502, "UPSTREAM_UNREACHABLE", "Could not reach the extraction service");
   }
 
