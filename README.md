@@ -98,6 +98,7 @@ Gracera is a two-sided marketplace that removes the friction from B2B sourcing a
 | [Legal & Compliance](docs/25-legal-compliance.md) | GDPR/CCPA, KYB/sanctions screening, marketplace liability framework, contract template library, prohibited goods |
 | [Runbook](docs/26-runbook.md) | On-call structure, incident response, SLAs by tier, deployment procedures, backup/restore, background jobs, post-mortem template |
 | [Integrations](docs/27-integrations.md) | Claude API, Stripe, SendGrid, DocuSign, QIMA, DeepL, ERP (Coupa/Odoo), OAuth2, business registry APIs, freight forwarder APIs |
+| [Portal Navigation](docs/28-portal-navigation.md) | Sidebar item spec per dashboard context (supplier / buyer), citing the doc section behind each item |
 
 ---
 
