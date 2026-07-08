@@ -425,6 +425,187 @@ data model doc and are referenced by name below:
 - **Phase:** 3 (M3.1, payment track record) → 3 (M3.2, buyer protection
   referral).
 
+### Admin-only
+
+None of this exists today — no `/admin` route, no admin tables, and
+critically **no table backs the internal admin-role enum itself**
+(`super_admin`, `trust_team`, `customer_success`, `finance_ops`,
+`content_mod`, `data_analyst` from [20](20-admin-ops-spec.md) §1). Every
+Audience restriction in the Admin context table above assumes that
+enum is checkable per user; right now it isn't stored anywhere. That
+makes **Staff Accounts** the actual prerequisite for the rest of this
+section, regardless of build order elsewhere — nothing else here can
+enforce who's allowed to see it without it.
+
+**Schema gaps formalized into [09](09-data-model.md)** — these five
+weren't speced anywhere before this pass; also included `match_hold` /
+`match_hold_expires_at` on `supplier_profiles` and `buyer_profiles`,
+surfaced by the same Match Override plan:
+
+- `admin_role_assignments` — see Staff Accounts below.
+- `match_suppressions` — named by [20](20-admin-ops-spec.md) §6.2, now
+  with columns.
+- `wire_transfers` — the wire queue's own ledger, distinct from
+  `subscriptions.wire_confirmation_status`.
+- `flags` — backs the Content Moderation flag queue ([20](20-admin-ops-spec.md) §8.1).
+- `users.suspension_type` / `suspension_reason` — backs Account Suspension ([20](20-admin-ops-spec.md) §7.2).
+
+#### Staff Accounts
+- **Status:** not built.
+- **Data model:** new `admin_role_assignments` table (`user_id` FK,
+  `admin_role` enum, `created_at`; `PRIMARY KEY (user_id, admin_role)` —
+  one staff member can hold more than one internal role). Deliberately
+  **not** modeled on `roles`/`user_roles` ([09](09-data-model.md) §2):
+  those are self-service via Role & Feature Management below, and
+  granting internal admin capability needs to stay a separate, more
+  locked-down action so that system can't be used to escalate into the
+  admin dashboard. The first `super_admin` is bootstrapped via a
+  one-time migration/seed, not through the UI (avoids a chicken-and-egg
+  lockout).
+- **Backend:** `POST/DELETE /api/admin/staff/{userId}/roles` —
+  `super_admin` only.
+- **Frontend:** `/admin/staff`.
+- **Depends on:** nothing — but every other item in this section
+  depends on this existing first.
+- **Phase:** not milestoned in [13](13-roadmap.md); this whole section
+  postdates that doc. Build first regardless.
+
+#### Dashboard (Platform Health)
+- **Status:** not built.
+- **Data model:** none new for the numbers themselves — aggregates over
+  `users` and `matches` (once it exists); AI service latency and error
+  rate need an APM/logging pipeline, not a Postgres table (infra gap,
+  out of scope for a schema change).
+- **Backend:** `GET /api/admin/dashboard/health`.
+- **Frontend:** `/admin` overview page.
+- **Depends on:** Staff Accounts (authorization).
+- **Phase:** 1 (rides with M1.1's "Admin impersonation").
+
+#### Verification Queue
+- **Status:** not built.
+- **Data model:** none new — reads `supplier_profiles`/`buyer_profiles`
+  where `verification_level = basic` and `certifications` where
+  `verified = false`. KYB queue ([20](20-admin-ops-spec.md) §3.3) is
+  Phase 4+, deferred with it.
+- **Backend:** `GET /api/admin/verification-queue`,
+  `POST /api/admin/verification-queue/{id}/approve|reject`.
+- **Frontend:** `/admin/verification`.
+- **Depends on:** Staff Accounts, Certifications (Supplier-only, above).
+- **Phase:** 1 (M1.1, business registration verification) → 2 (M2.1,
+  cert expiry ties in).
+
+#### Dispute Queue
+- **Status:** not built. `disputes` table is speced in
+  [09](09-data-model.md) but not yet in `schema.ts`.
+- **Data model:** add `disputes` exactly as speced.
+- **Backend:** `GET /api/admin/disputes?status=`,
+  `POST /api/admin/disputes/{id}/assign|recommend|resolve`, evidence
+  ZIP export ([20](20-admin-ops-spec.md) §4).
+- **Frontend:** `/admin/disputes` — list + detail with SLA countdown.
+- **Depends on:** Staff Accounts, Deals (a dispute is filed against one).
+- **Phase:** 3 (M3.1).
+
+#### Wire Transfer Queue
+- **Status:** not built.
+- **Data model:** `wire_transfers` ([09](09-data-model.md) §2) —
+  reconciles against `subscriptions.wire_confirmation_status`.
+- **Backend:** `POST /api/admin/wire-transfers` (`finance_ops` manual
+  entry), auto-match by reference + amount,
+  `POST /api/admin/wire-transfers/{id}/reconcile`.
+- **Frontend:** `/admin/wire-transfers`.
+- **Depends on:** Staff Accounts, Billing (Shared, above).
+- **Phase:** 1 (M1.1, "subscription tiers with offline payment support").
+
+#### Match Override
+- **Status:** not built.
+- **Data model:** `match_suppressions`, and `match_hold` /
+  `match_hold_expires_at` on both `supplier_profiles` and
+  `buyer_profiles` ([09](09-data-model.md) §2, §6.3).
+- **Backend:** `POST /api/admin/matches/inject`,
+  `POST /api/admin/match-suppressions`,
+  `PATCH /api/admin/profiles/{id}/match-hold`.
+- **Frontend:** `/admin/match-override`.
+- **Depends on:** Staff Accounts, Matches (Shared, above).
+- **Phase:** not explicitly milestoned in [13](13-roadmap.md) — bundle
+  with the Matches build-out.
+
+#### Accounts
+- **Status:** not built.
+- **Data model:** `users.suspension_type` / `suspension_reason`
+  ([09](09-data-model.md) §2); subscription overrides reuse the
+  existing `subscriptions` table. Impersonation needs a distinct
+  read-only session/token type that structurally can't submit a
+  mutating request, not just a frontend banner.
+- **Backend:** `/admin/users/{userId}/impersonate` (issues the
+  read-only token), `POST /api/admin/users/{id}/suspend`,
+  `PATCH /api/admin/subscriptions/{id}` (override).
+- **Frontend:** `/admin/users/{id}` detail + persistent impersonation
+  banner.
+- **Depends on:** Staff Accounts, Billing (for §7.3 overrides).
+- **Phase:** 1 (M1.1 explicitly names "Admin impersonation").
+
+#### Content Moderation
+- **Status:** not built.
+- **Data model:** `flags` ([09](09-data-model.md) §2); broadcast
+  campaign approval ([20](20-admin-ops-spec.md) §8.2) adds a
+  `review_status` column to the (also not-yet-built) `broadcasts` table
+  from the Supplier-only plan above.
+- **Backend:** `GET /api/admin/flags`,
+  `POST /api/admin/flags/{id}/dismiss|warn|remove|escalate`;
+  auto-suppress logic (≥3 spam flags → `match_hold = true`, reusing
+  Match Override's column).
+- **Frontend:** `/admin/flags`.
+- **Depends on:** Staff Accounts; auto-suppression depends on Match
+  Override existing.
+- **Phase:** 1 (M1.3, "basic spam/fraud controls") → 3 (M3.3, broadcast
+  approval, once Broadcasts exists).
+
+#### Platform Metrics
+- **Status:** not built.
+- **Data model:** none new — aggregate queries over `users`, `matches`,
+  `deals`, `subscriptions`, `disputes` as each is built; AI inference
+  cost and match queue depth come from the ai-service's own metrics,
+  not Postgres.
+- **Backend:** `GET /api/admin/metrics/{panel}` — one per
+  [20](20-admin-ops-spec.md) §9 panel (supply-demand, matching,
+  deal-funnel, revenue, trust-safety).
+- **Frontend:** `/admin/metrics`.
+- **Depends on:** Staff Accounts, and effectively everything else in
+  this doc — this panel is a lagging indicator, not a data source.
+- **Phase:** spans every phase's exit criteria in
+  [13](13-roadmap.md); build each metric incrementally as its
+  underlying feature ships, not as one batch.
+
+#### Role & Feature Management
+- **Status:** designed, not built — `roles`/`features`/`role_features`/
+  `user_roles` are speced ([09](09-data-model.md) §2) but not yet in
+  `schema.ts`. This doc's own Supplier/Buyer/Admin tables above are
+  exactly the seed data these tables would hold.
+- **Data model:** the four tables from [09](09-data-model.md) §2.
+- **Backend:** CRUD exactly as speced in
+  [20](20-admin-ops-spec.md) §13.
+- **Frontend:** `/admin/roles`.
+- **Depends on:** Staff Accounts (`super_admin` only) — nothing else;
+  this can exist before the roles it manages have real portals behind
+  them, since it's the mechanism that generates those portals' sidebars.
+- **Phase:** not yet milestoned in [13](13-roadmap.md) — this whole
+  RBAC generalization postdates that doc.
+
+#### Audit Log
+- **Status:** not built. Schema is fully speced inline in
+  [20](20-admin-ops-spec.md) §12 (treated as its authoritative source,
+  not duplicated into [09](09-data-model.md)) but not yet in `schema.ts`.
+- **Data model:** `audit_log` exactly as speced in
+  [20](20-admin-ops-spec.md) §12.
+- **Backend:** every admin mutation above writes here as it's built —
+  wire the logging hook into each item at build time, don't bolt it on
+  after; `GET /api/admin/audit-log?entity_type=&actor_id=` for browsing.
+- **Frontend:** `/admin/audit-log`.
+- **Depends on:** Staff Accounts. Works from day one with nothing to
+  show; its value scales with how many other admin actions exist to log.
+- **Phase:** 1 — ship its write path alongside Accounts (§7), the
+  first admin mutation to exist.
+
 ---
 
 [Back to README](../README.md)

@@ -54,6 +54,8 @@ Core entity relationships for the Gracera Marketplace platform.
 | `created_at` | timestamp | |
 | `last_login_at` | timestamp | |
 | `status` | enum | active, suspended, deleted |
+| `suspension_type` | enum | nullable; soft_suspend, hard_suspend, profile_under_review — set only when `status = suspended`; drives the specific enforcement behavior in [20](20-admin-ops-spec.md) §7.2 |
+| `suspension_reason` | text | nullable; free text, logged but never shown to the user (generic notice shown instead per [20](20-admin-ops-spec.md) §7.2) |
 
 ---
 
@@ -139,6 +141,32 @@ moved to `user_roles`.
 
 ---
 
+### admin_role_assignments
+
+Which internal admin capabilities ([20](20-admin-ops-spec.md) §1) a
+staff member holds — deliberately **not** modeled on `roles`/
+`user_roles` above. Those two are self-service via
+[20](20-admin-ops-spec.md) §13 (Role & Feature Management); granting
+internal admin capability stays a separate, more locked-down action so
+that self-service system can never be used to escalate into the admin
+dashboard. Holding the platform `admin` role (via `user_roles`) and
+holding an `admin_role_assignments` row are independent checks — see §3.
+
+| Column | Type | Notes |
+|--------|------|-------|
+| `user_id` | UUID FK → users | |
+| `admin_role` | enum | super_admin, trust_team, customer_success, finance_ops, content_mod, data_analyst |
+| `created_at` | timestamp | |
+
+`PRIMARY KEY (user_id, admin_role)` — one staff member can hold more
+than one internal role.
+
+**Bootstrap note:** the first `super_admin` row is created via a
+one-time migration/seed, not through the admin UI this table backs —
+otherwise no one could ever grant the first one.
+
+---
+
 ### supplier_profiles
 
 | Column | Type | Notes |
@@ -168,6 +196,8 @@ moved to `user_roles`.
 | `availability_status` | enum | available, limited, fully_booked |
 | `next_available_date` | date | nullable; set when fully_booked |
 | `availability_updated_at` | timestamp | resets to limited if not updated within 14 days |
+| `match_hold` | boolean | default false; when true, excluded from all AI matching without suspending the account ([20](20-admin-ops-spec.md) §6.3) |
+| `match_hold_expires_at` | timestamp | nullable; set when `match_hold = true` for a temporary hold |
 | `embedding` | vector(1536) | pgvector — cosine similarity index (HNSW); computed from `ideal_customer_description` + product line descriptions; recomputed on material profile change |
 | `created_at` | timestamp | |
 | `updated_at` | timestamp | |
@@ -220,6 +250,8 @@ moved to `user_roles`.
 | `avg_days_to_payment` | float | nullable; computed from deal history |
 | `completed_deals_count` | integer | default 0 |
 | `payment_disputes_count` | integer | default 0 |
+| `match_hold` | boolean | default false; when true, excluded from all AI matching without suspending the account ([20](20-admin-ops-spec.md) §6.3) |
+| `match_hold_expires_at` | timestamp | nullable; set when `match_hold = true` for a temporary hold |
 | `created_at` | timestamp | |
 | `updated_at` | timestamp | |
 
@@ -269,6 +301,24 @@ moved to `user_roles`.
 | `buyer_status` | enum | pending, accepted, rejected |
 | `created_at` | timestamp | when match was generated |
 | `expires_at` | timestamp | match card expires if not acted on |
+
+---
+
+### match_suppressions
+
+Prevents a specific supplier–buyer pair from ever being matched, per
+[20](20-admin-ops-spec.md) §6.2. The matching engine checks this table
+before surfacing any introduction between the two IDs, in either
+direction.
+
+| Column | Type | Notes |
+|--------|------|-------|
+| `id` | UUID PK | |
+| `supplier_profile_id` | UUID FK | |
+| `buyer_profile_id` | UUID FK | |
+| `reason` | text | |
+| `created_by_user_id` | UUID FK → users | admin who created the suppression |
+| `created_at` | timestamp | |
 
 ---
 
@@ -384,6 +434,27 @@ moved to `user_roles`.
 | `status` | enum | filed, under_review, resolved, referred |
 | `trust_team_recommendation` | text | nullable |
 | `resolution_notes` | text | nullable |
+| `created_at` | timestamp | |
+| `resolved_at` | timestamp | nullable |
+
+---
+
+### flags
+
+Backs the Content Moderation flag queue ([20](20-admin-ops-spec.md)
+§8.1). Users flag profiles, messages, forum posts (Phase 4), and
+broadcast campaigns; all land here regardless of entity type.
+
+| Column | Type | Notes |
+|--------|------|-------|
+| `id` | UUID PK | |
+| `entity_type` | enum | supplier_profile, buyer_profile, message, forum_post, broadcast |
+| `entity_id` | UUID | polymorphic — FK target depends on `entity_type` |
+| `reporting_user_id` | UUID FK → users | |
+| `category` | enum | spam, inappropriate_content, impersonation, false_information, other |
+| `description` | text | |
+| `status` | enum | open, dismissed, warned, content_removed, escalated |
+| `sla_due_at` | timestamp | set on creation per the category's SLA in [20](20-admin-ops-spec.md) §8.1 |
 | `created_at` | timestamp | |
 | `resolved_at` | timestamp | nullable |
 
@@ -510,6 +581,28 @@ Backs tier/billing state for both roles independently — see §3.6.
 | `dual_role_bundle` | boolean | true if this tier was purchased under the 15% dual-role bundle discount (§3.6) |
 | `created_at` | timestamp | |
 | `updated_at` | timestamp | |
+
+---
+
+### wire_transfers
+
+The wire queue's own ledger ([20](20-admin-ops-spec.md) §5) — distinct
+from `subscriptions.wire_confirmation_status`, which just reflects the
+outcome. This table is the reconciliation record `finance_ops` works
+from: one row per reported inbound transfer, matched or not.
+
+| Column | Type | Notes |
+|--------|------|-------|
+| `id` | UUID PK | |
+| `subscription_id` | UUID FK → subscriptions | nullable until matched |
+| `payment_reference` | string | e.g. `GRC-2026-00412` |
+| `amount_received` | decimal | |
+| `expected_amount` | decimal | |
+| `currency` | char(3) | ISO 4217 |
+| `received_date` | date | |
+| `status` | enum | matched, mismatch, unmatched |
+| `entered_by_user_id` | UUID FK → users | `finance_ops` staff member who logged it |
+| `created_at` | timestamp | |
 
 ---
 
