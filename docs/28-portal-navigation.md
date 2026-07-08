@@ -10,11 +10,16 @@ data** for the `supplier` and `buyer` system roles' `role_features` rows
 assigned features away from these defaults, or stand up an entirely new
 role with its own set, via [Admin Ops](20-admin-ops-spec.md) §13.
 
-The platform's third launch role, `admin`, doesn't get a sidebar table
-here — its portal is the internal admin dashboard, fully speced in
-[Admin Ops](20-admin-ops-spec.md) §§1–13, and it isn't a `role_features`
-consumer in the same sense (internal admin capabilities are gated by a
-separate internal admin-roles enum, [20](20-admin-ops-spec.md) §1).
+The platform's third launch role, `admin`, gets a sidebar table below
+too, for the same reason the other two do — but its items work
+differently under the hood: `admin`'s portal is the internal admin
+dashboard, fully speced in [Admin Ops](20-admin-ops-spec.md) §§1–13, and
+each item there is gated by the internal admin-roles enum in that doc's
+§1 (`super_admin`, `trust_team`, `finance_ops`, `content_mod`,
+`data_analyst`) rather than by `role_features` rows — visibility varies
+per internal admin account, not uniformly by holding the `admin` role.
+The **Audience** column below names which internal admin role(s) see
+each item.
 
 Each item cites the doc section that defines the underlying feature. Build
 status is tracked separately in [Roadmap](13-roadmap.md); this doc is IA
@@ -63,6 +68,26 @@ only, not a completion record.
 | Billing | Subscription tier | [15](15-monetization.md) |
 | Settings | Account, language, notification prefs | — |
 
+## Admin context
+
+| Item | Shows | Audience | Spec |
+|---|---|---|---|
+| Dashboard | Active users, match queue depth, AI service latency (p50/p99), error rate | `super_admin` | [20](20-admin-ops-spec.md) §2 |
+| Verification Queue | Pending business verifications, cert uploads, KYB sessions awaiting scheduling | `trust_team` | [20](20-admin-ops-spec.md) §3 |
+| Dispute Queue | Open disputes by status, SLA countdowns, overdue cases | `trust_team` | [20](20-admin-ops-spec.md) §4 |
+| Wire Transfer Queue | Pending wire confirmations, matched vs. unmatched incoming transfers | `finance_ops` | [20](20-admin-ops-spec.md) §5 |
+| Match Override | Manual match injection/suppression, profile-level matching hold | `customer_success`, `trust_team` | [20](20-admin-ops-spec.md) §6 |
+| Accounts | Impersonation (read-only), account suspension, subscription overrides | `customer_success` | [20](20-admin-ops-spec.md) §7 |
+| Content Moderation | Flag queue, broadcast campaign approval (Phase 3+), sourcing request moderation | `content_mod` | [20](20-admin-ops-spec.md) §8 |
+| Platform Metrics | Supply/demand health, matching engine performance, deal funnel, revenue, trust & safety KPIs | `data_analyst`, `super_admin` | [20](20-admin-ops-spec.md) §9 |
+| Role & Feature Management | Platform roles, per-role feature assignment — the table this doc's Supplier/Buyer sections seed | `super_admin` | [20](20-admin-ops-spec.md) §13 |
+| Staff Accounts | Create/edit/delete internal admin accounts and their permission level | `super_admin` | [20](20-admin-ops-spec.md) §1 |
+| Audit Log | Append-only record of every admin action and automated platform decision | `super_admin` | [20](20-admin-ops-spec.md) §12 |
+
+Certification expiry monitoring (§10) and availability signal auto-reset
+(§11) are automated background jobs, not sidebar destinations — same
+reasoning as leaving RAG out of the Supplier/Buyer tables above.
+
 ---
 
 ## Not a sidebar item: RAG
@@ -73,10 +98,12 @@ no-login Sourcing Query Tool ([03](03-system-architecture.md) §3.3), which
 lives outside the portal entirely. Giving it its own slot would send users
 looking for a place to "do RAG" that doesn't need to exist.
 
-## Cross-cutting, not in either sidebar
+## Cross-cutting, not in the Supplier/Buyer sidebars
 
 - **Dispute Center** ([08](08-deal-workflow.md) §7) — an action inside a
-  specific Deal, not a standalone list, until volume justifies one.
+  specific Deal, not a standalone list, until volume justifies one for
+  suppliers/buyers. (Admins do get a standalone Dispute Queue — see
+  Admin context above.)
 - **Human Translator booking** ([08](08-deal-workflow.md) §10) —
   contextual inside Deal Room/Messages, not a nav item.
 
