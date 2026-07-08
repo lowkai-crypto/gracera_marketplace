@@ -6,6 +6,7 @@ WORKDIR /app
 COPY package.json pnpm-workspace.yaml pnpm-lock.yaml ./
 COPY apps/web/package.json ./apps/web/
 COPY packages/config/package.json ./packages/config/
+COPY packages/db/package.json ./packages/db/
 RUN pnpm install --frozen-lockfile
 
 FROM base AS builder
@@ -25,6 +26,10 @@ RUN addgroup --system --gid 1001 nodejs && adduser --system --uid 1001 nextjs
 COPY --from=builder --chown=nextjs:nodejs /app/apps/web/.next/standalone ./
 COPY --from=builder --chown=nextjs:nodejs /app/apps/web/.next/static ./apps/web/.next/static
 COPY --from=builder --chown=nextjs:nodejs /app/apps/web/public ./apps/web/public
+# Bundling inlines @gracera/db's code but can't inline the migration SQL
+# files it reads from disk at runtime — copy them explicitly.
+COPY --from=builder --chown=nextjs:nodejs /app/packages/db/migrations ./packages/db/migrations
+ENV DB_MIGRATIONS_DIR=/app/packages/db/migrations
 USER nextjs
 EXPOSE 3000
 ENV PORT=3000
