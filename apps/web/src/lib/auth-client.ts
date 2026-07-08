@@ -14,15 +14,31 @@ export function saveSession(session: Session) {
   localStorage.setItem(STORAGE_KEY, JSON.stringify(session));
 }
 
+// useSyncExternalStore requires getSnapshot to return a referentially
+// stable value when the underlying data hasn't changed (it compares with
+// Object.is). JSON.parse-ing on every call would return a new object
+// reference each time even when localStorage is unchanged, which makes
+// React think the store changes on every render -> infinite render loop
+// (React error #185, "Maximum update depth exceeded"). Cache by raw string.
+let cachedRaw: string | null = null;
+let cachedSession: Session | null = null;
+
 export function getSession(): Session | null {
   if (typeof window === "undefined") return null;
   const raw = localStorage.getItem(STORAGE_KEY);
-  if (!raw) return null;
-  try {
-    return JSON.parse(raw) as Session;
-  } catch {
-    return null;
+  if (raw === cachedRaw) return cachedSession;
+
+  cachedRaw = raw;
+  if (!raw) {
+    cachedSession = null;
+    return cachedSession;
   }
+  try {
+    cachedSession = JSON.parse(raw) as Session;
+  } catch {
+    cachedSession = null;
+  }
+  return cachedSession;
 }
 
 export function clearSession() {
