@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 
 import { AuthError, requireAuth } from "@/lib/auth";
 import { errorResponse } from "@/lib/api-error";
-import { eq, getDb, matches, sourcingRequests } from "@/lib/db";
+import { deals, eq, getDb, matches, sourcingRequests } from "@/lib/db";
 import { loadMatchAndCallerSide } from "@/lib/match-party";
 
 export async function POST(request: Request, { params }: { params: Promise<{ id: string }> }) {
@@ -48,14 +48,42 @@ export async function POST(request: Request, { params }: { params: Promise<{ id:
 
   const bothAccepted = updated.supplierStatus === "accepted" && updated.buyerStatus === "accepted";
 
-  // docs/10-api-reference.md: mutual accept auto-creates a Deal. Deferred
-  // here — no `deals` table exists yet; Deals v0's first job will backfill
-  // one for every already-mutually-accepted match instead of building a
-  // one-off insert here.
+  // docs/10-api-reference.md: mutual accept auto-creates a Deal. Guarded
+  // by checking for an existing deal first — accept can be called more
+  // than once (e.g. a duplicate request), and `deals.match_id` is also
+  // unique at the DB level as a second line of defense against the race.
+  let dealId: string | undefined;
+  if (bothAccepted) {
+    const [existingDeal] = await db.select().from(deals).where(eq(deals.matchId, id)).limit(1);
+    if (existingDeal) {
+      dealId = existingDeal.id;
+    } else {
+      try {
+        const [created] = await db
+          .insert(deals)
+          .values({
+            matchId: id,
+            supplierProfileId: updated.supplierProfileId,
+            buyerProfileId: updated.buyerProfileId,
+          })
+          .returning();
+        dealId = created.id;
+      } catch (err) {
+        // Unique violation on deals.match_id — a concurrent accept call
+        // won the race between the SELECT above and this INSERT. The
+        // deal exists either way; fetch it rather than treat this as an error.
+        if ((err as { code?: string }).code !== "23505") throw err;
+        const [raceWinner] = await db.select().from(deals).where(eq(deals.matchId, id)).limit(1);
+        dealId = raceWinner?.id;
+      }
+    }
+  }
+
   return NextResponse.json({
     id: updated.id,
     supplierStatus: updated.supplierStatus,
     buyerStatus: updated.buyerStatus,
     bothAccepted,
+    dealId,
   });
 }

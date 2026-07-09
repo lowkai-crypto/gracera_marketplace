@@ -62,6 +62,14 @@ export const matchRejectionReasonEnum = pgEnum("match_rejection_reason", [
   "already_connected",
   "other",
 ]);
+export const dealStageEnum = pgEnum("deal_stage", [
+  "messaging",
+  "rfq_issued",
+  "quote_submitted",
+  "deal_room",
+  "closed",
+  "abandoned",
+]);
 
 // ── users ─────────────────────────────────────────────────────────────────
 // docs/09-data-model.md — trimmed: no auth_provider/OAuth column yet (v0 is
@@ -271,6 +279,47 @@ export const matches = pgTable("matches", {
   expiresAt: timestamp("expires_at", { withTimezone: true }).notNull(),
 });
 
+// ── deals ────────────────────────────────────────────────────────────────
+// docs/08-deal-workflow.md + docs/09. `matchId` is unique — a match can
+// only ever produce one deal. RFQ/Quote/Deal Room stages are defined in
+// the enum but nothing in v0 writes them; see the Deals v0 plan.
+
+export const deals = pgTable("deals", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  matchId: uuid("match_id")
+    .notNull()
+    .unique()
+    .references(() => matches.id),
+  supplierProfileId: uuid("supplier_profile_id")
+    .notNull()
+    .references(() => supplierProfiles.id),
+  buyerProfileId: uuid("buyer_profile_id")
+    .notNull()
+    .references(() => buyerProfiles.id),
+  stage: dealStageEnum("stage").notNull().default("messaging"),
+  createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+  updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow(),
+  closedAt: timestamp("closed_at", { withTimezone: true }),
+});
+
+// ── messages ─────────────────────────────────────────────────────────────
+// docs/09. `attachments` is nullable — no upload flow exists yet to
+// populate it (see the Deals v0 plan).
+
+export const messages = pgTable("messages", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  dealId: uuid("deal_id")
+    .notNull()
+    .references(() => deals.id),
+  senderUserId: uuid("sender_user_id")
+    .notNull()
+    .references(() => users.id),
+  body: text("body").notNull(),
+  attachments: jsonb("attachments"),
+  createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+  readAt: timestamp("read_at", { withTimezone: true }),
+});
+
 export type User = typeof users.$inferSelect;
 export type NewUser = typeof users.$inferInsert;
 export type SupplierProfile = typeof supplierProfiles.$inferSelect;
@@ -283,3 +332,7 @@ export type SourcingRequest = typeof sourcingRequests.$inferSelect;
 export type NewSourcingRequest = typeof sourcingRequests.$inferInsert;
 export type Match = typeof matches.$inferSelect;
 export type NewMatch = typeof matches.$inferInsert;
+export type Deal = typeof deals.$inferSelect;
+export type NewDeal = typeof deals.$inferInsert;
+export type Message = typeof messages.$inferSelect;
+export type NewMessage = typeof messages.$inferInsert;

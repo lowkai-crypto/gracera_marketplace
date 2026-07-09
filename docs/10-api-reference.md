@@ -132,9 +132,8 @@ Returns matches for the authenticated user's profile. Sorted by `final_score` de
 ```
 
 ### POST /matches/{id}/accept
-Accept an introduction. If both parties have accepted, a Deal is created automatically — this
-side effect ships with the Deals feature, not with Matches v0; until then, the response includes
-`bothAccepted: true` and no `deals` row exists yet.
+Accept an introduction. If both parties have accepted, a Deal is created automatically
+(response includes `bothAccepted: true` and `dealId`).
 
 ### POST /matches/{id}/reject
 Reject with optional reason:
@@ -146,17 +145,21 @@ Reject with optional reason:
 
 ## Deals
 
-### GET /deals?user_id={id}&stage=rfq_issued
-List deals for authenticated user.
+### GET /deals?stage=rfq_issued
+List deals for the authenticated caller — scoped to whichever profile(s) they own, not an
+open `user_id` parameter (that would let anyone view anyone's deals just by knowing their ID).
 
 ### GET /deals/{id}
-Full deal detail including messages, RFQs, and quotes.
+Full deal detail including messages, RFQs, and quotes. RFQs/quotes are empty until the Deals
+feature grows past its v0 messaging-only scope.
 
 ### POST /deals/{id}/messages
 Send a message in the deal thread.
 ```json
-{ "body": "...", "attachments": ["s3://..."] }
+{ "body": "..." }
 ```
+`attachments` is speced (`[{filename, url, size}]`) but not yet accepted — no upload flow
+(`/uploads/presign`) exists to produce a URL for one.
 
 ---
 

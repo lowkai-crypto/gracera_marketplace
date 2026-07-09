@@ -109,6 +109,9 @@ export default function OnboardingPage() {
                       <Link href="/matches" className={styles.helpText}>
                         View matches
                       </Link>
+                      <Link href="/deals" className={styles.helpText}>
+                        View deals
+                      </Link>
                     </div>
                   </div>
                 ) : (
@@ -151,6 +154,9 @@ export default function OnboardingPage() {
                       </Link>
                       <Link href="/matches" className={styles.helpText}>
                         View matches
+                      </Link>
+                      <Link href="/deals" className={styles.helpText}>
+                        View deals
                       </Link>
                     </div>
                     {sourcingRequests.length > 0 && (

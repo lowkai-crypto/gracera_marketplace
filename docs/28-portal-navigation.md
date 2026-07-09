@@ -198,36 +198,43 @@ data model doc and are referenced by name below:
   supplement — still open).
 
 #### Deals
-- **Status:** not built — no `deals`/`messages`/`rfqs`/`quotes` tables
-  exist yet.
-- **Data model:** add `deals`, `messages`, `rfqs`, `quotes`,
-  `quote_line_items` per [09](09-data-model.md); Deal Room stage also
-  needs `deal_contracts`.
-- **Backend:** deal auto-creation on mutual match accept; message,
-  RFQ, and quote endpoints exactly as contracted in
-  [10](10-api-reference.md) (`POST /deals/{id}/messages`,
-  `POST /deals/{deal_id}/rfqs`, `POST /rfqs/{id}/quotes`,
-  `POST /quotes/{id}/accept|counter|decline`); Deal Room referral
-  triggers (trade finance, logistics, e-signature, inspection, buyer
-  protection, translator) fire "at Deal Room entry" per
-  [08](08-deal-workflow.md). Either party can file a dispute against the
-  deal via `POST /deals/{deal_id}/disputes` ([10](10-api-reference.md),
-  [08](08-deal-workflow.md) §7) — the trust-team side is Dispute Queue,
-  Admin-only, below.
-- **Frontend:** `/deals` list filterable by stage, `/deals/{id}` detail
-  (thread, RFQ form, side-by-side quote comparison, Deal Room checklist).
+- **Status:** built (v0, messaging only). `deals` + `messages` tables
+  exist; `rfqs`/`quotes`/`quote_line_items`/`deal_contracts` do not —
+  RFQ, Quote, Deal Room, and Post-Deal Review are all still deferred to
+  their own future scoping pass (Phase 3 in [13](13-roadmap.md)).
+- **Data model:** `deals` (`matchId` unique — one deal per match) and
+  `messages` per [09](09-data-model.md); `deals.stage` enum includes
+  the full docs/09 value set but v0 only ever writes `messaging`
+  (`closed`/`abandoned` have no endpoint that sets them yet).
+- **Backend:** deal creation happens **synchronously inside**
+  `POST /api/matches/{id}/accept` the moment `bothAccepted` flips true
+  (idempotent — checks for an existing deal first, and the DB's unique
+  constraint on `matches.id` is the second line of defense against a
+  concurrent-accept race), not via a separate backfill job. `GET
+  /api/deals`, `GET /api/deals/{id}`, `POST /api/deals/{id}/messages`
+  implemented per the corrected [10](10-api-reference.md) contract
+  (auth-scoped, not an open `user_id` param). RFQ/Quote endpoints,
+  Deal Room referral triggers, and dispute filing remain exactly as
+  speced but unbuilt.
+- **Frontend:** `/deals` list, `/deals/{id}` message thread (text only —
+  no RFQ form, quote comparison, or Deal Room checklist yet). Linked
+  from `/matches` ("Go to deal" once `bothAccepted`) and
+  `/onboarding` ("View deals").
 - **Depends on:** Matches (a deal originates from an accepted match).
-- **Phase:** messaging = 1 (M1.2); RFQ/Quote = 3 (M3.1); Deal Room = 3
-  (M3.2).
+- **Phase:** messaging = 1 (M1.2, done) → RFQ/Quote = 3 (M3.1, open) →
+  Deal Room = 3 (M3.2, open).
 
 #### Messages
-- **Status:** not built — inbox is a view over `deals.messages`, not a
-  standalone feature.
+- **Status:** built (v0) as a view over `deals.messages` — no standalone
+  cross-deal inbox with unread counts yet (that's still a real gap: a
+  user with several deals has to open each one to check for new
+  messages).
 - **Data model:** `messages` table (see Deals above).
-- **Backend:** `GET /api/messages` aggregating unread counts across all
-  of a user's deal threads; reuses `POST /deals/{id}/messages`.
-- **Frontend:** `/messages` inbox sorted by recent activity with unread
-  badges, opening into the parent deal thread.
+- **Backend:** `POST /api/deals/{id}/messages` per Deals above. A
+  dedicated `GET /api/messages` aggregating unread counts across all of
+  a user's deal threads is not built.
+- **Frontend:** no standalone `/messages` inbox; threads only exist
+  inside `/deals/{id}`.
 - **Depends on:** Deals.
 - **Phase:** 1 (M1.2).
 

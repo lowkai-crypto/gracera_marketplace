@@ -35,6 +35,7 @@ type MatchItem = {
   sourcingRequest: SourcingRequestSummary | null;
   supplierStatus: "pending" | "accepted" | "rejected";
   buyerStatus: "pending" | "accepted" | "rejected";
+  dealId: string | null;
   createdAt: string;
 };
 
@@ -155,6 +156,13 @@ function MatchList({ profileType, profileId }: { profileType: MatchParty; profil
             </div>
           )}
           {m[myStatusKey] !== "pending" && <p className={styles.helpText}>Status: {m[myStatusKey]}</p>}
+          {m.dealId && (
+            <div className={styles.submitRow}>
+              <Link href={`/deals/${m.dealId}`} className={styles.btnTealWarm}>
+                Go to deal
+              </Link>
+            </div>
+          )}
         </div>
       ))}
     </>

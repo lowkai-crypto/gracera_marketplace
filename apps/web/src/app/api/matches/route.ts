@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 
 import { AuthError, requireAuth } from "@/lib/auth";
 import { errorResponse } from "@/lib/api-error";
-import { buyerProfiles, eq, getDb, inArray, matches, qualityLabel, sourcingRequests, supplierProfiles } from "@/lib/db";
+import { buyerProfiles, deals, eq, getDb, inArray, matches, qualityLabel, sourcingRequests, supplierProfiles } from "@/lib/db";
 
 // docs/06 §6 / docs/10: contact fields are hidden until both parties have
 // accepted — same rule as the public supplier/buyer profile GETs, just
@@ -60,6 +60,12 @@ export async function GET(request: Request) {
     : [];
   const requestsById = new Map(requests.map((r) => [r.id, r]));
 
+  const matchIds = rows.map((m) => m.id);
+  const relatedDeals = matchIds.length
+    ? await db.select().from(deals).where(inArray(deals.matchId, matchIds))
+    : [];
+  const dealIdByMatchId = new Map(relatedDeals.map((d) => [d.matchId, d.id]));
+
   const sorted = [...rows].sort((a, b) => b.finalScore - a.finalScore);
   const results = sorted.map((m) => {
     const bothAccepted = m.supplierStatus === "accepted" && m.buyerStatus === "accepted";
@@ -87,6 +93,7 @@ export async function GET(request: Request) {
         : null,
       supplierStatus: m.supplierStatus,
       buyerStatus: m.buyerStatus,
+      dealId: dealIdByMatchId.get(m.id) ?? null,
       createdAt: m.createdAt,
     };
   });
