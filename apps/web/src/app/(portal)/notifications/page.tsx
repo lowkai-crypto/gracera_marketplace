@@ -29,13 +29,12 @@ export default function NotificationsPage() {
       .then((body) => setItems(body.notifications ?? []));
   }, []);
 
+  // No redirect here — the (portal) layout already guarantees an
+  // authenticated session before this page renders.
   useEffect(() => {
-    if (!session) {
-      router.replace("/get-started");
-      return;
-    }
+    if (!session) return;
     load();
-  }, [session, router, load]);
+  }, [session, load]);
 
   async function markAllRead() {
     await authFetch("/api/notifications/read-all", { method: "POST" });

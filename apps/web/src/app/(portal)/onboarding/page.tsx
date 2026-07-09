@@ -1,7 +1,6 @@
 "use client";
 
 import Link from "next/link";
-import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 
 import { authFetch, useSession } from "@/lib/auth-client";
@@ -30,18 +29,16 @@ type SourcingRequestSummary = {
 };
 
 export default function OnboardingPage() {
-  const router = useRouter();
   const session = useSession();
 
   const [supplierProfile, setSupplierProfile] = useState<SupplierSummary | null | undefined>(undefined);
   const [buyerProfile, setBuyerProfile] = useState<BuyerSummary | null | undefined>(undefined);
   const [sourcingRequests, setSourcingRequests] = useState<SourcingRequestSummary[]>([]);
 
+  // No redirect here — the (portal) layout already guarantees an
+  // authenticated session before this page renders.
   useEffect(() => {
-    if (!session) {
-      router.replace("/get-started");
-      return;
-    }
+    if (!session) return;
 
     const showSupplier = session.role === "supplier" || session.role === "both";
     const showBuyer = session.role === "buyer" || session.role === "both";
@@ -63,7 +60,7 @@ export default function OnboardingPage() {
           }
         });
     }
-  }, [session, router]);
+  }, [session]);
 
   if (!session) return null;
 

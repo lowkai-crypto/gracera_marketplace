@@ -4,7 +4,7 @@ import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 
-import { clearSession, useSession } from "@/lib/auth-client";
+import { clearSession, getSession, useSession } from "@/lib/auth-client";
 import styles from "../warm.module.css";
 
 type NavItem = {
@@ -71,19 +71,25 @@ export default function PortalLayout({ children }: { children: React.ReactNode }
   const [activeContext, setActiveContext] = useState<Context>(defaultContext);
 
   useEffect(() => {
-    if (!session) {
+    // Read the session directly here rather than trusting the reactive
+    // `session` value from useSession(). That hook is backed by
+    // useSyncExternalStore with a `null` server snapshot, so right after
+    // hydration there's a window where it still reads null even though
+    // real localStorage already has a valid session — redirecting on that
+    // stale read sent logged-in users back to /get-started on every
+    // refresh. getSession() only ever runs client-side here, so it always
+    // reflects the real, current value, no snapshot mismatch possible.
+    const current = getSession();
+    if (!current) {
       router.replace("/get-started");
       return;
     }
-    if (session.role !== "both") return;
+    if (current.role !== "both") return;
     const stored = localStorage.getItem(ACTIVE_CONTEXT_KEY);
     if (stored !== "supplier" && stored !== "buyer") return;
-    // localStorage isn't available during SSR/the lazy initializer, so this
-    // has to be an effect — a documented exception to "you might not need
-    // an effect" (synchronizing with a browser API on mount).
     // eslint-disable-next-line react-hooks/set-state-in-effect
     setActiveContext(stored);
-  }, [session, router]);
+  }, [router]);
 
   function switchContext(context: Context) {
     setActiveContext(context);

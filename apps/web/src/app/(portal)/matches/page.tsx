@@ -1,7 +1,6 @@
 "use client";
 
 import Link from "next/link";
-import { useRouter } from "next/navigation";
 import { useCallback, useEffect, useState } from "react";
 
 import { authFetch, useSession } from "@/lib/auth-client";
@@ -170,17 +169,17 @@ function MatchList({ profileType, profileId }: { profileType: MatchParty; profil
 }
 
 export default function MatchesPage() {
-  const router = useRouter();
   const session = useSession();
 
   const [supplierProfile, setSupplierProfile] = useState<{ id: string } | null | undefined>(undefined);
   const [buyerProfile, setBuyerProfile] = useState<{ id: string } | null | undefined>(undefined);
 
+  // No redirect here — the (portal) layout already guarantees an
+  // authenticated session before this page renders. Redirecting on this
+  // page's own (reactive, briefly-null-after-hydration) session read was
+  // sending logged-in users back to /get-started on every refresh.
   useEffect(() => {
-    if (!session) {
-      router.replace("/get-started");
-      return;
-    }
+    if (!session) return;
     const showSupplier = session.role === "supplier" || session.role === "both";
     const showBuyer = session.role === "buyer" || session.role === "both";
 
@@ -194,7 +193,7 @@ export default function MatchesPage() {
         .then((res) => (res.ok ? res.json() : null))
         .then(setBuyerProfile);
     }
-  }, [session, router]);
+  }, [session]);
 
   if (!session) return null;
 

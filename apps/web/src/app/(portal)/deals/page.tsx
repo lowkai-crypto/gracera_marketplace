@@ -1,7 +1,6 @@
 "use client";
 
 import Link from "next/link";
-import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 
 import { authFetch, useSession } from "@/lib/auth-client";
@@ -16,19 +15,17 @@ type DealItem = {
 };
 
 export default function DealsPage() {
-  const router = useRouter();
   const session = useSession();
   const [deals, setDeals] = useState<DealItem[] | null>(null);
 
+  // No redirect here — the (portal) layout already guarantees an
+  // authenticated session before this page renders.
   useEffect(() => {
-    if (!session) {
-      router.replace("/get-started");
-      return;
-    }
+    if (!session) return;
     authFetch("/api/deals")
       .then((res) => (res.ok ? res.json() : { deals: [] }))
       .then((body) => setDeals(body.deals ?? []));
-  }, [session, router]);
+  }, [session]);
 
   if (!session) return null;
 

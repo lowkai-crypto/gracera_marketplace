@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useParams, useRouter } from "next/navigation";
+import { useParams } from "next/navigation";
 import { useCallback, useEffect, useState } from "react";
 
 import { authFetch, useSession } from "@/lib/auth-client";
@@ -23,7 +23,6 @@ type DealDetail = {
 
 export default function DealDetailPage() {
   const params = useParams<{ id: string }>();
-  const router = useRouter();
   const session = useSession();
   const [deal, setDeal] = useState<DealDetail | null | undefined>(undefined);
   const [body, setBody] = useState("");
@@ -36,13 +35,12 @@ export default function DealDetailPage() {
       .then(setDeal);
   }, [params.id]);
 
+  // No redirect here — the (portal) layout already guarantees an
+  // authenticated session before this page renders.
   useEffect(() => {
-    if (!session) {
-      router.replace("/get-started");
-      return;
-    }
+    if (!session) return;
     load();
-  }, [session, router, load]);
+  }, [session, load]);
 
   async function send(e: React.FormEvent) {
     e.preventDefault();
