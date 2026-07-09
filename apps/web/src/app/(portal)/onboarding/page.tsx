@@ -4,8 +4,8 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 
-import { authFetch, clearSession, useSession } from "@/lib/auth-client";
-import styles from "../warm.module.css";
+import { authFetch, useSession } from "@/lib/auth-client";
+import styles from "../../warm.module.css";
 
 type SupplierSummary = {
   id: string;
@@ -36,17 +36,12 @@ export default function OnboardingPage() {
   const [supplierProfile, setSupplierProfile] = useState<SupplierSummary | null | undefined>(undefined);
   const [buyerProfile, setBuyerProfile] = useState<BuyerSummary | null | undefined>(undefined);
   const [sourcingRequests, setSourcingRequests] = useState<SourcingRequestSummary[]>([]);
-  const [unreadCount, setUnreadCount] = useState(0);
 
   useEffect(() => {
     if (!session) {
       router.replace("/get-started");
       return;
     }
-
-    authFetch("/api/notifications")
-      .then((res) => (res.ok ? res.json() : { unreadCount: 0 }))
-      .then((body) => setUnreadCount(body.unreadCount ?? 0));
 
     const showSupplier = session.role === "supplier" || session.role === "both";
     const showBuyer = session.role === "buyer" || session.role === "both";
@@ -85,9 +80,6 @@ export default function OnboardingPage() {
               <p className={styles.heroSub}>
                 Let&apos;s build your profile so Gracera can start matching you.
               </p>
-              <Link href="/notifications" className={styles.helpText}>
-                Notifications {unreadCount > 0 ? `(${unreadCount} unread)` : ""}
-              </Link>
             </div>
             <div className={styles.formCard}>
               {showSupplier &&
@@ -113,12 +105,6 @@ export default function OnboardingPage() {
                     <div style={{ display: "flex", gap: "0.75rem" }}>
                       <Link href="/onboarding/supplier" className={styles.btnTealWarm}>
                         Edit profile
-                      </Link>
-                      <Link href="/matches" className={styles.helpText}>
-                        View matches
-                      </Link>
-                      <Link href="/deals" className={styles.helpText}>
-                        View deals
                       </Link>
                     </div>
                   </div>
@@ -160,12 +146,6 @@ export default function OnboardingPage() {
                       >
                         Post another sourcing request
                       </Link>
-                      <Link href="/matches" className={styles.helpText}>
-                        View matches
-                      </Link>
-                      <Link href="/deals" className={styles.helpText}>
-                        View deals
-                      </Link>
                     </div>
                     {sourcingRequests.length > 0 && (
                       <>
@@ -201,20 +181,6 @@ export default function OnboardingPage() {
                     </Link>
                   </div>
                 ))}
-
-              <div className={styles.submitRow}>
-                <button
-                  type="button"
-                  className={styles.helpText}
-                  style={{ background: "none", border: "none", cursor: "pointer", padding: 0 }}
-                  onClick={() => {
-                    clearSession();
-                    router.push("/");
-                  }}
-                >
-                  Sign out
-                </button>
-              </div>
             </div>
           </div>
         </div>

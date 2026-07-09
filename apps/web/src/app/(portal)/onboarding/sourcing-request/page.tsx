@@ -4,7 +4,7 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { Suspense, useEffect, useState } from "react";
 
 import { authFetch, getSession } from "@/lib/auth-client";
-import styles from "../../warm.module.css";
+import styles from "../../../warm.module.css";
 
 const ORDER_FREQUENCIES = ["one_time", "monthly", "quarterly", "annual", "ongoing"];
 

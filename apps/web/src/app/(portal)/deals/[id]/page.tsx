@@ -5,7 +5,7 @@ import { useParams, useRouter } from "next/navigation";
 import { useCallback, useEffect, useState } from "react";
 
 import { authFetch, useSession } from "@/lib/auth-client";
-import styles from "../../warm.module.css";
+import styles from "../../../warm.module.css";
 
 type Message = {
   id: string;

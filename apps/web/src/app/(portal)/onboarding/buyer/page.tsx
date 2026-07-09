@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 
 import { authFetch, getSession } from "@/lib/auth-client";
-import styles from "../../warm.module.css";
+import styles from "../../../warm.module.css";
 
 const BUYER_TYPES = [
   "Retailer",
