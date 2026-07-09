@@ -10,6 +10,10 @@ import styles from "../warm.module.css";
 type NavItem = {
   label: string;
   href?: string; // omitted => "Soon" (feature not built yet)
+  // "Messages" shares a destination with "Deals" — without this, both
+  // light up together whenever either is active, which reads as two
+  // items being "selected" at once rather than "these are the same page."
+  neverActive?: boolean;
 };
 
 // docs/28-portal-navigation.md Supplier context table, in that doc's order.
@@ -18,7 +22,7 @@ const SUPPLIER_NAV: NavItem[] = [
   { label: "My Profile", href: "/onboarding/supplier" },
   { label: "Matches", href: "/matches" },
   { label: "Deals", href: "/deals" },
-  { label: "Messages", href: "/deals" }, // same destination — messaging lives inside a deal, not its own page
+  { label: "Messages", href: "/deals", neverActive: true }, // same destination — messaging lives inside a deal, not its own page
   { label: "AI-Brain" },
   { label: "Insights" },
   { label: "Certifications" },
@@ -38,7 +42,7 @@ const BUYER_NAV: NavItem[] = [
   { label: "Sourcing Requests", href: "/onboarding/sourcing-request" }, // create form — no list page exists yet
   { label: "Matches", href: "/matches" },
   { label: "Deals", href: "/deals" },
-  { label: "Messages", href: "/deals" },
+  { label: "Messages", href: "/deals", neverActive: true },
   { label: "Group Buys" },
   { label: "AI-Brain" },
   { label: "Price Compass" },
@@ -135,7 +139,7 @@ export default function PortalLayout({ children }: { children: React.ReactNode }
               <Link
                 key={item.label}
                 href={item.href}
-                className={`${styles.portalNavLink} ${isActive(pathname, item.href) ? activeLinkClass : ""}`}
+                className={`${styles.portalNavLink} ${!item.neverActive && isActive(pathname, item.href) ? activeLinkClass : ""}`}
               >
                 {item.label}
               </Link>
