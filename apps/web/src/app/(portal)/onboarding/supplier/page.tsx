@@ -77,6 +77,32 @@ const INITIAL_FORM = {
   productSampleAvailable: false,
 };
 
+// Wizard steps — exactly the fields already marked `required` in each of
+// the form's 6 original sections (the "Start faster" pre-fill widget isn't
+// a step; it lives inside step 0, unchanged from before the wizard).
+const STEPS: { title: string; required: (keyof typeof INITIAL_FORM)[] }[] = [
+  {
+    title: "Company Identity",
+    required: ["companyName", "displayName", "country", "headquartersCity", "businessRegNumber", "tagline", "description"],
+  },
+  {
+    title: "Products & Services",
+    required: ["categories", "productName", "productUnit", "productMoq", "productMoqUnit", "productLeadTimeDays", "productDescription"],
+  },
+  {
+    title: "Target Market",
+    required: ["targetGeographies", "languagesSpoken", "idealCustomerDescription"],
+  },
+  {
+    title: "Additional Details",
+    required: [],
+  },
+  {
+    title: "Contact",
+    required: ["primaryContactName", "primaryContactEmail"],
+  },
+];
+
 function toArray(value: string): string[] {
   return value
     .split(",")
@@ -109,6 +135,13 @@ export default function SupplierOnboardingPage() {
   const [existingProfileId, setExistingProfileId] = useState<string | null>(null);
   const [checkingExisting, setCheckingExisting] = useState(true);
 
+  const [currentStep, setCurrentStep] = useState(0);
+  // Create mode: steps unlock one at a time as you complete each one.
+  // Edit mode: every step starts unlocked — you shouldn't have to click
+  // through 4 screens to fix a phone number on step 5. Set once existing
+  // profile data (if any) finishes loading, below.
+  const [maxStepReached, setMaxStepReached] = useState(0);
+
   useEffect(() => {
     if (!getSession()) {
       router.replace("/get-started");
@@ -119,6 +152,7 @@ export default function SupplierOnboardingPage() {
       .then((profile) => {
         if (!profile) return;
         setExistingProfileId(profile.id);
+        setMaxStepReached(STEPS.length - 1);
         setForm((f) => ({
           ...f,
           companyName: profile.companyName ?? "",
@@ -210,6 +244,28 @@ export default function SupplierOnboardingPage() {
       onChange: (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) =>
         setForm((f) => ({ ...f, [name]: e.target.value })),
     };
+  }
+
+  function stepIsComplete(index: number): boolean {
+    return STEPS[index].required.every((key) => {
+      const value = form[key];
+      return typeof value === "string" && value.trim().length > 0;
+    });
+  }
+
+  function goToStep(index: number) {
+    if (index <= maxStepReached) setCurrentStep(index);
+  }
+
+  function handleNext() {
+    if (!stepIsComplete(currentStep)) return;
+    const next = currentStep + 1;
+    setMaxStepReached((m) => Math.max(m, next));
+    setCurrentStep(next);
+  }
+
+  function handleBack() {
+    setCurrentStep((s) => Math.max(0, s - 1));
   }
 
   async function handleSubmit(e: React.FormEvent) {
@@ -354,323 +410,384 @@ export default function SupplierOnboardingPage() {
                 The more complete your profile, the better your matches.
               </p>
             </div>
+
+            <div className={styles.wizardProgress}>
+              {STEPS.map((step, i) => {
+                const reachable = i <= maxStepReached;
+                // Any non-current step whose own required fields are already
+                // filled reads as "done" — true for steps already passed in
+                // create mode, and for every pre-filled step in edit mode.
+                const done = i !== currentStep && stepIsComplete(i);
+                return (
+                  <button
+                    key={step.title}
+                    type="button"
+                    className={styles.wizardStep}
+                    disabled={!reachable}
+                    onClick={() => goToStep(i)}
+                  >
+                    <span
+                      className={`${styles.wizardStepDot} ${
+                        i === currentStep ? styles.wizardStepDotActive : done ? styles.wizardStepDotDone : ""
+                      }`}
+                    >
+                      {i + 1}
+                    </span>
+                    <span className={`${styles.wizardStepLabel} ${i === currentStep ? styles.wizardStepLabelActive : ""}`}>
+                      {step.title}
+                    </span>
+                  </button>
+                );
+              })}
+            </div>
+
             <form className={styles.formCard} onSubmit={handleSubmit}>
               {error && <div className={styles.formError}>{error}</div>}
 
-              <div className={styles.formSection}>
-                <div className={styles.formSectionTitle}>Start faster (optional)</div>
-                <p className={styles.helpText} style={{ marginBottom: "0.75rem" }}>
-                  Paste your company website and we&apos;ll pre-fill what we can find.
-                  Websites rarely list MOQ, lead time, or pricing, so you&apos;ll still
-                  want to fill in Products &amp; Services yourself.
-                </p>
-                <div style={{ display: "flex", gap: "0.75rem" }}>
-                  <input
-                    type="url"
-                    placeholder="https://yourcompany.com"
-                    className={styles.input}
-                    value={websiteUrl}
-                    onChange={(e) => setWebsiteUrl(e.target.value)}
-                  />
+              {currentStep === 0 && (
+                <>
+                  <div className={styles.formSection}>
+                    <div className={styles.formSectionTitle}>Start faster (optional)</div>
+                    <p className={styles.helpText} style={{ marginBottom: "0.75rem" }}>
+                      Paste your company website and we&apos;ll pre-fill what we can find.
+                      Websites rarely list MOQ, lead time, or pricing, so you&apos;ll still
+                      want to fill in Products &amp; Services yourself.
+                    </p>
+                    <div style={{ display: "flex", gap: "0.75rem" }}>
+                      <input
+                        type="url"
+                        placeholder="https://yourcompany.com"
+                        className={styles.input}
+                        value={websiteUrl}
+                        onChange={(e) => setWebsiteUrl(e.target.value)}
+                      />
+                      <button
+                        type="button"
+                        className={styles.btnSubmit}
+                        onClick={handleExtract}
+                        disabled={extracting || !websiteUrl}
+                      >
+                        {extracting ? "Reading..." : "Pre-fill from website"}
+                      </button>
+                    </div>
+                    {extractError && (
+                      <div className={styles.formError} style={{ marginTop: "0.75rem" }}>
+                        {extractError}
+                      </div>
+                    )}
+                    {extractWarnings.length > 0 && (
+                      <div className={styles.formError} style={{ marginTop: "0.75rem" }}>
+                        {extractWarnings.join(" ")}
+                      </div>
+                    )}
+                    {extractInfo && (
+                      <div className={styles.formSuccess} style={{ marginTop: "0.75rem" }}>
+                        Pre-filled from {extractInfo.sourceUrl}.
+                        {extractInfo.needsReview.length > 0 && (
+                          <> Please double-check: {extractInfo.needsReview.join(", ")}.</>
+                        )}
+                      </div>
+                    )}
+                  </div>
+
+                  <div className={styles.formSection}>
+                    <div className={styles.formSectionTitle}>Company Identity</div>
+                    <div className={styles.formGrid}>
+                      <div className={styles.formGroup}>
+                        <label className={styles.label} htmlFor="companyName">Company name</label>
+                        <input id="companyName" required className={styles.input} {...field("companyName")} />
+                      </div>
+                      <div className={styles.formGroup}>
+                        <label className={styles.label} htmlFor="displayName">Display / brand name</label>
+                        <input id="displayName" required className={styles.input} {...field("displayName")} />
+                      </div>
+                      <div className={styles.formGroup}>
+                        <label className={styles.label} htmlFor="country">Country (ISO code, e.g. KR)</label>
+                        <input id="country" required maxLength={2} className={styles.input} {...field("country")} />
+                      </div>
+                      <div className={styles.formGroup}>
+                        <label className={styles.label} htmlFor="headquartersCity">Headquarters city</label>
+                        <input id="headquartersCity" required className={styles.input} {...field("headquartersCity")} />
+                      </div>
+                      <div className={styles.formGroup}>
+                        <label className={styles.label} htmlFor="yearEstablished">
+                          Year established <span className={styles.labelHint}>(optional)</span>
+                        </label>
+                        <input id="yearEstablished" type="number" className={styles.input} {...field("yearEstablished")} />
+                      </div>
+                      <div className={styles.formGroup}>
+                        <label className={styles.label} htmlFor="companySize">Company size</label>
+                        <select id="companySize" className={styles.select} {...field("companySize")}>
+                          {COMPANY_SIZES.map((s) => (
+                            <option key={s} value={s}>{s}</option>
+                          ))}
+                        </select>
+                      </div>
+                      <div className={styles.formGroup}>
+                        <label className={styles.label} htmlFor="businessRegNumber">Business registration number</label>
+                        <input id="businessRegNumber" required className={styles.input} {...field("businessRegNumber")} />
+                      </div>
+                      <div className={styles.formGroup}>
+                        <label className={styles.label} htmlFor="tagline">Tagline</label>
+                        <input id="tagline" required maxLength={120} className={styles.input} {...field("tagline")} />
+                      </div>
+                    </div>
+                    <div className={styles.formGroup}>
+                      <label className={styles.label} htmlFor="description">Company description</label>
+                      <textarea id="description" required className={styles.textarea} {...field("description")} />
+                    </div>
+                  </div>
+                </>
+              )}
+
+              {currentStep === 1 && (
+                <div className={styles.formSection}>
+                  <div className={styles.formSectionTitle}>Products &amp; Services</div>
+                  <div className={styles.formGroup}>
+                    <label className={styles.label}>Supplier type</label>
+                    <div className={styles.roleOptions}>
+                      {SUPPLIER_TYPES.map((t) => (
+                        <label key={t} className={styles.roleOption}>
+                          <input
+                            type="checkbox"
+                            checked={supplierType.includes(t)}
+                            onChange={() => setSupplierType((v) => toggle(v, t))}
+                            className={styles.roleOptionInput}
+                          />
+                          {t}
+                        </label>
+                      ))}
+                    </div>
+                  </div>
+                  <div className={styles.formGroup}>
+                    <label className={styles.label} htmlFor="categories">
+                      Categories <span className={styles.labelHint}>(comma-separated, up to 5)</span>
+                    </label>
+                    <input id="categories" required className={styles.input} {...field("categories")} />
+                  </div>
+
+                  <div className={styles.formSectionTitle} style={{ marginTop: "1.5rem" }}>
+                    One product to get started
+                  </div>
+                  <div className={styles.formGrid}>
+                    <div className={styles.formGroup}>
+                      <label className={styles.label} htmlFor="productName">Product name</label>
+                      <input id="productName" required className={styles.input} {...field("productName")} />
+                    </div>
+                    <div className={styles.formGroup}>
+                      <label className={styles.label} htmlFor="productUnit">Unit (e.g. case, kg)</label>
+                      <input id="productUnit" required className={styles.input} {...field("productUnit")} />
+                    </div>
+                    <div className={styles.formGroup}>
+                      <label className={styles.label} htmlFor="productMoq">MOQ</label>
+                      <input id="productMoq" type="number" required className={styles.input} {...field("productMoq")} />
+                    </div>
+                    <div className={styles.formGroup}>
+                      <label className={styles.label} htmlFor="productMoqUnit">MOQ unit</label>
+                      <input id="productMoqUnit" required className={styles.input} {...field("productMoqUnit")} />
+                    </div>
+                    <div className={styles.formGroup}>
+                      <label className={styles.label} htmlFor="productLeadTimeDays">Lead time (days)</label>
+                      <input
+                        id="productLeadTimeDays"
+                        type="number"
+                        required
+                        className={styles.input}
+                        {...field("productLeadTimeDays")}
+                      />
+                    </div>
+                    <div className={styles.formGroup}>
+                      <label className={styles.checkboxRow}>
+                        <input
+                          type="checkbox"
+                          checked={form.productSampleAvailable}
+                          onChange={(e) => setForm((f) => ({ ...f, productSampleAvailable: e.target.checked }))}
+                        />
+                        Samples available
+                      </label>
+                    </div>
+                  </div>
+                  <div className={styles.formGroup}>
+                    <label className={styles.label} htmlFor="productDescription">Product description</label>
+                    <textarea
+                      id="productDescription"
+                      required
+                      className={styles.textarea}
+                      {...field("productDescription")}
+                    />
+                  </div>
+                </div>
+              )}
+
+              {currentStep === 2 && (
+                <div className={styles.formSection}>
+                  <div className={styles.formSectionTitle}>Target Market &amp; Ideal Customer</div>
+                  <div className={styles.formGrid}>
+                    <div className={styles.formGroup}>
+                      <label className={styles.label} htmlFor="targetGeographies">
+                        Target countries <span className={styles.labelHint}>(comma-separated ISO codes)</span>
+                      </label>
+                      <input id="targetGeographies" required className={styles.input} {...field("targetGeographies")} />
+                    </div>
+                    <div className={styles.formGroup}>
+                      <label className={styles.label} htmlFor="languagesSpoken">
+                        Languages spoken <span className={styles.labelHint}>(comma-separated)</span>
+                      </label>
+                      <input id="languagesSpoken" required className={styles.input} {...field("languagesSpoken")} />
+                    </div>
+                  </div>
+                  <div className={styles.formGroup}>
+                    <label className={styles.label}>Target customer types</label>
+                    <div className={styles.roleOptions}>
+                      {CUSTOMER_TYPES.map((t) => (
+                        <label key={t} className={styles.roleOption}>
+                          <input
+                            type="checkbox"
+                            checked={targetCustomerTypes.includes(t)}
+                            onChange={() => setTargetCustomerTypes((v) => toggle(v, t))}
+                            className={styles.roleOptionInput}
+                          />
+                          {t}
+                        </label>
+                      ))}
+                    </div>
+                  </div>
+                  <div className={styles.formGroup}>
+                    <label className={styles.label}>Preferred deal types</label>
+                    <div className={styles.roleOptions}>
+                      {DEAL_TYPES.map((t) => (
+                        <label key={t} className={styles.roleOption}>
+                          <input
+                            type="checkbox"
+                            checked={preferredDealTypes.includes(t)}
+                            onChange={() => setPreferredDealTypes((v) => toggle(v, t))}
+                            className={styles.roleOptionInput}
+                          />
+                          {t}
+                        </label>
+                      ))}
+                    </div>
+                  </div>
+                  <div className={styles.formGroup}>
+                    <label className={styles.label} htmlFor="idealCustomerDescription">
+                      Describe your ideal customer
+                    </label>
+                    <textarea
+                      id="idealCustomerDescription"
+                      required
+                      className={styles.textarea}
+                      {...field("idealCustomerDescription")}
+                    />
+                  </div>
+                </div>
+              )}
+
+              {currentStep === 3 && (
+                <div className={styles.formSection}>
+                  <div className={styles.formSectionTitle}>
+                    Additional details <span className={styles.labelHint}>(optional, improves match quality)</span>
+                  </div>
+                  <div className={styles.formGrid}>
+                    <div className={styles.formGroup}>
+                      <label className={styles.label} htmlFor="annualRevenueRange">Annual revenue range</label>
+                      <input id="annualRevenueRange" className={styles.input} {...field("annualRevenueRange")} />
+                    </div>
+                    <div className={styles.formGroup}>
+                      <label className={styles.label} htmlFor="productionCapacityMonthly">Monthly production capacity</label>
+                      <input id="productionCapacityMonthly" className={styles.input} {...field("productionCapacityMonthly")} />
+                    </div>
+                    <div className={styles.formGroup}>
+                      <label className={styles.label} htmlFor="certifications">
+                        Certifications <span className={styles.labelHint}>(comma-separated)</span>
+                      </label>
+                      <input id="certifications" className={styles.input} {...field("certifications")} />
+                    </div>
+                    <div className={styles.formGroup}>
+                      <label className={styles.label} htmlFor="notableCustomers">
+                        Notable customers <span className={styles.labelHint}>(comma-separated)</span>
+                      </label>
+                      <input id="notableCustomers" className={styles.input} {...field("notableCustomers")} />
+                    </div>
+                  </div>
+                  <div className={styles.formGroup}>
+                    <label className={styles.label} htmlFor="qualityControlProcess">Quality control process</label>
+                    <textarea id="qualityControlProcess" className={styles.textarea} {...field("qualityControlProcess")} />
+                  </div>
+                  <label className={styles.checkboxRow}>
+                    <input
+                      type="checkbox"
+                      checked={form.referencesAvailable}
+                      onChange={(e) => setForm((f) => ({ ...f, referencesAvailable: e.target.checked }))}
+                    />
+                    References available on request
+                  </label>
+                </div>
+              )}
+
+              {currentStep === 4 && (
+                <div className={styles.formSection}>
+                  <div className={styles.formSectionTitle}>Contact</div>
+                  <div className={styles.formGrid}>
+                    <div className={styles.formGroup}>
+                      <label className={styles.label} htmlFor="primaryContactName">Contact name</label>
+                      <input id="primaryContactName" required className={styles.input} {...field("primaryContactName")} />
+                    </div>
+                    <div className={styles.formGroup}>
+                      <label className={styles.label} htmlFor="primaryContactRole">Contact role</label>
+                      <select id="primaryContactRole" className={styles.select} {...field("primaryContactRole")}>
+                        {CONTACT_ROLES.map((r) => (
+                          <option key={r} value={r}>{r.replace(/_/g, " ")}</option>
+                        ))}
+                      </select>
+                    </div>
+                    <div className={styles.formGroup}>
+                      <label className={styles.label} htmlFor="primaryContactEmail">Contact email</label>
+                      <input
+                        id="primaryContactEmail"
+                        type="email"
+                        required
+                        className={styles.input}
+                        {...field("primaryContactEmail")}
+                      />
+                    </div>
+                    <div className={styles.formGroup}>
+                      <label className={styles.label} htmlFor="primaryContactPhone">
+                        Contact phone <span className={styles.labelHint}>(optional)</span>
+                      </label>
+                      <input id="primaryContactPhone" className={styles.input} {...field("primaryContactPhone")} />
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              <div className={styles.wizardNav}>
+                {currentStep > 0 ? (
+                  <button type="button" className={styles.wizardBtnBack} onClick={handleBack}>
+                    Back
+                  </button>
+                ) : (
+                  <span />
+                )}
+                {currentStep < STEPS.length - 1 ? (
                   <button
                     type="button"
                     className={styles.btnSubmit}
-                    onClick={handleExtract}
-                    disabled={extracting || !websiteUrl}
+                    onClick={handleNext}
+                    disabled={!stepIsComplete(currentStep)}
                   >
-                    {extracting ? "Reading..." : "Pre-fill from website"}
+                    Next
                   </button>
-                </div>
-                {extractError && (
-                  <div className={styles.formError} style={{ marginTop: "0.75rem" }}>
-                    {extractError}
-                  </div>
+                ) : (
+                  <button type="submit" className={styles.btnSubmit} disabled={submitting}>
+                    {submitting
+                      ? existingProfileId
+                        ? "Updating profile..."
+                        : "Creating profile..."
+                      : existingProfileId
+                        ? "Update profile"
+                        : "Create profile"}
+                  </button>
                 )}
-                {extractWarnings.length > 0 && (
-                  <div className={styles.formError} style={{ marginTop: "0.75rem" }}>
-                    {extractWarnings.join(" ")}
-                  </div>
-                )}
-                {extractInfo && (
-                  <div className={styles.formSuccess} style={{ marginTop: "0.75rem" }}>
-                    Pre-filled from {extractInfo.sourceUrl}.
-                    {extractInfo.needsReview.length > 0 && (
-                      <> Please double-check: {extractInfo.needsReview.join(", ")}.</>
-                    )}
-                  </div>
-                )}
-              </div>
-
-              <div className={styles.formSection}>
-                <div className={styles.formSectionTitle}>Company Identity</div>
-                <div className={styles.formGrid}>
-                  <div className={styles.formGroup}>
-                    <label className={styles.label} htmlFor="companyName">Company name</label>
-                    <input id="companyName" required className={styles.input} {...field("companyName")} />
-                  </div>
-                  <div className={styles.formGroup}>
-                    <label className={styles.label} htmlFor="displayName">Display / brand name</label>
-                    <input id="displayName" required className={styles.input} {...field("displayName")} />
-                  </div>
-                  <div className={styles.formGroup}>
-                    <label className={styles.label} htmlFor="country">Country (ISO code, e.g. KR)</label>
-                    <input id="country" required maxLength={2} className={styles.input} {...field("country")} />
-                  </div>
-                  <div className={styles.formGroup}>
-                    <label className={styles.label} htmlFor="headquartersCity">Headquarters city</label>
-                    <input id="headquartersCity" required className={styles.input} {...field("headquartersCity")} />
-                  </div>
-                  <div className={styles.formGroup}>
-                    <label className={styles.label} htmlFor="yearEstablished">
-                      Year established <span className={styles.labelHint}>(optional)</span>
-                    </label>
-                    <input id="yearEstablished" type="number" className={styles.input} {...field("yearEstablished")} />
-                  </div>
-                  <div className={styles.formGroup}>
-                    <label className={styles.label} htmlFor="companySize">Company size</label>
-                    <select id="companySize" className={styles.select} {...field("companySize")}>
-                      {COMPANY_SIZES.map((s) => (
-                        <option key={s} value={s}>{s}</option>
-                      ))}
-                    </select>
-                  </div>
-                  <div className={styles.formGroup}>
-                    <label className={styles.label} htmlFor="businessRegNumber">Business registration number</label>
-                    <input id="businessRegNumber" required className={styles.input} {...field("businessRegNumber")} />
-                  </div>
-                  <div className={styles.formGroup}>
-                    <label className={styles.label} htmlFor="tagline">Tagline</label>
-                    <input id="tagline" required maxLength={120} className={styles.input} {...field("tagline")} />
-                  </div>
-                </div>
-                <div className={styles.formGroup}>
-                  <label className={styles.label} htmlFor="description">Company description</label>
-                  <textarea id="description" required className={styles.textarea} {...field("description")} />
-                </div>
-              </div>
-
-              <div className={styles.formSection}>
-                <div className={styles.formSectionTitle}>Products &amp; Services</div>
-                <div className={styles.formGroup}>
-                  <label className={styles.label}>Supplier type</label>
-                  <div className={styles.roleOptions}>
-                    {SUPPLIER_TYPES.map((t) => (
-                      <label key={t} className={styles.roleOption}>
-                        <input
-                          type="checkbox"
-                          checked={supplierType.includes(t)}
-                          onChange={() => setSupplierType((v) => toggle(v, t))}
-                          className={styles.roleOptionInput}
-                        />
-                        {t}
-                      </label>
-                    ))}
-                  </div>
-                </div>
-                <div className={styles.formGroup}>
-                  <label className={styles.label} htmlFor="categories">
-                    Categories <span className={styles.labelHint}>(comma-separated, up to 5)</span>
-                  </label>
-                  <input id="categories" required className={styles.input} {...field("categories")} />
-                </div>
-
-                <div className={styles.formSectionTitle} style={{ marginTop: "1.5rem" }}>
-                  One product to get started
-                </div>
-                <div className={styles.formGrid}>
-                  <div className={styles.formGroup}>
-                    <label className={styles.label} htmlFor="productName">Product name</label>
-                    <input id="productName" required className={styles.input} {...field("productName")} />
-                  </div>
-                  <div className={styles.formGroup}>
-                    <label className={styles.label} htmlFor="productUnit">Unit (e.g. case, kg)</label>
-                    <input id="productUnit" required className={styles.input} {...field("productUnit")} />
-                  </div>
-                  <div className={styles.formGroup}>
-                    <label className={styles.label} htmlFor="productMoq">MOQ</label>
-                    <input id="productMoq" type="number" required className={styles.input} {...field("productMoq")} />
-                  </div>
-                  <div className={styles.formGroup}>
-                    <label className={styles.label} htmlFor="productMoqUnit">MOQ unit</label>
-                    <input id="productMoqUnit" required className={styles.input} {...field("productMoqUnit")} />
-                  </div>
-                  <div className={styles.formGroup}>
-                    <label className={styles.label} htmlFor="productLeadTimeDays">Lead time (days)</label>
-                    <input
-                      id="productLeadTimeDays"
-                      type="number"
-                      required
-                      className={styles.input}
-                      {...field("productLeadTimeDays")}
-                    />
-                  </div>
-                  <div className={styles.formGroup}>
-                    <label className={styles.checkboxRow}>
-                      <input
-                        type="checkbox"
-                        checked={form.productSampleAvailable}
-                        onChange={(e) => setForm((f) => ({ ...f, productSampleAvailable: e.target.checked }))}
-                      />
-                      Samples available
-                    </label>
-                  </div>
-                </div>
-                <div className={styles.formGroup}>
-                  <label className={styles.label} htmlFor="productDescription">Product description</label>
-                  <textarea
-                    id="productDescription"
-                    required
-                    className={styles.textarea}
-                    {...field("productDescription")}
-                  />
-                </div>
-              </div>
-
-              <div className={styles.formSection}>
-                <div className={styles.formSectionTitle}>Target Market &amp; Ideal Customer</div>
-                <div className={styles.formGrid}>
-                  <div className={styles.formGroup}>
-                    <label className={styles.label} htmlFor="targetGeographies">
-                      Target countries <span className={styles.labelHint}>(comma-separated ISO codes)</span>
-                    </label>
-                    <input id="targetGeographies" required className={styles.input} {...field("targetGeographies")} />
-                  </div>
-                  <div className={styles.formGroup}>
-                    <label className={styles.label} htmlFor="languagesSpoken">
-                      Languages spoken <span className={styles.labelHint}>(comma-separated)</span>
-                    </label>
-                    <input id="languagesSpoken" required className={styles.input} {...field("languagesSpoken")} />
-                  </div>
-                </div>
-                <div className={styles.formGroup}>
-                  <label className={styles.label}>Target customer types</label>
-                  <div className={styles.roleOptions}>
-                    {CUSTOMER_TYPES.map((t) => (
-                      <label key={t} className={styles.roleOption}>
-                        <input
-                          type="checkbox"
-                          checked={targetCustomerTypes.includes(t)}
-                          onChange={() => setTargetCustomerTypes((v) => toggle(v, t))}
-                          className={styles.roleOptionInput}
-                        />
-                        {t}
-                      </label>
-                    ))}
-                  </div>
-                </div>
-                <div className={styles.formGroup}>
-                  <label className={styles.label}>Preferred deal types</label>
-                  <div className={styles.roleOptions}>
-                    {DEAL_TYPES.map((t) => (
-                      <label key={t} className={styles.roleOption}>
-                        <input
-                          type="checkbox"
-                          checked={preferredDealTypes.includes(t)}
-                          onChange={() => setPreferredDealTypes((v) => toggle(v, t))}
-                          className={styles.roleOptionInput}
-                        />
-                        {t}
-                      </label>
-                    ))}
-                  </div>
-                </div>
-                <div className={styles.formGroup}>
-                  <label className={styles.label} htmlFor="idealCustomerDescription">
-                    Describe your ideal customer
-                  </label>
-                  <textarea
-                    id="idealCustomerDescription"
-                    required
-                    className={styles.textarea}
-                    {...field("idealCustomerDescription")}
-                  />
-                </div>
-              </div>
-
-              <div className={styles.formSection}>
-                <div className={styles.formSectionTitle}>
-                  Additional details <span className={styles.labelHint}>(optional, improves match quality)</span>
-                </div>
-                <div className={styles.formGrid}>
-                  <div className={styles.formGroup}>
-                    <label className={styles.label} htmlFor="annualRevenueRange">Annual revenue range</label>
-                    <input id="annualRevenueRange" className={styles.input} {...field("annualRevenueRange")} />
-                  </div>
-                  <div className={styles.formGroup}>
-                    <label className={styles.label} htmlFor="productionCapacityMonthly">Monthly production capacity</label>
-                    <input id="productionCapacityMonthly" className={styles.input} {...field("productionCapacityMonthly")} />
-                  </div>
-                  <div className={styles.formGroup}>
-                    <label className={styles.label} htmlFor="certifications">
-                      Certifications <span className={styles.labelHint}>(comma-separated)</span>
-                    </label>
-                    <input id="certifications" className={styles.input} {...field("certifications")} />
-                  </div>
-                  <div className={styles.formGroup}>
-                    <label className={styles.label} htmlFor="notableCustomers">
-                      Notable customers <span className={styles.labelHint}>(comma-separated)</span>
-                    </label>
-                    <input id="notableCustomers" className={styles.input} {...field("notableCustomers")} />
-                  </div>
-                </div>
-                <div className={styles.formGroup}>
-                  <label className={styles.label} htmlFor="qualityControlProcess">Quality control process</label>
-                  <textarea id="qualityControlProcess" className={styles.textarea} {...field("qualityControlProcess")} />
-                </div>
-                <label className={styles.checkboxRow}>
-                  <input
-                    type="checkbox"
-                    checked={form.referencesAvailable}
-                    onChange={(e) => setForm((f) => ({ ...f, referencesAvailable: e.target.checked }))}
-                  />
-                  References available on request
-                </label>
-              </div>
-
-              <div className={styles.formSection}>
-                <div className={styles.formSectionTitle}>Contact</div>
-                <div className={styles.formGrid}>
-                  <div className={styles.formGroup}>
-                    <label className={styles.label} htmlFor="primaryContactName">Contact name</label>
-                    <input id="primaryContactName" required className={styles.input} {...field("primaryContactName")} />
-                  </div>
-                  <div className={styles.formGroup}>
-                    <label className={styles.label} htmlFor="primaryContactRole">Contact role</label>
-                    <select id="primaryContactRole" className={styles.select} {...field("primaryContactRole")}>
-                      {CONTACT_ROLES.map((r) => (
-                        <option key={r} value={r}>{r.replace(/_/g, " ")}</option>
-                      ))}
-                    </select>
-                  </div>
-                  <div className={styles.formGroup}>
-                    <label className={styles.label} htmlFor="primaryContactEmail">Contact email</label>
-                    <input
-                      id="primaryContactEmail"
-                      type="email"
-                      required
-                      className={styles.input}
-                      {...field("primaryContactEmail")}
-                    />
-                  </div>
-                  <div className={styles.formGroup}>
-                    <label className={styles.label} htmlFor="primaryContactPhone">
-                      Contact phone <span className={styles.labelHint}>(optional)</span>
-                    </label>
-                    <input id="primaryContactPhone" className={styles.input} {...field("primaryContactPhone")} />
-                  </div>
-                </div>
-              </div>
-
-              <div className={styles.submitRow}>
-                <button type="submit" className={styles.btnSubmit} disabled={submitting}>
-                  {submitting
-                    ? existingProfileId
-                      ? "Updating profile..."
-                      : "Creating profile..."
-                    : existingProfileId
-                      ? "Update profile"
-                      : "Create profile"}
-                </button>
               </div>
             </form>
           </div>
