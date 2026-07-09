@@ -7,6 +7,7 @@ import {
   eq,
   getDb,
   matches,
+  notifications,
   passesHardFilters,
   productLines,
   sourcingRequests,
@@ -174,15 +175,38 @@ export async function POST(request: Request) {
 
       if (scoreResponse.final_score < SURFACE_THRESHOLD) continue;
 
-      await db.insert(matches).values({
-        supplierProfileId: supplier.id,
-        buyerProfileId: buyer.id,
-        sourcingRequestId: sourcingRequest.id,
-        aiScore: scoreResponse.semantic_score,
-        finalScore: scoreResponse.final_score,
-        aiRationale: { dimensions: scoreResponse.dimensions, summary: scoreResponse.summary },
-        expiresAt: new Date(Date.now() + MATCH_EXPIRY_DAYS * 24 * 60 * 60 * 1000),
-      });
+      const [createdMatch] = await db
+        .insert(matches)
+        .values({
+          supplierProfileId: supplier.id,
+          buyerProfileId: buyer.id,
+          sourcingRequestId: sourcingRequest.id,
+          aiScore: scoreResponse.semantic_score,
+          finalScore: scoreResponse.final_score,
+          aiRationale: { dimensions: scoreResponse.dimensions, summary: scoreResponse.summary },
+          expiresAt: new Date(Date.now() + MATCH_EXPIRY_DAYS * 24 * 60 * 60 * 1000),
+        })
+        .returning();
+
+      await db.insert(notifications).values([
+        {
+          userId: supplier.userId,
+          type: "match.new",
+          title: "New match found",
+          body: `${buyer.companyName ?? "A buyer"} could be a fit for your business.`,
+          entityType: "match",
+          entityId: createdMatch.id,
+        },
+        {
+          userId: buyer.userId,
+          type: "match.new",
+          title: "New match found",
+          body: `${supplier.companyName ?? "A supplier"} could be a fit for your sourcing request.`,
+          entityType: "match",
+          entityId: createdMatch.id,
+        },
+      ]);
+
       matchesCreated++;
     }
   }

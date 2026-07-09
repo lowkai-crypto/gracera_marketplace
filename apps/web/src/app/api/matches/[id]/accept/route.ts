@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 
 import { AuthError, requireAuth } from "@/lib/auth";
 import { errorResponse } from "@/lib/api-error";
-import { deals, eq, getDb, matches, sourcingRequests } from "@/lib/db";
+import { deals, eq, getDb, matches, notifications, sourcingRequests } from "@/lib/db";
 import { loadMatchAndCallerSide } from "@/lib/match-party";
 
 export async function POST(request: Request, { params }: { params: Promise<{ id: string }> }) {
@@ -68,6 +68,27 @@ export async function POST(request: Request, { params }: { params: Promise<{ id:
           })
           .returning();
         dealId = created.id;
+
+        // Only on first creation — not on a repeat/idempotent accept call,
+        // which would otherwise re-notify both parties every time.
+        await db.insert(notifications).values([
+          {
+            userId: supplierProfile.userId,
+            type: "match.accepted",
+            title: "You have a new deal",
+            body: `${buyerProfile.companyName ?? "A buyer"} accepted your introduction — start the conversation.`,
+            entityType: "deal",
+            entityId: created.id,
+          },
+          {
+            userId: buyerProfile.userId,
+            type: "match.accepted",
+            title: "You have a new deal",
+            body: `${supplierProfile.companyName ?? "A supplier"} accepted your introduction — start the conversation.`,
+            entityType: "deal",
+            entityId: created.id,
+          },
+        ]);
       } catch (err) {
         // Unique violation on deals.match_id — a concurrent accept call
         // won the race between the SELECT above and this INSERT. The

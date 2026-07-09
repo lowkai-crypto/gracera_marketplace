@@ -36,12 +36,17 @@ export default function OnboardingPage() {
   const [supplierProfile, setSupplierProfile] = useState<SupplierSummary | null | undefined>(undefined);
   const [buyerProfile, setBuyerProfile] = useState<BuyerSummary | null | undefined>(undefined);
   const [sourcingRequests, setSourcingRequests] = useState<SourcingRequestSummary[]>([]);
+  const [unreadCount, setUnreadCount] = useState(0);
 
   useEffect(() => {
     if (!session) {
       router.replace("/get-started");
       return;
     }
+
+    authFetch("/api/notifications")
+      .then((res) => (res.ok ? res.json() : { unreadCount: 0 }))
+      .then((body) => setUnreadCount(body.unreadCount ?? 0));
 
     const showSupplier = session.role === "supplier" || session.role === "both";
     const showBuyer = session.role === "buyer" || session.role === "both";
@@ -80,6 +85,9 @@ export default function OnboardingPage() {
               <p className={styles.heroSub}>
                 Let&apos;s build your profile so Gracera can start matching you.
               </p>
+              <Link href="/notifications" className={styles.helpText}>
+                Notifications {unreadCount > 0 ? `(${unreadCount} unread)` : ""}
+              </Link>
             </div>
             <div className={styles.formCard}>
               {showSupplier &&

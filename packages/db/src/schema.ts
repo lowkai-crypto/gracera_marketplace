@@ -320,6 +320,26 @@ export const messages = pgTable("messages", {
   readAt: timestamp("read_at", { withTimezone: true }),
 });
 
+// ── notifications ────────────────────────────────────────────────────────
+// docs/21-notifications-email-spec.md §1 is the authoritative schema
+// source (not duplicated into docs/09), same precedent as audit_log
+// living only in docs/20 §12. `entityId` is intentionally not an FK —
+// it's polymorphic (`entityType` says which table it points at).
+
+export const notifications = pgTable("notifications", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  userId: uuid("user_id")
+    .notNull()
+    .references(() => users.id),
+  type: varchar("type", { length: 60 }).notNull(),
+  title: varchar("title", { length: 120 }).notNull(),
+  body: varchar("body", { length: 255 }).notNull(),
+  entityType: varchar("entity_type", { length: 40 }).notNull(),
+  entityId: uuid("entity_id").notNull(),
+  read: boolean("read").notNull().default(false),
+  createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+});
+
 export type User = typeof users.$inferSelect;
 export type NewUser = typeof users.$inferInsert;
 export type SupplierProfile = typeof supplierProfiles.$inferSelect;
@@ -336,3 +356,5 @@ export type Deal = typeof deals.$inferSelect;
 export type NewDeal = typeof deals.$inferInsert;
 export type Message = typeof messages.$inferSelect;
 export type NewMessage = typeof messages.$inferInsert;
+export type Notification = typeof notifications.$inferSelect;
+export type NewNotification = typeof notifications.$inferInsert;

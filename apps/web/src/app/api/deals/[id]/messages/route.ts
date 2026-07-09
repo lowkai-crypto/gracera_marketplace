@@ -3,7 +3,7 @@ import { z } from "zod";
 
 import { AuthError, requireAuth } from "@/lib/auth";
 import { errorResponse, validationErrorResponse } from "@/lib/api-error";
-import { getDb, messages } from "@/lib/db";
+import { getDb, messages, notifications } from "@/lib/db";
 import { loadDealAndCallerSide } from "@/lib/deal-party";
 
 // Text only for v0 — attachments need the presign upload flow from
@@ -27,11 +27,24 @@ export async function POST(request: Request, { params }: { params: Promise<{ id:
   if (result.status === "not_found") return errorResponse(404, "NOT_FOUND", "Deal not found");
   if (result.status === "forbidden") return errorResponse(403, "FORBIDDEN", "You are not a party to this deal");
 
+  const { side, supplierProfile, buyerProfile } = result;
   const db = getDb();
   const [message] = await db
     .insert(messages)
     .values({ dealId: id, senderUserId: auth.sub, body: parsed.data.body })
     .returning();
+
+  // Notify the counterpart only — never the sender.
+  const senderName = side === "supplier" ? supplierProfile.companyName : buyerProfile.companyName;
+  const recipientUserId = side === "supplier" ? buyerProfile.userId : supplierProfile.userId;
+  await db.insert(notifications).values({
+    userId: recipientUserId,
+    type: "message.new",
+    title: "New message",
+    body: `${senderName ?? "Your deal counterpart"} sent you a message.`,
+    entityType: "deal",
+    entityId: id,
+  });
 
   return NextResponse.json(message, { status: 201 });
 }
