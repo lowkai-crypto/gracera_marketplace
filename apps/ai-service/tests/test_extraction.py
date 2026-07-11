@@ -95,6 +95,11 @@ class TestExtractWebsite:
         async def fake_fetch_page(url: str) -> str:
             return "<html><body><p>Coming soon</p></body></html>"
 
+        async def fake_render_page(url: str, timeout_seconds: float) -> str:
+            # Rendering is attempted too, but it doesn't help either —
+            # a genuinely thin page, not a JS-rendered one.
+            return "<html><body><p>Coming soon</p></body></html>"
+
         claude_called = False
 
         def fake_get_client():
@@ -103,12 +108,68 @@ class TestExtractWebsite:
             return FakeClient(json.dumps(CLAUDE_EXTRACTION_RESPONSE))
 
         monkeypatch.setattr("extraction.fetch_page", fake_fetch_page)
+        monkeypatch.setattr("extraction.render_page", fake_render_page)
         monkeypatch.setattr("extraction.get_client", fake_get_client)
 
         fields, warnings = await extract_website("https://thin-site.example/")
         assert fields == {}
         assert len(warnings) == 1
         assert not claude_called  # cost-avoidance: don't call Claude on near-empty input
+
+    @pytest.mark.asyncio
+    async def test_thin_page_falls_back_to_headless_render(self, monkeypatch):
+        async def fake_fetch_page(url: str) -> str:
+            return "<html><body><sst-app></sst-app></body></html>"
+
+        async def fake_render_page(url: str, timeout_seconds: float) -> str:
+            return f"<html><body><p>{RICH_PAGE_TEXT}</p></body></html>"
+
+        monkeypatch.setattr("extraction.fetch_page", fake_fetch_page)
+        monkeypatch.setattr("extraction.render_page", fake_render_page)
+        monkeypatch.setattr(
+            "extraction.get_client", lambda: FakeClient(json.dumps(CLAUDE_EXTRACTION_RESPONSE))
+        )
+
+        fields, warnings = await extract_website("https://spa-site.example/")
+        assert fields["company_name"].value == "Jangdok Foods"
+        assert not any("JavaScript" in w for w in warnings)
+
+    @pytest.mark.asyncio
+    async def test_headless_render_failure_becomes_a_warning_not_an_exception(self, monkeypatch):
+        async def fake_fetch_page(url: str) -> str:
+            return "<html><body><sst-app></sst-app></body></html>"
+
+        async def fake_render_page(url: str, timeout_seconds: float) -> str:
+            raise ValueError("Could not render page: timeout")
+
+        monkeypatch.setattr("extraction.fetch_page", fake_fetch_page)
+        monkeypatch.setattr("extraction.render_page", fake_render_page)
+
+        fields, warnings = await extract_website("https://spa-site.example/")
+        assert fields == {}
+        assert any("Headless rendering failed" in w for w in warnings)
+        assert any("JavaScript" in w for w in warnings)
+
+    @pytest.mark.asyncio
+    async def test_headless_render_disabled_skips_fallback(self, monkeypatch):
+        async def fake_fetch_page(url: str) -> str:
+            return "<html><body><sst-app></sst-app></body></html>"
+
+        render_called = False
+
+        async def fake_render_page(url: str, timeout_seconds: float) -> str:
+            nonlocal render_called
+            render_called = True
+            return f"<html><body><p>{RICH_PAGE_TEXT}</p></body></html>"
+
+        monkeypatch.setattr("extraction.fetch_page", fake_fetch_page)
+        monkeypatch.setattr("extraction.render_page", fake_render_page)
+        monkeypatch.setattr("extraction.settings.enable_headless_render", False)
+
+        fields, warnings = await extract_website("https://spa-site.example/")
+        assert not render_called
+        assert fields == {}
+        assert any("JavaScript" in w for w in warnings)
 
     @pytest.mark.asyncio
     async def test_propagates_unsafe_url_error(self, monkeypatch):
@@ -118,6 +179,19 @@ class TestExtractWebsite:
         monkeypatch.setattr("extraction.fetch_page", fake_fetch_page)
         with pytest.raises(UnsafeUrlError):
             await extract_website("http://169.254.169.254/")
+
+    @pytest.mark.asyncio
+    async def test_propagates_unsafe_url_error_from_headless_render(self, monkeypatch):
+        async def fake_fetch_page(url: str) -> str:
+            return "<html><body><sst-app></sst-app></body></html>"
+
+        async def fake_render_page(url: str, timeout_seconds: float) -> str:
+            raise UnsafeUrlError("redirected to a disallowed IP")
+
+        monkeypatch.setattr("extraction.fetch_page", fake_fetch_page)
+        monkeypatch.setattr("extraction.render_page", fake_render_page)
+        with pytest.raises(UnsafeUrlError):
+            await extract_website("https://spa-site.example/")
 
     @pytest.mark.asyncio
     async def test_fetch_failure_becomes_a_warning_not_an_exception(self, monkeypatch):

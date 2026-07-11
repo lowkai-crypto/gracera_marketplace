@@ -4,6 +4,7 @@ import anthropic
 import httpx
 import trafilatura
 
+from browser_fetch import render_page
 from claude_util import get_client, strip_code_fence
 from config import settings
 from models import EXTRACTABLE_FIELDS, ExtractedField
@@ -133,10 +134,24 @@ async def extract_website(url: str) -> tuple[dict[str, ExtractedField], list[str
         return {}, [str(exc)]
 
     page_text = trafilatura.extract(html) or ""
+    if len(page_text) < MIN_TEXT_LENGTH and settings.enable_headless_render:
+        # Likely a JS-rendered SPA — the raw HTML has nothing readable until
+        # the page's own JavaScript runs. Fall back to actually rendering it
+        # in headless Chromium and re-extracting; this is a fallback, not
+        # the default path, so normal server-rendered sites never pay for a
+        # browser launch.
+        try:
+            rendered_html = await render_page(url, settings.headless_render_timeout_seconds)
+            page_text = trafilatura.extract(rendered_html) or page_text
+        except UnsafeUrlError:
+            raise
+        except Exception as exc:
+            warnings.append(f"Headless rendering failed: {exc}")
+
     if len(page_text) < MIN_TEXT_LENGTH:
-        # Likely a JS-rendered SPA we can't read without headless rendering
-        # (deferred — see plan), or a genuinely thin page. Don't waste a
-        # Claude call on near-empty input.
+        # Still nothing readable, even after a render attempt (or rendering
+        # is disabled) — a genuinely thin page. Don't waste a Claude call on
+        # near-empty input.
         warnings.append(
             "Couldn't extract much readable content from this page — it may require "
             "JavaScript to render. Try filling the form manually or use a different page."
