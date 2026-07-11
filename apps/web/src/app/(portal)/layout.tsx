@@ -84,10 +84,19 @@ export default function PortalLayout({ children }: { children: React.ReactNode }
       router.replace("/get-started");
       return;
     }
-    if (current.role !== "both") return;
+    // Single-role accounts: `defaultContext` (used to seed activeContext's
+    // initial state) was computed from useSession(), which reads null on
+    // the very first render — so a buyer-only account could get seeded
+    // with the "supplier" fallback and never self-correct, since nothing
+    // else re-derives activeContext from the real role after that. Always
+    // resync here, once the real session is available.
+    if (current.role !== "both") {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
+      setActiveContext(current.role);
+      return;
+    }
     const stored = localStorage.getItem(ACTIVE_CONTEXT_KEY);
     if (stored !== "supplier" && stored !== "buyer") return;
-    // eslint-disable-next-line react-hooks/set-state-in-effect
     setActiveContext(stored);
   }, [router]);
 
