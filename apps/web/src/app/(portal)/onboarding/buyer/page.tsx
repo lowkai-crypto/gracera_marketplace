@@ -193,10 +193,10 @@ export default function BuyerOnboardingPage() {
         <div className={styles.container}>
           <div className={styles.formNarrow}>
             <div className={styles.formIntro}>
-              <h1 className={styles.h1}>
+              <h1 className={styles.formH1}>
                 {existingProfileId ? "Edit your buyer profile" : "Create your buyer profile"}
               </h1>
-              <p className={styles.heroSub}>Tell us about your company.</p>
+              <p className={styles.formHeroSub}>Tell us about your company.</p>
             </div>
             <form className={styles.formCard} onSubmit={handleSubmit}>
               {error && <div className={styles.formError}>{error}</div>}

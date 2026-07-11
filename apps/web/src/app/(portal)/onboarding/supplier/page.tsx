@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 
 import { authFetch, getSession } from "@/lib/auth-client";
+import Tooltip from "@/components/Tooltip";
 import styles from "../../../warm.module.css";
 
 const SUPPLIER_TYPES = ["Manufacturer", "Distributor", "Trading Company", "Service Provider", "Agent/Rep"];
@@ -435,14 +436,14 @@ export default function SupplierOnboardingPage() {
 
   return (
     <div className={styles.page}>
-      <section className={styles.formSec}>
+      <section className={styles.wizardSec}>
         <div className={styles.container}>
-          <div className={styles.formNarrow}>
+          <div className={styles.wizardWide}>
             <div className={styles.formIntro}>
-              <h1 className={styles.h1}>
+              <h1 className={styles.formH1}>
                 {existingProfileId ? "Edit your supplier profile" : "Create your supplier profile"}
               </h1>
-              <p className={styles.heroSub}>
+              <p className={styles.formHeroSub}>
                 The more complete your profile, the better your matches.
               </p>
             </div>
@@ -483,11 +484,12 @@ export default function SupplierOnboardingPage() {
               {STEPS[currentStep]?.key === "basics" && (
                 <>
                   <div className={styles.formSection}>
-                    <div className={styles.formSectionTitle}>Start faster (optional)</div>
+                    <div className={styles.formSectionTitle}>
+                      Start faster (optional)
+                      <Tooltip text="Websites rarely list MOQ, lead time, or pricing, so you'll still want to fill in Products & Services yourself." />
+                    </div>
                     <p className={styles.helpText} style={{ marginBottom: "0.75rem" }}>
                       Paste your company website and we&apos;ll pre-fill what we can find.
-                      Websites rarely list MOQ, lead time, or pricing, so you&apos;ll still
-                      want to fill in Products &amp; Services yourself.
                     </p>
                     <div style={{ display: "flex", gap: "0.75rem" }}>
                       <input
@@ -574,13 +576,15 @@ export default function SupplierOnboardingPage() {
                     </div>
                     <div className={styles.formGroup}>
                       <label className={styles.label} htmlFor="businessRegNumber">
-                        Business registration number <span className={styles.labelHint}>(optional for now — needed to publish)</span>
+                        Business registration number <span className={styles.labelHint}>(optional)</span>
+                        <Tooltip text="Needed before you can publish your profile — not required to save now." />
                       </label>
                       <input id="businessRegNumber" className={styles.input} {...field("businessRegNumber")} />
                     </div>
                     <div className={styles.formGroup}>
                       <label className={styles.label} htmlFor="tagline">
-                        Tagline <span className={styles.labelHint}>(optional for now — needed to publish)</span>
+                        Tagline <span className={styles.labelHint}>(optional)</span>
+                        <Tooltip text="Needed before you can publish your profile — not required to save now." />
                       </label>
                       <input id="tagline" maxLength={120} className={styles.input} {...field("tagline")} />
                     </div>
@@ -609,7 +613,8 @@ export default function SupplierOnboardingPage() {
                   </div>
                   <div className={styles.formGroup}>
                     <label className={styles.label} htmlFor="categories">
-                      Categories <span className={styles.labelHint}>(comma-separated, up to 5)</span>
+                      Categories
+                      <Tooltip text="Comma-separated, up to 5 categories." />
                     </label>
                     <input id="categories" required className={styles.input} {...field("categories")} />
                   </div>
@@ -675,13 +680,15 @@ export default function SupplierOnboardingPage() {
                   <div className={styles.formGrid}>
                     <div className={styles.formGroup}>
                       <label className={styles.label} htmlFor="targetGeographies">
-                        Target countries <span className={styles.labelHint}>(comma-separated ISO codes)</span>
+                        Target countries
+                        <Tooltip text="Comma-separated ISO country codes, e.g. US, CA, MX." />
                       </label>
                       <input id="targetGeographies" required className={styles.input} {...field("targetGeographies")} />
                     </div>
                     <div className={styles.formGroup}>
                       <label className={styles.label} htmlFor="languagesSpoken">
-                        Languages spoken <span className={styles.labelHint}>(comma-separated)</span>
+                        Languages spoken
+                        <Tooltip text="Comma-separated, e.g. en, ko." />
                       </label>
                       <input id="languagesSpoken" required className={styles.input} {...field("languagesSpoken")} />
                     </div>
@@ -735,7 +742,8 @@ export default function SupplierOnboardingPage() {
               {STEPS[currentStep]?.key === "additional" && (
                 <div className={styles.formSection}>
                   <div className={styles.formSectionTitle}>
-                    Additional details <span className={styles.labelHint}>(optional, improves match quality)</span>
+                    Additional details <span className={styles.labelHint}>(optional)</span>
+                    <Tooltip text="None of this is required, but filling it in improves match quality." />
                   </div>
                   <div className={styles.formGrid}>
                     <div className={styles.formGroup}>
@@ -748,13 +756,15 @@ export default function SupplierOnboardingPage() {
                     </div>
                     <div className={styles.formGroup}>
                       <label className={styles.label} htmlFor="certifications">
-                        Certifications <span className={styles.labelHint}>(comma-separated)</span>
+                        Certifications
+                        <Tooltip text="Comma-separated." />
                       </label>
                       <input id="certifications" className={styles.input} {...field("certifications")} />
                     </div>
                     <div className={styles.formGroup}>
                       <label className={styles.label} htmlFor="notableCustomers">
-                        Notable customers <span className={styles.labelHint}>(comma-separated)</span>
+                        Notable customers
+                        <Tooltip text="Comma-separated." />
                       </label>
                       <input id="notableCustomers" className={styles.input} {...field("notableCustomers")} />
                     </div>

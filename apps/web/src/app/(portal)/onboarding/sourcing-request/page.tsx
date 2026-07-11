@@ -245,8 +245,8 @@ export default function SourcingRequestPage() {
         <div className={styles.container}>
           <div className={styles.formNarrow}>
             <div className={styles.formIntro}>
-              <h1 className={styles.h1}>Post a sourcing request</h1>
-              <p className={styles.heroSub}>
+              <h1 className={styles.formH1}>Post a sourcing request</h1>
+              <p className={styles.formHeroSub}>
                 The more detail here, the better your AI-matched suppliers.
               </p>
             </div>

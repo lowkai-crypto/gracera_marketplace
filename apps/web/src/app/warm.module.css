@@ -688,6 +688,18 @@
   max-width: 36rem;
   margin: 0 auto;
 }
+/* Wizard-scoped variants — additive, not modifying .formSec/.formNarrow
+   above, since those are shared by sign-in/matches/deals/notifications/
+   buyer/sourcing-request too. Wider (56rem vs 36rem, still capped by
+   .container's own 72rem) and tighter vertical padding (this is a
+   utility form, not a marketing page). */
+.wizardSec {
+  padding: 2rem 0 3rem;
+}
+.wizardWide {
+  max-width: 56rem;
+  margin: 0 auto;
+}
 .formCard {
   background: var(--surface);
   border: 1px solid var(--warm-200);
@@ -697,6 +709,23 @@
 }
 .formIntro {
   margin-bottom: 2rem;
+}
+/* Form-page heading — same intent as .h1/.heroSub but sized for a utility
+   page, not a marketing hero. .h1 alone runs up to 3.25rem (52px); on a
+   multi-step form that's now often shorter than the heading above it. */
+.formH1 {
+  font-size: 1.75rem;
+  font-weight: 800;
+  line-height: 1.25;
+  letter-spacing: -0.02em;
+  color: var(--ink);
+  margin-bottom: 0.375rem;
+}
+.formHeroSub {
+  font-size: 0.9375rem;
+  line-height: 1.5;
+  color: var(--muted);
+  font-weight: 400;
 }
 .formSection {
   margin-bottom: 2rem;
@@ -718,7 +747,11 @@
 }
 .formGrid {
   display: grid;
-  grid-template-columns: 1fr 1fr;
+  /* auto-fit: fills as many ~220px columns as the container has room for,
+     instead of a fixed 2 — only visibly changes anything once paired with
+     a wider container (see .wizardWide), so this is a no-op everywhere
+     this class is already used at the narrower .formNarrow width. */
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
   gap: 1.25rem;
 }
 .formGroup {
@@ -1041,4 +1074,53 @@
 }
 .wizardBtnBack:hover {
   color: var(--ink);
+}
+
+/* TOOLTIP — src/components/Tooltip.tsx */
+
+.tooltipWrap {
+  position: relative;
+  display: inline-flex;
+  margin-left: 0.375rem;
+  vertical-align: middle;
+}
+.tooltipTrigger {
+  width: 1rem;
+  height: 1rem;
+  border-radius: 100px;
+  border: 1px solid var(--warm-300);
+  background: var(--warm-100);
+  color: var(--muted);
+  font-size: 0.6875rem;
+  font-weight: 700;
+  font-style: italic;
+  line-height: 1;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  cursor: help;
+  padding: 0;
+}
+.tooltipPopup {
+  display: none;
+  position: absolute;
+  bottom: calc(100% + 0.375rem);
+  left: 50%;
+  transform: translateX(-50%);
+  width: max-content;
+  max-width: 16rem;
+  background: var(--ink);
+  color: var(--surface);
+  font-size: 0.8125rem;
+  font-weight: 400;
+  line-height: 1.4;
+  padding: 0.5rem 0.75rem;
+  border-radius: var(--r);
+  z-index: 20;
+  box-shadow: 0 4px 16px rgba(36, 24, 16, 0.18);
+}
+.tooltipWrap:hover .tooltipPopup,
+.tooltipWrap:focus-within .tooltipPopup,
+.tooltipPopupOpen {
+  display: block;
 }
