@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 
 import { authFetch, getSession } from "@/lib/auth-client";
+import Tooltip from "@/components/Tooltip";
 import styles from "../../../warm.module.css";
 
 const BUYER_TYPES = [
@@ -46,6 +47,34 @@ const INITIAL_FORM = {
   primaryContactPhone: "",
 };
 
+// Wizard steps, keyed (not indexed) so JSX can reference a step without
+// depending on its position — matches the supplier onboarding page's
+// pattern. `required` gates the "Next" button; the API's create schema
+// only ever requires companyName/country, so nothing here needs to be
+// stricter than what's actually needed to create a useful profile.
+const STEPS: { key: string; title: string; required: (keyof typeof INITIAL_FORM)[] }[] = [
+  {
+    key: "basics",
+    title: "Basics",
+    required: ["companyName", "displayName", "country", "headquartersCity"],
+  },
+  {
+    key: "about",
+    title: "About Your Company",
+    required: ["industry"],
+  },
+  {
+    key: "preferences",
+    title: "Buyer Type & Preferences",
+    required: ["languagesSpoken"],
+  },
+  {
+    key: "contact",
+    title: "Contact",
+    required: ["primaryContactName", "primaryContactEmail"],
+  },
+];
+
 function toArray(value: string): string[] {
   return value
     .split(",")
@@ -68,6 +97,12 @@ export default function BuyerOnboardingPage() {
   const [existingProfileId, setExistingProfileId] = useState<string | null>(null);
   const [checkingExisting, setCheckingExisting] = useState(true);
 
+  const [currentStep, setCurrentStep] = useState(0);
+  // Create mode: steps unlock one at a time as you complete each one.
+  // Edit mode: every step starts unlocked, set once existing profile data
+  // (if any) finishes loading, below.
+  const [maxStepReached, setMaxStepReached] = useState(0);
+
   useEffect(() => {
     if (!getSession()) {
       router.replace("/get-started");
@@ -78,6 +113,7 @@ export default function BuyerOnboardingPage() {
       .then((profile) => {
         if (!profile) return;
         setExistingProfileId(profile.id);
+        setMaxStepReached(STEPS.length - 1);
         setForm((f) => ({
           ...f,
           companyName: profile.companyName ?? "",
@@ -106,6 +142,28 @@ export default function BuyerOnboardingPage() {
       onChange: (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) =>
         setForm((f) => ({ ...f, [name]: e.target.value })),
     };
+  }
+
+  function stepIsComplete(index: number): boolean {
+    return STEPS[index].required.every((key) => {
+      const value = form[key];
+      return typeof value === "string" && value.trim().length > 0;
+    });
+  }
+
+  function goToStep(index: number) {
+    if (index <= maxStepReached) setCurrentStep(index);
+  }
+
+  function handleNext() {
+    if (!stepIsComplete(currentStep)) return;
+    const next = currentStep + 1;
+    setMaxStepReached((m) => Math.max(m, next));
+    setCurrentStep(next);
+  }
+
+  function handleBack() {
+    setCurrentStep((s) => Math.max(0, s - 1));
   }
 
   async function handleSubmit(e: React.FormEvent) {
@@ -189,140 +247,205 @@ export default function BuyerOnboardingPage() {
 
   return (
     <div className={styles.page}>
-      <section className={styles.formSec}>
+      <section className={styles.wizardSec}>
         <div className={styles.container}>
-          <div className={styles.formNarrow}>
+          <div className={styles.wizardWide}>
             <div className={styles.formIntro}>
               <h1 className={styles.formH1}>
                 {existingProfileId ? "Edit your buyer profile" : "Create your buyer profile"}
               </h1>
               <p className={styles.formHeroSub}>Tell us about your company.</p>
             </div>
+
+            <div className={styles.wizardProgress}>
+              {STEPS.map((step, i) => {
+                const reachable = i <= maxStepReached;
+                const done = i !== currentStep && stepIsComplete(i);
+                return (
+                  <button
+                    key={step.title}
+                    type="button"
+                    className={styles.wizardStep}
+                    disabled={!reachable}
+                    onClick={() => goToStep(i)}
+                  >
+                    <span
+                      className={`${styles.wizardStepDot} ${
+                        i === currentStep ? styles.wizardStepDotActive : done ? styles.wizardStepDotDone : ""
+                      }`}
+                    >
+                      {i + 1}
+                    </span>
+                    <span className={`${styles.wizardStepLabel} ${i === currentStep ? styles.wizardStepLabelActive : ""}`}>
+                      {step.title}
+                    </span>
+                  </button>
+                );
+              })}
+            </div>
+
             <form className={styles.formCard} onSubmit={handleSubmit}>
               {error && <div className={styles.formError}>{error}</div>}
 
-              <div className={styles.formSection}>
-                <div className={styles.formSectionTitle}>Company Identity</div>
-                <div className={styles.formGrid}>
-                  <div className={styles.formGroup}>
-                    <label className={styles.label} htmlFor="companyName">Company name</label>
-                    <input id="companyName" required className={styles.input} {...field("companyName")} />
-                  </div>
-                  <div className={styles.formGroup}>
-                    <label className={styles.label} htmlFor="displayName">Display / trade name</label>
-                    <input id="displayName" required className={styles.input} {...field("displayName")} />
-                  </div>
-                  <div className={styles.formGroup}>
-                    <label className={styles.label} htmlFor="country">Country (ISO code, e.g. US)</label>
-                    <input id="country" required maxLength={2} className={styles.input} {...field("country")} />
-                  </div>
-                  <div className={styles.formGroup}>
-                    <label className={styles.label} htmlFor="headquartersCity">Headquarters city</label>
-                    <input id="headquartersCity" required className={styles.input} {...field("headquartersCity")} />
-                  </div>
-                  <div className={styles.formGroup}>
-                    <label className={styles.label} htmlFor="companySize">Company size</label>
-                    <select id="companySize" className={styles.select} {...field("companySize")}>
-                      {COMPANY_SIZES.map((s) => (
-                        <option key={s} value={s}>{s}</option>
-                      ))}
-                    </select>
-                  </div>
-                  <div className={styles.formGroup}>
-                    <label className={styles.label} htmlFor="businessRegNumber">Business registration number</label>
-                    <input id="businessRegNumber" required className={styles.input} {...field("businessRegNumber")} />
-                  </div>
-                  <div className={styles.formGroup}>
-                    <label className={styles.label} htmlFor="industry">Industry</label>
-                    <input id="industry" required className={styles.input} {...field("industry")} />
-                  </div>
-                  <div className={styles.formGroup}>
-                    <label className={styles.label} htmlFor="annualPurchasingVolume">
-                      Annual purchasing volume <span className={styles.labelHint}>(optional)</span>
-                    </label>
-                    <input id="annualPurchasingVolume" className={styles.input} {...field("annualPurchasingVolume")} />
+              {STEPS[currentStep]?.key === "basics" && (
+                <div className={styles.formSection}>
+                  <div className={styles.formSectionTitle}>Basics</div>
+                  <div className={styles.formGrid}>
+                    <div className={styles.formGroup}>
+                      <label className={styles.label} htmlFor="companyName">Company name</label>
+                      <input id="companyName" required className={styles.input} {...field("companyName")} />
+                    </div>
+                    <div className={styles.formGroup}>
+                      <label className={styles.label} htmlFor="displayName">Display / trade name</label>
+                      <input id="displayName" required className={styles.input} {...field("displayName")} />
+                    </div>
+                    <div className={styles.formGroup}>
+                      <label className={styles.label} htmlFor="country">Country (ISO code, e.g. US)</label>
+                      <input id="country" required maxLength={2} className={styles.input} {...field("country")} />
+                    </div>
+                    <div className={styles.formGroup}>
+                      <label className={styles.label} htmlFor="headquartersCity">Headquarters city</label>
+                      <input id="headquartersCity" required className={styles.input} {...field("headquartersCity")} />
+                    </div>
                   </div>
                 </div>
-                <div className={styles.formGroup}>
-                  <label className={styles.label}>Buyer type</label>
-                  <div className={styles.roleOptions}>
-                    {BUYER_TYPES.map((t) => (
-                      <label key={t} className={styles.roleOption}>
-                        <input
-                          type="checkbox"
-                          checked={buyerType.includes(t)}
-                          onChange={() => setBuyerType((v) => toggle(v, t))}
-                          className={styles.roleOptionInput}
-                        />
-                        {t}
+              )}
+
+              {STEPS[currentStep]?.key === "about" && (
+                <div className={styles.formSection}>
+                  <div className={styles.formSectionTitle}>About Your Company</div>
+                  <div className={styles.formGrid}>
+                    <div className={styles.formGroup}>
+                      <label className={styles.label} htmlFor="companySize">Company size</label>
+                      <select id="companySize" className={styles.select} {...field("companySize")}>
+                        {COMPANY_SIZES.map((s) => (
+                          <option key={s} value={s}>{s}</option>
+                        ))}
+                      </select>
+                    </div>
+                    <div className={styles.formGroup}>
+                      <label className={styles.label} htmlFor="industry">Industry</label>
+                      <input id="industry" required className={styles.input} {...field("industry")} />
+                    </div>
+                    <div className={styles.formGroup}>
+                      <label className={styles.label} htmlFor="businessRegNumber">
+                        Business registration number <span className={styles.labelHint}>(optional)</span>
+                        <Tooltip text="Helps us verify your company — not required to save now." />
                       </label>
-                    ))}
+                      <input id="businessRegNumber" className={styles.input} {...field("businessRegNumber")} />
+                    </div>
+                    <div className={styles.formGroup}>
+                      <label className={styles.label} htmlFor="annualPurchasingVolume">
+                        Annual purchasing volume <span className={styles.labelHint}>(optional)</span>
+                      </label>
+                      <input id="annualPurchasingVolume" className={styles.input} {...field("annualPurchasingVolume")} />
+                    </div>
                   </div>
                 </div>
-              </div>
+              )}
 
-              <div className={styles.formSection}>
-                <div className={styles.formSectionTitle}>Purchasing Preferences</div>
-                <div className={styles.formGrid}>
+              {STEPS[currentStep]?.key === "preferences" && (
+                <div className={styles.formSection}>
+                  <div className={styles.formSectionTitle}>Buyer Type &amp; Preferences</div>
                   <div className={styles.formGroup}>
-                    <label className={styles.label} htmlFor="preferredSupplierCountries">
-                      Preferred supplier countries <span className={styles.labelHint}>(optional, comma-separated)</span>
-                    </label>
-                    <input id="preferredSupplierCountries" className={styles.input} {...field("preferredSupplierCountries")} />
-                  </div>
-                  <div className={styles.formGroup}>
-                    <label className={styles.label} htmlFor="languagesSpoken">
-                      Languages spoken <span className={styles.labelHint}>(comma-separated)</span>
-                    </label>
-                    <input id="languagesSpoken" required className={styles.input} {...field("languagesSpoken")} />
-                  </div>
-                </div>
-              </div>
-
-              <div className={styles.formSection}>
-                <div className={styles.formSectionTitle}>Contact</div>
-                <div className={styles.formGrid}>
-                  <div className={styles.formGroup}>
-                    <label className={styles.label} htmlFor="primaryContactName">Contact name</label>
-                    <input id="primaryContactName" required className={styles.input} {...field("primaryContactName")} />
-                  </div>
-                  <div className={styles.formGroup}>
-                    <label className={styles.label} htmlFor="primaryContactRole">Contact role</label>
-                    <select id="primaryContactRole" className={styles.select} {...field("primaryContactRole")}>
-                      {CONTACT_ROLES.map((r) => (
-                        <option key={r} value={r}>{r.replace(/_/g, " ")}</option>
+                    <label className={styles.label}>Buyer type</label>
+                    <div className={styles.roleOptions}>
+                      {BUYER_TYPES.map((t) => (
+                        <label key={t} className={styles.roleOption}>
+                          <input
+                            type="checkbox"
+                            checked={buyerType.includes(t)}
+                            onChange={() => setBuyerType((v) => toggle(v, t))}
+                            className={styles.roleOptionInput}
+                          />
+                          {t}
+                        </label>
                       ))}
-                    </select>
+                    </div>
                   </div>
-                  <div className={styles.formGroup}>
-                    <label className={styles.label} htmlFor="primaryContactEmail">Contact email</label>
-                    <input
-                      id="primaryContactEmail"
-                      type="email"
-                      required
-                      className={styles.input}
-                      {...field("primaryContactEmail")}
-                    />
-                  </div>
-                  <div className={styles.formGroup}>
-                    <label className={styles.label} htmlFor="primaryContactPhone">
-                      Contact phone <span className={styles.labelHint}>(optional)</span>
-                    </label>
-                    <input id="primaryContactPhone" className={styles.input} {...field("primaryContactPhone")} />
+                  <div className={styles.formGrid}>
+                    <div className={styles.formGroup}>
+                      <label className={styles.label} htmlFor="preferredSupplierCountries">
+                        Preferred supplier countries <span className={styles.labelHint}>(optional)</span>
+                        <Tooltip text="Comma-separated ISO country codes, e.g. US, CA, MX." />
+                      </label>
+                      <input id="preferredSupplierCountries" className={styles.input} {...field("preferredSupplierCountries")} />
+                    </div>
+                    <div className={styles.formGroup}>
+                      <label className={styles.label} htmlFor="languagesSpoken">
+                        Languages spoken
+                        <Tooltip text="Comma-separated, e.g. en, ko." />
+                      </label>
+                      <input id="languagesSpoken" required className={styles.input} {...field("languagesSpoken")} />
+                    </div>
                   </div>
                 </div>
-              </div>
+              )}
 
-              <div className={styles.submitRow}>
-                <button type="submit" className={styles.btnSubmit} disabled={submitting}>
-                  {submitting
-                    ? existingProfileId
-                      ? "Updating profile..."
-                      : "Creating profile..."
-                    : existingProfileId
-                      ? "Update profile"
-                      : "Create profile"}
-                </button>
+              {STEPS[currentStep]?.key === "contact" && (
+                <div className={styles.formSection}>
+                  <div className={styles.formSectionTitle}>Contact</div>
+                  <div className={styles.formGrid}>
+                    <div className={styles.formGroup}>
+                      <label className={styles.label} htmlFor="primaryContactName">Contact name</label>
+                      <input id="primaryContactName" required className={styles.input} {...field("primaryContactName")} />
+                    </div>
+                    <div className={styles.formGroup}>
+                      <label className={styles.label} htmlFor="primaryContactRole">Contact role</label>
+                      <select id="primaryContactRole" className={styles.select} {...field("primaryContactRole")}>
+                        {CONTACT_ROLES.map((r) => (
+                          <option key={r} value={r}>{r.replace(/_/g, " ")}</option>
+                        ))}
+                      </select>
+                    </div>
+                    <div className={styles.formGroup}>
+                      <label className={styles.label} htmlFor="primaryContactEmail">Contact email</label>
+                      <input
+                        id="primaryContactEmail"
+                        type="email"
+                        required
+                        className={styles.input}
+                        {...field("primaryContactEmail")}
+                      />
+                    </div>
+                    <div className={styles.formGroup}>
+                      <label className={styles.label} htmlFor="primaryContactPhone">
+                        Contact phone <span className={styles.labelHint}>(optional)</span>
+                      </label>
+                      <input id="primaryContactPhone" className={styles.input} {...field("primaryContactPhone")} />
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              <div className={styles.wizardNav}>
+                {currentStep > 0 ? (
+                  <button type="button" className={styles.wizardBtnBack} onClick={handleBack}>
+                    Back
+                  </button>
+                ) : (
+                  <span />
+                )}
+                {currentStep < STEPS.length - 1 ? (
+                  <button
+                    type="button"
+                    className={styles.btnSubmit}
+                    onClick={handleNext}
+                    disabled={!stepIsComplete(currentStep)}
+                  >
+                    Next
+                  </button>
+                ) : (
+                  <button type="submit" className={styles.btnSubmit} disabled={submitting}>
+                    {submitting
+                      ? existingProfileId
+                        ? "Updating profile..."
+                        : "Creating profile..."
+                      : existingProfileId
+                        ? "Update profile"
+                        : "Create profile"}
+                  </button>
+                )}
               </div>
             </form>
           </div>
