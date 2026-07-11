@@ -89,14 +89,24 @@ const INITIAL_FORM = {
 // just no longer forced during first-time creation.
 const ALL_STEPS: { key: string; title: string; required: (keyof typeof INITIAL_FORM)[] }[] = [
   {
-    key: "identity",
-    title: "Company Identity",
-    required: ["companyName", "displayName", "country", "headquartersCity", "description"],
+    key: "basics",
+    title: "Basics",
+    required: ["companyName", "displayName", "country", "headquartersCity"],
   },
   {
-    key: "products",
-    title: "Products & Services",
-    required: ["categories", "productName", "productUnit", "productMoq", "productMoqUnit", "productLeadTimeDays", "productDescription"],
+    key: "about",
+    title: "About Your Company",
+    required: ["description"],
+  },
+  {
+    key: "category",
+    title: "Category & Type",
+    required: ["categories"],
+  },
+  {
+    key: "product",
+    title: "Your First Product",
+    required: ["productName", "productUnit", "productMoq", "productMoqUnit", "productLeadTimeDays", "productDescription"],
   },
   {
     key: "market",
@@ -470,7 +480,7 @@ export default function SupplierOnboardingPage() {
             <form className={styles.formCard} onSubmit={handleSubmit}>
               {error && <div className={styles.formError}>{error}</div>}
 
-              {STEPS[currentStep]?.key === "identity" && (
+              {STEPS[currentStep]?.key === "basics" && (
                 <>
                   <div className={styles.formSection}>
                     <div className={styles.formSectionTitle}>Start faster (optional)</div>
@@ -517,7 +527,7 @@ export default function SupplierOnboardingPage() {
                   </div>
 
                   <div className={styles.formSection}>
-                    <div className={styles.formSectionTitle}>Company Identity</div>
+                    <div className={styles.formSectionTitle}>Basics</div>
                     <div className={styles.formGrid}>
                       <div className={styles.formGroup}>
                         <label className={styles.label} htmlFor="companyName">Company name</label>
@@ -535,44 +545,52 @@ export default function SupplierOnboardingPage() {
                         <label className={styles.label} htmlFor="headquartersCity">Headquarters city</label>
                         <input id="headquartersCity" required className={styles.input} {...field("headquartersCity")} />
                       </div>
-                      <div className={styles.formGroup}>
-                        <label className={styles.label} htmlFor="yearEstablished">
-                          Year established <span className={styles.labelHint}>(optional)</span>
-                        </label>
-                        <input id="yearEstablished" type="number" className={styles.input} {...field("yearEstablished")} />
-                      </div>
-                      <div className={styles.formGroup}>
-                        <label className={styles.label} htmlFor="companySize">Company size</label>
-                        <select id="companySize" className={styles.select} {...field("companySize")}>
-                          {COMPANY_SIZES.map((s) => (
-                            <option key={s} value={s}>{s}</option>
-                          ))}
-                        </select>
-                      </div>
-                      <div className={styles.formGroup}>
-                        <label className={styles.label} htmlFor="businessRegNumber">
-                          Business registration number <span className={styles.labelHint}>(optional for now — needed to publish)</span>
-                        </label>
-                        <input id="businessRegNumber" className={styles.input} {...field("businessRegNumber")} />
-                      </div>
-                      <div className={styles.formGroup}>
-                        <label className={styles.label} htmlFor="tagline">
-                          Tagline <span className={styles.labelHint}>(optional for now — needed to publish)</span>
-                        </label>
-                        <input id="tagline" maxLength={120} className={styles.input} {...field("tagline")} />
-                      </div>
-                    </div>
-                    <div className={styles.formGroup}>
-                      <label className={styles.label} htmlFor="description">Company description</label>
-                      <textarea id="description" required className={styles.textarea} {...field("description")} />
                     </div>
                   </div>
                 </>
               )}
 
-              {STEPS[currentStep]?.key === "products" && (
+              {STEPS[currentStep]?.key === "about" && (
                 <div className={styles.formSection}>
-                  <div className={styles.formSectionTitle}>Products &amp; Services</div>
+                  <div className={styles.formSectionTitle}>About Your Company</div>
+                  <div className={styles.formGroup}>
+                    <label className={styles.label} htmlFor="description">Company description</label>
+                    <textarea id="description" required className={styles.textarea} {...field("description")} />
+                  </div>
+                  <div className={styles.formGrid}>
+                    <div className={styles.formGroup}>
+                      <label className={styles.label} htmlFor="yearEstablished">
+                        Year established <span className={styles.labelHint}>(optional)</span>
+                      </label>
+                      <input id="yearEstablished" type="number" className={styles.input} {...field("yearEstablished")} />
+                    </div>
+                    <div className={styles.formGroup}>
+                      <label className={styles.label} htmlFor="companySize">Company size</label>
+                      <select id="companySize" className={styles.select} {...field("companySize")}>
+                        {COMPANY_SIZES.map((s) => (
+                          <option key={s} value={s}>{s}</option>
+                        ))}
+                      </select>
+                    </div>
+                    <div className={styles.formGroup}>
+                      <label className={styles.label} htmlFor="businessRegNumber">
+                        Business registration number <span className={styles.labelHint}>(optional for now — needed to publish)</span>
+                      </label>
+                      <input id="businessRegNumber" className={styles.input} {...field("businessRegNumber")} />
+                    </div>
+                    <div className={styles.formGroup}>
+                      <label className={styles.label} htmlFor="tagline">
+                        Tagline <span className={styles.labelHint}>(optional for now — needed to publish)</span>
+                      </label>
+                      <input id="tagline" maxLength={120} className={styles.input} {...field("tagline")} />
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {STEPS[currentStep]?.key === "category" && (
+                <div className={styles.formSection}>
+                  <div className={styles.formSectionTitle}>Category &amp; Type</div>
                   <div className={styles.formGroup}>
                     <label className={styles.label}>Supplier type</label>
                     <div className={styles.roleOptions}>
@@ -595,10 +613,12 @@ export default function SupplierOnboardingPage() {
                     </label>
                     <input id="categories" required className={styles.input} {...field("categories")} />
                   </div>
+                </div>
+              )}
 
-                  <div className={styles.formSectionTitle} style={{ marginTop: "1.5rem" }}>
-                    One product to get started
-                  </div>
+              {STEPS[currentStep]?.key === "product" && (
+                <div className={styles.formSection}>
+                  <div className={styles.formSectionTitle}>Your First Product</div>
                   <div className={styles.formGrid}>
                     <div className={styles.formGroup}>
                       <label className={styles.label} htmlFor="productName">Product name</label>
