@@ -496,12 +496,14 @@ export default function SupplierOnboardingPage() {
                         type="url"
                         placeholder="https://yourcompany.com"
                         className={styles.input}
+                        style={{ flex: "1 1 auto", minWidth: 0 }}
                         value={websiteUrl}
                         onChange={(e) => setWebsiteUrl(e.target.value)}
                       />
                       <button
                         type="button"
                         className={styles.btnSubmit}
+                        style={{ flexShrink: 0, whiteSpace: "nowrap" }}
                         onClick={handleExtract}
                         disabled={extracting || !websiteUrl}
                       >
