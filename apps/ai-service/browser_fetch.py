@@ -89,9 +89,19 @@ async def render_page(url: str, timeout_seconds: float) -> str:
             await page.route("**/*", guard_request)
 
             try:
-                await page.goto(
-                    url, wait_until="networkidle", timeout=timeout_seconds * 1000
-                )
+                # "networkidle" is deliberately avoided: it waits for ALL
+                # network activity to stop, which many real sites (ads,
+                # countdown timers, analytics beacons, chat widgets) never
+                # actually do — confirmed live against the exact site this
+                # feature targets, which timed out waiting for networkidle
+                # even though its content had already rendered. "load" only
+                # waits for the page's own load event, which is what
+                # actually gates whether the SPA's JS has run.
+                await page.goto(url, wait_until="load", timeout=timeout_seconds * 1000)
+                # A brief settle window for client-side rendering that
+                # happens just after the load event fires (typical for
+                # SPAs that bootstrap their framework on `load`).
+                await page.wait_for_timeout(1500)
             except Exception as exc:
                 if blocked:
                     raise UnsafeUrlError(blocked["reason"]) from exc
