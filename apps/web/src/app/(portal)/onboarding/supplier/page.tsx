@@ -77,31 +77,49 @@ const INITIAL_FORM = {
   productSampleAvailable: false,
 };
 
-// Wizard steps — exactly the fields already marked `required` in each of
-// the form's 6 original sections (the "Start faster" pre-fill widget isn't
-// a step; it lives inside step 0, unchanged from before the wizard).
-const STEPS: { title: string; required: (keyof typeof INITIAL_FORM)[] }[] = [
+// Wizard steps, keyed (not just indexed) so a step can be conditionally
+// excluded — see ALL_STEPS/CREATE_STEPS below — without renumbering the
+// rest. `required` fields gate the "Next" button; the API's create schema
+// only ever requires companyName/country, and the publish gate
+// (canPublishSupplierProfile) is the real completeness check, so nothing
+// here needs to be stricter than what's actually needed to make a useful
+// profile. businessRegNumber/tagline are collected on step 1 but no longer
+// block it — the publish gate still requires them (and already surfaces
+// that by name) before a profile can go live, so nothing is lost, it's
+// just no longer forced during first-time creation.
+const ALL_STEPS: { key: string; title: string; required: (keyof typeof INITIAL_FORM)[] }[] = [
   {
+    key: "identity",
     title: "Company Identity",
-    required: ["companyName", "displayName", "country", "headquartersCity", "businessRegNumber", "tagline", "description"],
+    required: ["companyName", "displayName", "country", "headquartersCity", "description"],
   },
   {
+    key: "products",
     title: "Products & Services",
     required: ["categories", "productName", "productUnit", "productMoq", "productMoqUnit", "productLeadTimeDays", "productDescription"],
   },
   {
+    key: "market",
     title: "Target Market",
     required: ["targetGeographies", "languagesSpoken", "idealCustomerDescription"],
   },
   {
+    key: "additional",
     title: "Additional Details",
     required: [],
   },
   {
+    key: "contact",
     title: "Contact",
     required: ["primaryContactName", "primaryContactEmail"],
   },
 ];
+
+// First-time creation skips "Additional Details" entirely — none of its
+// fields are required, so it was pure optional padding in the middle of
+// onboarding. It's still fully editable afterward, since editing an
+// existing profile uses ALL_STEPS (see maxStepReached init below).
+const CREATE_STEPS = ALL_STEPS.filter((s) => s.key !== "additional");
 
 function toArray(value: string): string[] {
   return value
@@ -152,7 +170,11 @@ export default function SupplierOnboardingPage() {
       .then((profile) => {
         if (!profile) return;
         setExistingProfileId(profile.id);
-        setMaxStepReached(STEPS.length - 1);
+        // Always ALL_STEPS here, not the mode-dependent STEPS computed
+        // below — we're setting up edit mode in this very callback, so
+        // referencing the reactive value would use its stale (create-mode)
+        // length from before existingProfileId updates.
+        setMaxStepReached(ALL_STEPS.length - 1);
         setForm((f) => ({
           ...f,
           companyName: profile.companyName ?? "",
@@ -245,6 +267,10 @@ export default function SupplierOnboardingPage() {
         setForm((f) => ({ ...f, [name]: e.target.value })),
     };
   }
+
+  // Edit mode shows all 5 steps (Additional Details included, since real
+  // data may already be there); first-time creation skips straight past it.
+  const STEPS = existingProfileId ? ALL_STEPS : CREATE_STEPS;
 
   function stepIsComplete(index: number): boolean {
     return STEPS[index].required.every((key) => {
@@ -444,7 +470,7 @@ export default function SupplierOnboardingPage() {
             <form className={styles.formCard} onSubmit={handleSubmit}>
               {error && <div className={styles.formError}>{error}</div>}
 
-              {currentStep === 0 && (
+              {STEPS[currentStep]?.key === "identity" && (
                 <>
                   <div className={styles.formSection}>
                     <div className={styles.formSectionTitle}>Start faster (optional)</div>
@@ -524,12 +550,16 @@ export default function SupplierOnboardingPage() {
                         </select>
                       </div>
                       <div className={styles.formGroup}>
-                        <label className={styles.label} htmlFor="businessRegNumber">Business registration number</label>
-                        <input id="businessRegNumber" required className={styles.input} {...field("businessRegNumber")} />
+                        <label className={styles.label} htmlFor="businessRegNumber">
+                          Business registration number <span className={styles.labelHint}>(optional for now — needed to publish)</span>
+                        </label>
+                        <input id="businessRegNumber" className={styles.input} {...field("businessRegNumber")} />
                       </div>
                       <div className={styles.formGroup}>
-                        <label className={styles.label} htmlFor="tagline">Tagline</label>
-                        <input id="tagline" required maxLength={120} className={styles.input} {...field("tagline")} />
+                        <label className={styles.label} htmlFor="tagline">
+                          Tagline <span className={styles.labelHint}>(optional for now — needed to publish)</span>
+                        </label>
+                        <input id="tagline" maxLength={120} className={styles.input} {...field("tagline")} />
                       </div>
                     </div>
                     <div className={styles.formGroup}>
@@ -540,7 +570,7 @@ export default function SupplierOnboardingPage() {
                 </>
               )}
 
-              {currentStep === 1 && (
+              {STEPS[currentStep]?.key === "products" && (
                 <div className={styles.formSection}>
                   <div className={styles.formSectionTitle}>Products &amp; Services</div>
                   <div className={styles.formGroup}>
@@ -619,7 +649,7 @@ export default function SupplierOnboardingPage() {
                 </div>
               )}
 
-              {currentStep === 2 && (
+              {STEPS[currentStep]?.key === "market" && (
                 <div className={styles.formSection}>
                   <div className={styles.formSectionTitle}>Target Market &amp; Ideal Customer</div>
                   <div className={styles.formGrid}>
@@ -682,7 +712,7 @@ export default function SupplierOnboardingPage() {
                 </div>
               )}
 
-              {currentStep === 3 && (
+              {STEPS[currentStep]?.key === "additional" && (
                 <div className={styles.formSection}>
                   <div className={styles.formSectionTitle}>
                     Additional details <span className={styles.labelHint}>(optional, improves match quality)</span>
@@ -724,7 +754,7 @@ export default function SupplierOnboardingPage() {
                 </div>
               )}
 
-              {currentStep === 4 && (
+              {STEPS[currentStep]?.key === "contact" && (
                 <div className={styles.formSection}>
                   <div className={styles.formSectionTitle}>Contact</div>
                   <div className={styles.formGrid}>
