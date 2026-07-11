@@ -80,13 +80,14 @@ const INITIAL_FORM = {
 
 // Wizard steps, keyed (not just indexed) so a step can be conditionally
 // excluded — see ALL_STEPS/CREATE_STEPS below — without renumbering the
-// rest. `required` fields gate the "Next" button; the API's create schema
-// only ever requires companyName/country, and the publish gate
-// (canPublishSupplierProfile) is the real completeness check, so nothing
-// here needs to be stricter than what's actually needed to make a useful
-// profile. businessRegNumber/tagline are collected on step 1 but no longer
-// block it — the publish gate still requires them (and already surfaces
-// that by name) before a profile can go live, so nothing is lost, it's
+// rest. `required` only drives the "done" indicator on the progress bar —
+// navigation itself is unrestricted, and the API's create schema only ever
+// requires companyName/country. The publish gate (canPublishSupplierProfile)
+// is the real completeness check, so nothing here needs to be stricter than
+// what's actually needed to make a useful profile. businessRegNumber/tagline
+// are collected on step 1 but no longer block it — the publish gate still
+// requires them (and already surfaces that by name) before a profile can go
+// live, so nothing is lost, it's
 // just no longer forced during first-time creation.
 const ALL_STEPS: { key: string; title: string; required: (keyof typeof INITIAL_FORM)[] }[] = [
   {
@@ -129,7 +130,7 @@ const ALL_STEPS: { key: string; title: string; required: (keyof typeof INITIAL_F
 // First-time creation skips "Additional Details" entirely — none of its
 // fields are required, so it was pure optional padding in the middle of
 // onboarding. It's still fully editable afterward, since editing an
-// existing profile uses ALL_STEPS (see maxStepReached init below).
+// existing profile uses ALL_STEPS.
 const CREATE_STEPS = ALL_STEPS.filter((s) => s.key !== "additional");
 
 function toArray(value: string): string[] {
@@ -168,12 +169,11 @@ export default function SupplierOnboardingPage() {
   const [existingProfileId, setExistingProfileId] = useState<string | null>(null);
   const [checkingExisting, setCheckingExisting] = useState(true);
 
+  // Every step is freely navigable in both create and edit mode — nothing
+  // here requires filling a step to move on, so gating navigation would
+  // only get in the way, not prevent invalid data (the create/update APIs
+  // are the actual validation boundary).
   const [currentStep, setCurrentStep] = useState(0);
-  // Create mode: steps unlock one at a time as you complete each one.
-  // Edit mode: every step starts unlocked — you shouldn't have to click
-  // through 4 screens to fix a phone number on step 5. Set once existing
-  // profile data (if any) finishes loading, below.
-  const [maxStepReached, setMaxStepReached] = useState(0);
 
   useEffect(() => {
     if (!getSession()) {
@@ -185,11 +185,6 @@ export default function SupplierOnboardingPage() {
       .then((profile) => {
         if (!profile) return;
         setExistingProfileId(profile.id);
-        // Always ALL_STEPS here, not the mode-dependent STEPS computed
-        // below — we're setting up edit mode in this very callback, so
-        // referencing the reactive value would use its stale (create-mode)
-        // length from before existingProfileId updates.
-        setMaxStepReached(ALL_STEPS.length - 1);
         setForm((f) => ({
           ...f,
           companyName: profile.companyName ?? "",
@@ -297,14 +292,11 @@ export default function SupplierOnboardingPage() {
   }
 
   function goToStep(index: number) {
-    if (index <= maxStepReached) setCurrentStep(index);
+    setCurrentStep(index);
   }
 
   function handleNext() {
-    if (!stepIsComplete(currentStep)) return;
-    const next = currentStep + 1;
-    setMaxStepReached((m) => Math.max(m, next));
-    setCurrentStep(next);
+    setCurrentStep((s) => Math.min(STEPS.length - 1, s + 1));
   }
 
   function handleBack() {
@@ -456,7 +448,6 @@ export default function SupplierOnboardingPage() {
 
             <div className={styles.wizardProgress}>
               {STEPS.map((step, i) => {
-                const reachable = i <= maxStepReached;
                 // Any non-current step whose own required fields are already
                 // filled reads as "done" — true for steps already passed in
                 // create mode, and for every pre-filled step in edit mode.
@@ -466,7 +457,6 @@ export default function SupplierOnboardingPage() {
                     key={step.title}
                     type="button"
                     className={styles.wizardStep}
-                    disabled={!reachable}
                     onClick={() => goToStep(i)}
                   >
                     <span
@@ -847,12 +837,7 @@ export default function SupplierOnboardingPage() {
                   <span />
                 )}
                 {currentStep < STEPS.length - 1 ? (
-                  <button
-                    type="button"
-                    className={styles.btnSubmit}
-                    onClick={handleNext}
-                    disabled={!stepIsComplete(currentStep)}
-                  >
+                  <button type="button" className={styles.btnSubmit} onClick={handleNext}>
                     Next
                   </button>
                 ) : (

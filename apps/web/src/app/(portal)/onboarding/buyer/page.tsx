@@ -97,11 +97,11 @@ export default function BuyerOnboardingPage() {
   const [existingProfileId, setExistingProfileId] = useState<string | null>(null);
   const [checkingExisting, setCheckingExisting] = useState(true);
 
+  // Every step is freely navigable in both create and edit mode — nothing
+  // here requires filling a step to move on, so gating navigation would
+  // only get in the way, not prevent invalid data (the create/update APIs
+  // are the actual validation boundary).
   const [currentStep, setCurrentStep] = useState(0);
-  // Create mode: steps unlock one at a time as you complete each one.
-  // Edit mode: every step starts unlocked, set once existing profile data
-  // (if any) finishes loading, below.
-  const [maxStepReached, setMaxStepReached] = useState(0);
 
   useEffect(() => {
     if (!getSession()) {
@@ -113,7 +113,6 @@ export default function BuyerOnboardingPage() {
       .then((profile) => {
         if (!profile) return;
         setExistingProfileId(profile.id);
-        setMaxStepReached(STEPS.length - 1);
         setForm((f) => ({
           ...f,
           companyName: profile.companyName ?? "",
@@ -152,14 +151,11 @@ export default function BuyerOnboardingPage() {
   }
 
   function goToStep(index: number) {
-    if (index <= maxStepReached) setCurrentStep(index);
+    setCurrentStep(index);
   }
 
   function handleNext() {
-    if (!stepIsComplete(currentStep)) return;
-    const next = currentStep + 1;
-    setMaxStepReached((m) => Math.max(m, next));
-    setCurrentStep(next);
+    setCurrentStep((s) => Math.min(STEPS.length - 1, s + 1));
   }
 
   function handleBack() {
@@ -259,14 +255,12 @@ export default function BuyerOnboardingPage() {
 
             <div className={styles.wizardProgress}>
               {STEPS.map((step, i) => {
-                const reachable = i <= maxStepReached;
                 const done = i !== currentStep && stepIsComplete(i);
                 return (
                   <button
                     key={step.title}
                     type="button"
                     className={styles.wizardStep}
-                    disabled={!reachable}
                     onClick={() => goToStep(i)}
                   >
                     <span
@@ -427,12 +421,7 @@ export default function BuyerOnboardingPage() {
                   <span />
                 )}
                 {currentStep < STEPS.length - 1 ? (
-                  <button
-                    type="button"
-                    className={styles.btnSubmit}
-                    onClick={handleNext}
-                    disabled={!stepIsComplete(currentStep)}
-                  >
+                  <button type="button" className={styles.btnSubmit} onClick={handleNext}>
                     Next
                   </button>
                 ) : (
