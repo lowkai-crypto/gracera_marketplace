@@ -159,7 +159,11 @@ export default function SupplierOnboardingPage() {
   const [extracting, setExtracting] = useState(false);
   const [extractError, setExtractError] = useState<string | null>(null);
   const [extractWarnings, setExtractWarnings] = useState<string[]>([]);
-  const [extractInfo, setExtractInfo] = useState<{ sourceUrl: string; needsReview: string[] } | null>(null);
+  const [extractInfo, setExtractInfo] = useState<{
+    sourceUrl: string;
+    filledFields: string[];
+    needsReview: string[];
+  } | null>(null);
 
   const [existingProfileId, setExistingProfileId] = useState<string | null>(null);
   const [checkingExisting, setCheckingExisting] = useState(true);
@@ -245,6 +249,7 @@ export default function SupplierOnboardingPage() {
         return;
       }
 
+      const filledFields: string[] = [];
       const needsReview: string[] = [];
       setForm((f) => {
         const next = { ...f };
@@ -256,13 +261,14 @@ export default function SupplierOnboardingPage() {
           if (!(name in next)) continue;
           const value = Array.isArray(extracted.value) ? extracted.value.join(", ") : extracted.value;
           mutable[name] = value;
+          filledFields.push(EXTRACTABLE_FIELD_LABELS[name] ?? name);
           if (extracted.confidence !== "high") {
             needsReview.push(EXTRACTABLE_FIELD_LABELS[name] ?? name);
           }
         }
         return next;
       });
-      setExtractInfo({ sourceUrl: body.sourceUrl, needsReview });
+      setExtractInfo({ sourceUrl: body.sourceUrl, filledFields, needsReview });
       setExtractWarnings(body.warnings ?? []);
     } catch {
       setExtractError("Could not reach the server. Please try again.");
@@ -522,9 +528,19 @@ export default function SupplierOnboardingPage() {
                     )}
                     {extractInfo && (
                       <div className={styles.formSuccess} style={{ marginTop: "0.75rem" }}>
-                        Pre-filled from {extractInfo.sourceUrl}.
-                        {extractInfo.needsReview.length > 0 && (
-                          <> Please double-check: {extractInfo.needsReview.join(", ")}.</>
+                        {extractInfo.filledFields.length > 0 ? (
+                          <>
+                            Pre-filled from {extractInfo.sourceUrl}: {extractInfo.filledFields.join(", ")}.
+                            {" "}(Some of these may be on a later step.)
+                            {extractInfo.needsReview.length > 0 && (
+                              <> Please double-check: {extractInfo.needsReview.join(", ")}.</>
+                            )}
+                          </>
+                        ) : (
+                          <>
+                            Checked {extractInfo.sourceUrl}, but couldn&apos;t confidently identify any profile
+                            fields there — you&apos;ll need to fill in the form manually.
+                          </>
                         )}
                       </div>
                     )}
