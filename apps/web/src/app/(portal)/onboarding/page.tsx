@@ -106,14 +106,18 @@ export default function OnboardingPage() {
                     </div>
                   </div>
                 ) : (
+                  // Defensive fallback only — every account gets a (empty)
+                  // supplier profile row at registration, so this should be
+                  // unreachable in practice; kept in case an older account
+                  // hasn't been backfilled yet.
                   <div className={styles.formSection}>
                     <div className={styles.formSectionTitle}>Supplier</div>
                     <p style={{ marginBottom: "1rem" }}>
-                      List your company and products to start receiving buyer
-                      introductions.
+                      Your profile is empty — add your company details to
+                      start matching.
                     </p>
                     <Link href="/onboarding/supplier" className={styles.btnTealWarm}>
-                      Create supplier profile
+                      My Profile
                     </Link>
                   </div>
                 ))}
@@ -167,14 +171,18 @@ export default function OnboardingPage() {
                     )}
                   </div>
                 ) : (
+                  // Defensive fallback only — every account gets a (empty)
+                  // buyer profile row at registration, so this should be
+                  // unreachable in practice; kept in case an older account
+                  // hasn't been backfilled yet.
                   <div className={styles.formSection}>
                     <div className={styles.formSectionTitle}>Buyer</div>
                     <p style={{ marginBottom: "1rem" }}>
-                      Tell us about your company, then post what you&apos;re
-                      sourcing.
+                      Your profile is empty — add your company details, then
+                      post what you&apos;re sourcing.
                     </p>
                     <Link href="/onboarding/buyer" className={styles.btnOrangeWarm}>
-                      Create buyer profile
+                      My Profile
                     </Link>
                   </div>
                 ))}

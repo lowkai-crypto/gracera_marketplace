@@ -53,12 +53,13 @@ const SupplierProfileFields = {
   primaryContactPhone: z.string().optional(),
 };
 
+// Every field is optional: a profile row already exists empty from the
+// moment an account registers (apps/web/src/app/api/auth/register/route.ts),
+// so "create" here is really just an idempotent fallback path, not a
+// gated first-time event -- nothing needs to be required to call it.
 export const CreateSupplierProfileSchema = z
-  .object({
-    companyName: SupplierProfileFields.companyName,
-    country: SupplierProfileFields.country,
-  })
-  .extend(z.object(SupplierProfileFields).partial().shape)
+  .object(SupplierProfileFields)
+  .partial()
   .extend({ productLines: z.array(ProductLineSchema).optional() });
 
 export const UpdateSupplierProfileSchema = z
@@ -97,12 +98,8 @@ const BuyerProfileFields = {
   primaryContactPhone: z.string().optional(),
 };
 
-export const CreateBuyerProfileSchema = z
-  .object({
-    companyName: BuyerProfileFields.companyName,
-    country: BuyerProfileFields.country,
-  })
-  .extend(z.object(BuyerProfileFields).partial().shape);
+// See CreateSupplierProfileSchema above -- same reasoning, nothing required.
+export const CreateBuyerProfileSchema = z.object(BuyerProfileFields).partial();
 
 export const UpdateBuyerProfileSchema = z.object(BuyerProfileFields).partial().extend({
   profileStatus: z.enum(["draft", "active", "paused", "deleted"]).optional(),

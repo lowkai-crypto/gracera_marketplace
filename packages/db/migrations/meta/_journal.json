@@ -36,6 +36,13 @@
       "when": 1783562969689,
       "tag": "0004_faithful_pretty_boy",
       "breakpoints": true
+    },
+    {
+      "idx": 5,
+      "version": "7",
+      "when": 1783817258631,
+      "tag": "0005_backfill_profile_rows",
+      "breakpoints": true
     }
   ]
 }

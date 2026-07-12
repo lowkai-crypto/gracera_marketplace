@@ -78,18 +78,16 @@ const INITIAL_FORM = {
   productSampleAvailable: false,
 };
 
-// Wizard steps, keyed (not just indexed) so a step can be conditionally
-// excluded — see ALL_STEPS/CREATE_STEPS below — without renumbering the
-// rest. `required` only drives the "done" indicator on the progress bar —
-// navigation itself is unrestricted, and the API's create schema only ever
-// requires companyName/country. The publish gate (canPublishSupplierProfile)
-// is the real completeness check, so nothing here needs to be stricter than
-// what's actually needed to make a useful profile. businessRegNumber/tagline
-// are collected on step 1 but no longer block it — the publish gate still
-// requires them (and already surfaces that by name) before a profile can go
-// live, so nothing is lost, it's
-// just no longer forced during first-time creation.
-const ALL_STEPS: { key: string; title: string; required: (keyof typeof INITIAL_FORM)[] }[] = [
+// Wizard steps, keyed (not just indexed) so JSX can reference a step by name
+// without depending on array position. `required` only drives the "done"
+// indicator on the progress bar — navigation itself is unrestricted, and
+// every field is optional at the API layer. The publish gate
+// (canPublishSupplierProfile) is the real completeness check, so nothing
+// here needs to be stricter than what's actually needed to make a useful
+// profile — businessRegNumber/tagline are collected on step 1 but don't
+// block it; the publish gate still requires them (and already surfaces that
+// by name) before a profile can go live.
+const STEPS: { key: string; title: string; required: (keyof typeof INITIAL_FORM)[] }[] = [
   {
     key: "basics",
     title: "Basics",
@@ -127,12 +125,6 @@ const ALL_STEPS: { key: string; title: string; required: (keyof typeof INITIAL_F
   },
 ];
 
-// First-time creation skips "Additional Details" entirely — none of its
-// fields are required, so it was pure optional padding in the middle of
-// onboarding. It's still fully editable afterward, since editing an
-// existing profile uses ALL_STEPS.
-const CREATE_STEPS = ALL_STEPS.filter((s) => s.key !== "additional");
-
 function toArray(value: string): string[] {
   return value
     .split(",")
@@ -166,13 +158,18 @@ export default function SupplierOnboardingPage() {
     needsReview: string[];
   } | null>(null);
 
-  const [existingProfileId, setExistingProfileId] = useState<string | null>(null);
+  // A profile row always exists from the moment the account registered
+  // (apps/web/src/app/api/auth/register/route.ts) — this page always edits
+  // it, there is no separate "create" state. `null` only appears briefly
+  // while loading, or as a defensive fallback for an account that predates
+  // that change; see the .catch below.
+  const [profileId, setProfileId] = useState<string | null>(null);
   const [checkingExisting, setCheckingExisting] = useState(true);
 
-  // Every step is freely navigable in both create and edit mode — nothing
-  // here requires filling a step to move on, so gating navigation would
-  // only get in the way, not prevent invalid data (the create/update APIs
-  // are the actual validation boundary).
+  // Every step is freely navigable — nothing here requires filling a step
+  // to move on, so gating navigation would only get in the way, not
+  // prevent invalid data (the update API is the actual validation
+  // boundary).
   const [currentStep, setCurrentStep] = useState(0);
 
   useEffect(() => {
@@ -181,10 +178,21 @@ export default function SupplierOnboardingPage() {
       return;
     }
     authFetch("/api/supplier-profiles/me")
-      .then((res) => (res.ok ? res.json() : null))
+      .then(async (res) => {
+        if (res.ok) return res.json();
+        // Defensive fallback only — every account should already have a
+        // profile row from registration. Covers accounts that predate that
+        // change and haven't been backfilled yet.
+        const created = await authFetch("/api/supplier-profiles", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({}),
+        });
+        return created.ok ? created.json() : null;
+      })
       .then((profile) => {
         if (!profile) return;
-        setExistingProfileId(profile.id);
+        setProfileId(profile.id);
         setForm((f) => ({
           ...f,
           companyName: profile.companyName ?? "",
@@ -280,10 +288,6 @@ export default function SupplierOnboardingPage() {
     };
   }
 
-  // Edit mode shows all 5 steps (Additional Details included, since real
-  // data may already be there); first-time creation skips straight past it.
-  const STEPS = existingProfileId ? ALL_STEPS : CREATE_STEPS;
-
   function stepIsComplete(index: number): boolean {
     return STEPS[index].required.every((key) => {
       const value = form[key];
@@ -295,72 +299,89 @@ export default function SupplierOnboardingPage() {
     setCurrentStep(index);
   }
 
-  function handleNext() {
-    setCurrentStep((s) => Math.min(STEPS.length - 1, s + 1));
+  // Saves happen per-step now, potentially well before every field is
+  // filled in — so unlike a one-shot final submit, this can't just send
+  // the whole form verbatim. Fields with a min-length/min-count constraint
+  // (companyName, categories, primaryContactEmail, etc.) are only included
+  // once they actually satisfy it; skipped ones are simply left out of this
+  // save (the update schema is fully optional) rather than sent as invalid
+  // empty values, and picked up automatically on a later save once filled.
+  function buildUpdatePayload() {
+    const productLineComplete =
+      form.productName.trim() &&
+      form.productDescription.trim() &&
+      form.productUnit.trim() &&
+      form.productMoq &&
+      form.productMoqUnit.trim() &&
+      form.productLeadTimeDays;
+
+    const categories = toArray(form.categories);
+    const targetGeographies = toArray(form.targetGeographies).map((c) => c.toUpperCase());
+    const languagesSpoken = toArray(form.languagesSpoken);
+
+    return {
+      ...(form.companyName.trim() && { companyName: form.companyName }),
+      ...(form.displayName.trim() && { displayName: form.displayName }),
+      ...(form.country.trim().length === 2 && { country: form.country.toUpperCase() }),
+      ...(form.headquartersCity.trim() && { headquartersCity: form.headquartersCity }),
+      ...(form.yearEstablished && { yearEstablished: Number(form.yearEstablished) }),
+      companySize: form.companySize,
+      ...(form.businessRegNumber.trim() && { businessRegNumber: form.businessRegNumber }),
+      tagline: form.tagline,
+      ...(form.description.trim() && { description: form.description }),
+      ...(supplierType.length > 0 && { supplierType }),
+      ...(categories.length > 0 && { categories }),
+      ...(targetGeographies.length > 0 && { targetGeographies }),
+      ...(targetCustomerTypes.length > 0 && { targetCustomerTypes }),
+      ...(form.idealCustomerDescription.trim() && { idealCustomerDescription: form.idealCustomerDescription }),
+      ...(preferredDealTypes.length > 0 && { preferredDealTypes }),
+      ...(languagesSpoken.length > 0 && { languagesSpoken }),
+      annualRevenueRange: form.annualRevenueRange || undefined,
+      productionCapacityMonthly: form.productionCapacityMonthly || undefined,
+      qualityControlProcess: form.qualityControlProcess || undefined,
+      certifications: form.certifications ? toArray(form.certifications) : undefined,
+      notableCustomers: form.notableCustomers ? toArray(form.notableCustomers) : undefined,
+      referencesAvailable: form.referencesAvailable,
+      ...(form.primaryContactName.trim() && { primaryContactName: form.primaryContactName }),
+      primaryContactRole: form.primaryContactRole,
+      ...(form.primaryContactEmail.trim() && { primaryContactEmail: form.primaryContactEmail }),
+      primaryContactPhone: form.primaryContactPhone || undefined,
+      ...(productLineComplete && {
+        productLines: [
+          {
+            name: form.productName,
+            description: form.productDescription,
+            unit: form.productUnit,
+            moq: Number(form.productMoq),
+            moqUnit: form.productMoqUnit,
+            leadTimeDays: Number(form.productLeadTimeDays),
+            sampleAvailable: form.productSampleAvailable,
+          },
+        ],
+      }),
+    };
   }
 
-  function handleBack() {
-    setCurrentStep((s) => Math.max(0, s - 1));
-  }
-
-  async function handleSubmit(e: React.FormEvent) {
-    e.preventDefault();
+  async function handleSave() {
+    if (!profileId) return;
     setError(null);
     setSubmitting(true);
     try {
-      const response = await authFetch(
-        existingProfileId ? `/api/supplier-profiles/${existingProfileId}` : "/api/supplier-profiles",
-        {
-        method: existingProfileId ? "PATCH" : "POST",
+      const response = await authFetch(`/api/supplier-profiles/${profileId}`, {
+        method: "PATCH",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          companyName: form.companyName,
-          displayName: form.displayName,
-          country: form.country.toUpperCase(),
-          headquartersCity: form.headquartersCity,
-          yearEstablished: form.yearEstablished ? Number(form.yearEstablished) : undefined,
-          companySize: form.companySize,
-          businessRegNumber: form.businessRegNumber,
-          tagline: form.tagline,
-          description: form.description,
-          supplierType,
-          categories: toArray(form.categories),
-          targetGeographies: toArray(form.targetGeographies).map((c) => c.toUpperCase()),
-          targetCustomerTypes,
-          idealCustomerDescription: form.idealCustomerDescription,
-          preferredDealTypes,
-          languagesSpoken: toArray(form.languagesSpoken),
-          annualRevenueRange: form.annualRevenueRange || undefined,
-          productionCapacityMonthly: form.productionCapacityMonthly || undefined,
-          qualityControlProcess: form.qualityControlProcess || undefined,
-          certifications: form.certifications ? toArray(form.certifications) : undefined,
-          notableCustomers: form.notableCustomers ? toArray(form.notableCustomers) : undefined,
-          referencesAvailable: form.referencesAvailable,
-          primaryContactName: form.primaryContactName,
-          primaryContactRole: form.primaryContactRole,
-          primaryContactEmail: form.primaryContactEmail,
-          primaryContactPhone: form.primaryContactPhone || undefined,
-          productLines: form.productName
-            ? [
-                {
-                  name: form.productName,
-                  description: form.productDescription,
-                  unit: form.productUnit,
-                  moq: Number(form.productMoq),
-                  moqUnit: form.productMoqUnit,
-                  leadTimeDays: Number(form.productLeadTimeDays),
-                  sampleAvailable: form.productSampleAvailable,
-                },
-              ]
-            : undefined,
-        }),
+        body: JSON.stringify(buildUpdatePayload()),
       });
       const body = await response.json();
       if (!response.ok) {
         setError(body.error?.message ?? "Something went wrong. Please try again.");
         return;
       }
-      setResult({ id: body.id, completenessScore: body.completenessScore });
+      if (currentStep === STEPS.length - 1) {
+        setResult({ id: body.id, completenessScore: body.completenessScore });
+      } else {
+        setCurrentStep((s) => s + 1);
+      }
     } catch {
       setError("Could not reach the server. Please try again.");
     } finally {
@@ -394,8 +415,7 @@ export default function SupplierOnboardingPage() {
             <div className={styles.formNarrow}>
               <div className={styles.formCard}>
                 <div className={styles.formSuccess}>
-                  Supplier profile {existingProfileId ? "updated" : "created"}. Completeness score:{" "}
-                  <strong>{result.completenessScore}%</strong>
+                  Profile saved. Completeness score: <strong>{result.completenessScore}%</strong>
                 </div>
                 {publishState === "published" ? (
                   <p>Your profile is live. Buyers can now be matched with you.</p>
@@ -438,9 +458,7 @@ export default function SupplierOnboardingPage() {
         <div className={styles.container}>
           <div className={styles.wizardWide}>
             <div className={styles.formIntro}>
-              <h1 className={styles.formH1}>
-                {existingProfileId ? "Edit your supplier profile" : "Create your supplier profile"}
-              </h1>
+              <h1 className={styles.formH1}>My Supplier Profile</h1>
               <p className={styles.formHeroSub}>
                 The more complete your profile, the better your matches.
               </p>
@@ -449,8 +467,7 @@ export default function SupplierOnboardingPage() {
             <div className={styles.wizardProgress}>
               {STEPS.map((step, i) => {
                 // Any non-current step whose own required fields are already
-                // filled reads as "done" — true for steps already passed in
-                // create mode, and for every pre-filled step in edit mode.
+                // filled reads as "done".
                 const done = i !== currentStep && stepIsComplete(i);
                 return (
                   <button
@@ -474,7 +491,13 @@ export default function SupplierOnboardingPage() {
               })}
             </div>
 
-            <form className={styles.formCard} onSubmit={handleSubmit}>
+            <form
+              className={styles.formCard}
+              onSubmit={(e) => {
+                e.preventDefault();
+                handleSave();
+              }}
+            >
               {error && <div className={styles.formError}>{error}</div>}
 
               {STEPS[currentStep]?.key === "basics" && (
@@ -829,28 +852,10 @@ export default function SupplierOnboardingPage() {
               )}
 
               <div className={styles.wizardNav}>
-                {currentStep > 0 ? (
-                  <button type="button" className={styles.wizardBtnBack} onClick={handleBack}>
-                    Back
-                  </button>
-                ) : (
-                  <span />
-                )}
-                {currentStep < STEPS.length - 1 ? (
-                  <button type="button" className={styles.btnSubmit} onClick={handleNext}>
-                    Next
-                  </button>
-                ) : (
-                  <button type="submit" className={styles.btnSubmit} disabled={submitting}>
-                    {submitting
-                      ? existingProfileId
-                        ? "Updating profile..."
-                        : "Creating profile..."
-                      : existingProfileId
-                        ? "Update profile"
-                        : "Create profile"}
-                  </button>
-                )}
+                <span />
+                <button type="submit" className={styles.btnSubmit} disabled={submitting}>
+                  {submitting ? "Saving..." : currentStep === STEPS.length - 1 ? "Save" : "Save & Continue"}
+                </button>
               </div>
             </form>
           </div>

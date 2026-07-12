@@ -2,7 +2,7 @@ import { z } from "zod";
 
 import { hashPassword, signAccessToken, signRefreshToken } from "@/lib/auth";
 import { errorResponse, validationErrorResponse } from "@/lib/api-error";
-import { eq, getDb, users } from "@/lib/db";
+import { buyerProfiles, eq, getDb, supplierProfiles, users } from "@/lib/db";
 import { NextResponse } from "next/server";
 
 const RegisterSchema = z.object({
@@ -27,6 +27,18 @@ export async function POST(request: Request) {
     .insert(users)
     .values({ email, passwordHash, role })
     .returning();
+
+  // Every account gets its profile row(s) created immediately, empty --
+  // the wizard always operates in "edit whatever exists" mode, there is no
+  // separate "create your profile" step to gate this on.
+  await Promise.all([
+    role === "supplier" || role === "both"
+      ? db.insert(supplierProfiles).values({ userId: user.id })
+      : Promise.resolve(),
+    role === "buyer" || role === "both"
+      ? db.insert(buyerProfiles).values({ userId: user.id })
+      : Promise.resolve(),
+  ]);
 
   const [accessToken, refreshToken] = await Promise.all([
     signAccessToken({ sub: user.id, role: user.role }),
