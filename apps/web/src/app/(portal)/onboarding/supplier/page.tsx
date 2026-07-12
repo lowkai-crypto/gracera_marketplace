@@ -458,7 +458,7 @@ export default function SupplierOnboardingPage() {
         <div className={styles.container}>
           <div className={styles.wizardWide}>
             <div className={styles.formIntro}>
-              <h1 className={styles.formH1}>My Supplier Profile</h1>
+              <h1 className={styles.formH1}>Business Profile</h1>
               <p className={styles.formHeroSub}>
                 The more complete your profile, the better your matches.
               </p>

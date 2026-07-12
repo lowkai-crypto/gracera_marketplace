@@ -269,7 +269,7 @@ export default function BuyerOnboardingPage() {
         <div className={styles.container}>
           <div className={styles.wizardWide}>
             <div className={styles.formIntro}>
-              <h1 className={styles.formH1}>My Buyer Profile</h1>
+              <h1 className={styles.formH1}>Business Profile</h1>
               <p className={styles.formHeroSub}>Tell us about your company.</p>
             </div>
 

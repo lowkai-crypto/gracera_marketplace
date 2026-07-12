@@ -117,7 +117,7 @@ export default function OnboardingPage() {
                       start matching.
                     </p>
                     <Link href="/onboarding/supplier" className={styles.btnTealWarm}>
-                      My Profile
+                      Business Profile
                     </Link>
                   </div>
                 ))}
@@ -182,7 +182,7 @@ export default function OnboardingPage() {
                       post what you&apos;re sourcing.
                     </p>
                     <Link href="/onboarding/buyer" className={styles.btnOrangeWarm}>
-                      My Profile
+                      Business Profile
                     </Link>
                   </div>
                 ))}

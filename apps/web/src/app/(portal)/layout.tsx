@@ -5,6 +5,7 @@ import { usePathname, useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 
 import { clearSession, getSession, useSession } from "@/lib/auth-client";
+import AccountMenu from "@/components/AccountMenu";
 import styles from "../warm.module.css";
 
 type NavItem = {
@@ -19,7 +20,7 @@ type NavItem = {
 // docs/28-portal-navigation.md Supplier context table, in that doc's order.
 const SUPPLIER_NAV: NavItem[] = [
   { label: "Dashboard", href: "/onboarding" },
-  { label: "My Profile", href: "/onboarding/supplier" },
+  { label: "Business Profile", href: "/onboarding/supplier" },
   { label: "Matches", href: "/matches" },
   { label: "Deals", href: "/deals" },
   { label: "Messages", href: "/deals", neverActive: true }, // same destination — messaging lives inside a deal, not its own page
@@ -38,7 +39,7 @@ const SUPPLIER_NAV: NavItem[] = [
 // docs/28-portal-navigation.md Buyer context table, in that doc's order.
 const BUYER_NAV: NavItem[] = [
   { label: "Dashboard", href: "/onboarding" },
-  { label: "My Profile", href: "/onboarding/buyer" },
+  { label: "Business Profile", href: "/onboarding/buyer" },
   { label: "Sourcing Requests", href: "/onboarding/sourcing-request" }, // create form — no list page exists yet
   { label: "Matches", href: "/matches" },
   { label: "Deals", href: "/deals" },
@@ -135,16 +136,13 @@ export default function PortalLayout({ children }: { children: React.ReactNode }
               </button>
             </div>
           )}
-          <button
-            type="button"
-            className={styles.portalSignOut}
-            onClick={() => {
+          <AccountMenu
+            email={session.email}
+            onLogout={() => {
               clearSession();
               router.push("/");
             }}
-          >
-            Sign out
-          </button>
+          />
         </div>
       </div>
       <div className={styles.portalBody}>
