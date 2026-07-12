@@ -313,19 +313,19 @@ export default function BuyerOnboardingPage() {
                   <div className={styles.formGrid}>
                     <div className={styles.formGroup}>
                       <label className={styles.label} htmlFor="companyName">Company name</label>
-                      <input id="companyName" required className={styles.input} {...field("companyName")} />
+                      <input id="companyName" className={styles.input} {...field("companyName")} />
                     </div>
                     <div className={styles.formGroup}>
                       <label className={styles.label} htmlFor="displayName">Display / trade name</label>
-                      <input id="displayName" required className={styles.input} {...field("displayName")} />
+                      <input id="displayName" className={styles.input} {...field("displayName")} />
                     </div>
                     <div className={styles.formGroup}>
                       <label className={styles.label} htmlFor="country">Country (ISO code, e.g. US)</label>
-                      <input id="country" required maxLength={2} className={styles.input} {...field("country")} />
+                      <input id="country" maxLength={2} className={styles.input} {...field("country")} />
                     </div>
                     <div className={styles.formGroup}>
                       <label className={styles.label} htmlFor="headquartersCity">Headquarters city</label>
-                      <input id="headquartersCity" required className={styles.input} {...field("headquartersCity")} />
+                      <input id="headquartersCity" className={styles.input} {...field("headquartersCity")} />
                     </div>
                   </div>
                 </div>
@@ -345,7 +345,7 @@ export default function BuyerOnboardingPage() {
                     </div>
                     <div className={styles.formGroup}>
                       <label className={styles.label} htmlFor="industry">Industry</label>
-                      <input id="industry" required className={styles.input} {...field("industry")} />
+                      <input id="industry" className={styles.input} {...field("industry")} />
                     </div>
                     <div className={styles.formGroup}>
                       <label className={styles.label} htmlFor="businessRegNumber">
@@ -396,7 +396,7 @@ export default function BuyerOnboardingPage() {
                         Languages spoken
                         <Tooltip text="Comma-separated, e.g. en, ko." />
                       </label>
-                      <input id="languagesSpoken" required className={styles.input} {...field("languagesSpoken")} />
+                      <input id="languagesSpoken" className={styles.input} {...field("languagesSpoken")} />
                     </div>
                   </div>
                 </div>
@@ -408,7 +408,7 @@ export default function BuyerOnboardingPage() {
                   <div className={styles.formGrid}>
                     <div className={styles.formGroup}>
                       <label className={styles.label} htmlFor="primaryContactName">Contact name</label>
-                      <input id="primaryContactName" required className={styles.input} {...field("primaryContactName")} />
+                      <input id="primaryContactName" className={styles.input} {...field("primaryContactName")} />
                     </div>
                     <div className={styles.formGroup}>
                       <label className={styles.label} htmlFor="primaryContactRole">Contact role</label>
@@ -423,7 +423,6 @@ export default function BuyerOnboardingPage() {
                       <input
                         id="primaryContactEmail"
                         type="email"
-                        required
                         className={styles.input}
                         {...field("primaryContactEmail")}
                       />

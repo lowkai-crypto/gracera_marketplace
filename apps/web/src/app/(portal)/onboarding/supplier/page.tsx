@@ -564,19 +564,19 @@ export default function SupplierOnboardingPage() {
                     <div className={styles.formGrid}>
                       <div className={styles.formGroup}>
                         <label className={styles.label} htmlFor="companyName">Company name</label>
-                        <input id="companyName" required className={styles.input} {...field("companyName")} />
+                        <input id="companyName" className={styles.input} {...field("companyName")} />
                       </div>
                       <div className={styles.formGroup}>
                         <label className={styles.label} htmlFor="displayName">Display / brand name</label>
-                        <input id="displayName" required className={styles.input} {...field("displayName")} />
+                        <input id="displayName" className={styles.input} {...field("displayName")} />
                       </div>
                       <div className={styles.formGroup}>
                         <label className={styles.label} htmlFor="country">Country (ISO code, e.g. KR)</label>
-                        <input id="country" required maxLength={2} className={styles.input} {...field("country")} />
+                        <input id="country" maxLength={2} className={styles.input} {...field("country")} />
                       </div>
                       <div className={styles.formGroup}>
                         <label className={styles.label} htmlFor="headquartersCity">Headquarters city</label>
-                        <input id="headquartersCity" required className={styles.input} {...field("headquartersCity")} />
+                        <input id="headquartersCity" className={styles.input} {...field("headquartersCity")} />
                       </div>
                     </div>
                   </div>
@@ -588,7 +588,7 @@ export default function SupplierOnboardingPage() {
                   <div className={styles.formSectionTitle}>About Your Company</div>
                   <div className={styles.formGroup}>
                     <label className={styles.label} htmlFor="description">Company description</label>
-                    <textarea id="description" required className={styles.textarea} {...field("description")} />
+                    <textarea id="description" className={styles.textarea} {...field("description")} />
                   </div>
                   <div className={styles.formGrid}>
                     <div className={styles.formGroup}>
@@ -647,7 +647,7 @@ export default function SupplierOnboardingPage() {
                       Categories
                       <Tooltip text="Comma-separated, up to 5 categories." />
                     </label>
-                    <input id="categories" required className={styles.input} {...field("categories")} />
+                    <input id="categories" className={styles.input} {...field("categories")} />
                   </div>
                 </div>
               )}
@@ -658,26 +658,25 @@ export default function SupplierOnboardingPage() {
                   <div className={styles.formGrid}>
                     <div className={styles.formGroup}>
                       <label className={styles.label} htmlFor="productName">Product name</label>
-                      <input id="productName" required className={styles.input} {...field("productName")} />
+                      <input id="productName" className={styles.input} {...field("productName")} />
                     </div>
                     <div className={styles.formGroup}>
                       <label className={styles.label} htmlFor="productUnit">Unit (e.g. case, kg)</label>
-                      <input id="productUnit" required className={styles.input} {...field("productUnit")} />
+                      <input id="productUnit" className={styles.input} {...field("productUnit")} />
                     </div>
                     <div className={styles.formGroup}>
                       <label className={styles.label} htmlFor="productMoq">MOQ</label>
-                      <input id="productMoq" type="number" required className={styles.input} {...field("productMoq")} />
+                      <input id="productMoq" type="number" className={styles.input} {...field("productMoq")} />
                     </div>
                     <div className={styles.formGroup}>
                       <label className={styles.label} htmlFor="productMoqUnit">MOQ unit</label>
-                      <input id="productMoqUnit" required className={styles.input} {...field("productMoqUnit")} />
+                      <input id="productMoqUnit" className={styles.input} {...field("productMoqUnit")} />
                     </div>
                     <div className={styles.formGroup}>
                       <label className={styles.label} htmlFor="productLeadTimeDays">Lead time (days)</label>
                       <input
                         id="productLeadTimeDays"
                         type="number"
-                        required
                         className={styles.input}
                         {...field("productLeadTimeDays")}
                       />
@@ -697,7 +696,6 @@ export default function SupplierOnboardingPage() {
                     <label className={styles.label} htmlFor="productDescription">Product description</label>
                     <textarea
                       id="productDescription"
-                      required
                       className={styles.textarea}
                       {...field("productDescription")}
                     />
@@ -714,14 +712,14 @@ export default function SupplierOnboardingPage() {
                         Target countries
                         <Tooltip text="Comma-separated ISO country codes, e.g. US, CA, MX." />
                       </label>
-                      <input id="targetGeographies" required className={styles.input} {...field("targetGeographies")} />
+                      <input id="targetGeographies" className={styles.input} {...field("targetGeographies")} />
                     </div>
                     <div className={styles.formGroup}>
                       <label className={styles.label} htmlFor="languagesSpoken">
                         Languages spoken
                         <Tooltip text="Comma-separated, e.g. en, ko." />
                       </label>
-                      <input id="languagesSpoken" required className={styles.input} {...field("languagesSpoken")} />
+                      <input id="languagesSpoken" className={styles.input} {...field("languagesSpoken")} />
                     </div>
                   </div>
                   <div className={styles.formGroup}>
@@ -762,7 +760,6 @@ export default function SupplierOnboardingPage() {
                     </label>
                     <textarea
                       id="idealCustomerDescription"
-                      required
                       className={styles.textarea}
                       {...field("idealCustomerDescription")}
                     />
@@ -821,7 +818,7 @@ export default function SupplierOnboardingPage() {
                   <div className={styles.formGrid}>
                     <div className={styles.formGroup}>
                       <label className={styles.label} htmlFor="primaryContactName">Contact name</label>
-                      <input id="primaryContactName" required className={styles.input} {...field("primaryContactName")} />
+                      <input id="primaryContactName" className={styles.input} {...field("primaryContactName")} />
                     </div>
                     <div className={styles.formGroup}>
                       <label className={styles.label} htmlFor="primaryContactRole">Contact role</label>
@@ -836,7 +833,6 @@ export default function SupplierOnboardingPage() {
                       <input
                         id="primaryContactEmail"
                         type="email"
-                        required
                         className={styles.input}
                         {...field("primaryContactEmail")}
                       />
