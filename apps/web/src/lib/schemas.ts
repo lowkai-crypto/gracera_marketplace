@@ -137,13 +137,17 @@ const SourcingRequestFields = {
   expiresAt: z.coerce.date(),
 };
 
+// Only buyerProfileId is required here -- the same zod pitfall as the
+// profile Create schemas (see schemas.ts history): extending a base object
+// with a .partial() version of the same keys silently overrides them back
+// to optional, since extend() lets the argument's shape win on overlap. The
+// real minimum-completeness enforcement for a sourcing request already
+// lives in canPublishSourcingRequest (packages/db/src/completeness.ts),
+// called explicitly by the POST route -- this schema was never actually
+// the thing enforcing title/category/expiresAt, so it should not pretend
+// to.
 export const CreateSourcingRequestSchema = z
-  .object({
-    buyerProfileId: z.string().uuid(),
-    title: SourcingRequestFields.title,
-    category: SourcingRequestFields.category,
-    expiresAt: SourcingRequestFields.expiresAt,
-  })
+  .object({ buyerProfileId: z.string().uuid() })
   .extend(z.object(SourcingRequestFields).partial().shape);
 
 export const UpdateSourcingRequestSchema = z.object(SourcingRequestFields).partial().extend({

@@ -78,21 +78,29 @@ function SourcingRequestForm() {
     setError(null);
     setSubmitting(true);
     try {
+      // Blank fields are left out entirely rather than sent as "" / 0 / an
+      // invalid date -- those would trip the schema's own type validation
+      // (a confusing raw "Invalid date" or "must be positive" on whichever
+      // field happens to come first) instead of the clean, complete
+      // "Missing required fields: ..." message the server's real
+      // completeness check (canPublishSourcingRequest) already produces.
       const response = await authFetch("/api/sourcing-requests", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           buyerProfileId,
-          title: form.title,
-          category: form.category,
-          expiresAt: form.expiresAt,
-          description: form.description,
-          productName: form.productName,
-          quantityRequired: Number(form.quantityRequired),
-          quantityUnit: form.quantityUnit,
+          ...(form.title.trim() && { title: form.title }),
+          ...(form.category.trim() && { category: form.category }),
+          ...(form.expiresAt && { expiresAt: form.expiresAt }),
+          ...(form.description.trim() && { description: form.description }),
+          ...(form.productName.trim() && { productName: form.productName }),
+          ...(form.quantityRequired && { quantityRequired: Number(form.quantityRequired) }),
+          ...(form.quantityUnit.trim() && { quantityUnit: form.quantityUnit }),
           orderFrequency: form.orderFrequency,
           sampleRequired: form.sampleRequired,
-          idealSupplierDescription: form.idealSupplierDescription,
+          ...(form.idealSupplierDescription.trim() && {
+            idealSupplierDescription: form.idealSupplierDescription,
+          }),
           requiredCertifications: form.requiredCertifications ? toArray(form.requiredCertifications) : undefined,
           maxLeadTimeDays: form.maxLeadTimeDays ? Number(form.maxLeadTimeDays) : undefined,
           maxMoq: form.maxMoq ? Number(form.maxMoq) : undefined,
@@ -148,25 +156,35 @@ function SourcingRequestForm() {
         <div className={styles.formSectionTitle}>What are you sourcing?</div>
         <div className={styles.formGrid}>
           <div className={styles.formGroup}>
-            <label className={styles.label} htmlFor="title">Request title</label>
-            <input id="title" required className={styles.input} {...field("title")} />
+            <label className={styles.label} htmlFor="title">
+              Request title <span className={styles.labelHint}>(required)</span>
+            </label>
+            <input id="title" className={styles.input} {...field("title")} />
           </div>
           <div className={styles.formGroup}>
-            <label className={styles.label} htmlFor="category">Category</label>
-            <input id="category" required className={styles.input} {...field("category")} />
+            <label className={styles.label} htmlFor="category">
+              Category <span className={styles.labelHint}>(required)</span>
+            </label>
+            <input id="category" className={styles.input} {...field("category")} />
           </div>
           <div className={styles.formGroup}>
-            <label className={styles.label} htmlFor="productName">Product name</label>
-            <input id="productName" required className={styles.input} {...field("productName")} />
+            <label className={styles.label} htmlFor="productName">
+              Product name <span className={styles.labelHint}>(required)</span>
+            </label>
+            <input id="productName" className={styles.input} {...field("productName")} />
           </div>
           <div className={styles.formGroup}>
-            <label className={styles.label} htmlFor="expiresAt">Request expires on</label>
-            <input id="expiresAt" type="date" required className={styles.input} {...field("expiresAt")} />
+            <label className={styles.label} htmlFor="expiresAt">
+              Request expires on <span className={styles.labelHint}>(required)</span>
+            </label>
+            <input id="expiresAt" type="date" className={styles.input} {...field("expiresAt")} />
           </div>
         </div>
         <div className={styles.formGroup}>
-          <label className={styles.label} htmlFor="description">Description</label>
-          <textarea id="description" required className={styles.textarea} {...field("description")} />
+          <label className={styles.label} htmlFor="description">
+            Description <span className={styles.labelHint}>(required)</span>
+          </label>
+          <textarea id="description" className={styles.textarea} {...field("description")} />
         </div>
       </div>
 
@@ -174,18 +192,16 @@ function SourcingRequestForm() {
         <div className={styles.formSectionTitle}>Quantity &amp; Terms</div>
         <div className={styles.formGrid}>
           <div className={styles.formGroup}>
-            <label className={styles.label} htmlFor="quantityRequired">Quantity required</label>
-            <input
-              id="quantityRequired"
-              type="number"
-              required
-              className={styles.input}
-              {...field("quantityRequired")}
-            />
+            <label className={styles.label} htmlFor="quantityRequired">
+              Quantity required <span className={styles.labelHint}>(required)</span>
+            </label>
+            <input id="quantityRequired" type="number" className={styles.input} {...field("quantityRequired")} />
           </div>
           <div className={styles.formGroup}>
-            <label className={styles.label} htmlFor="quantityUnit">Quantity unit</label>
-            <input id="quantityUnit" required className={styles.input} {...field("quantityUnit")} />
+            <label className={styles.label} htmlFor="quantityUnit">
+              Quantity unit <span className={styles.labelHint}>(required)</span>
+            </label>
+            <input id="quantityUnit" className={styles.input} {...field("quantityUnit")} />
           </div>
           <div className={styles.formGroup}>
             <label className={styles.label} htmlFor="orderFrequency">Order frequency</label>
@@ -236,11 +252,10 @@ function SourcingRequestForm() {
         <div className={styles.formSectionTitle}>Ideal Supplier</div>
         <div className={styles.formGroup}>
           <label className={styles.label} htmlFor="idealSupplierDescription">
-            Describe the perfect supplier for this need
+            Describe the perfect supplier for this need <span className={styles.labelHint}>(required)</span>
           </label>
           <textarea
             id="idealSupplierDescription"
-            required
             className={styles.textarea}
             {...field("idealSupplierDescription")}
           />
