@@ -157,13 +157,13 @@ function SourcingRequestForm() {
         <div className={styles.formGrid}>
           <div className={styles.formGroup}>
             <label className={styles.label} htmlFor="title">
-              Request title <span className={styles.labelHint}>(required)</span>
+              Request title <span className={styles.labelHint}>(optional)</span>
             </label>
             <input id="title" className={styles.input} {...field("title")} />
           </div>
           <div className={styles.formGroup}>
             <label className={styles.label} htmlFor="category">
-              Category <span className={styles.labelHint}>(required)</span>
+              Category <span className={styles.labelHint}>(optional)</span>
             </label>
             <input id="category" className={styles.input} {...field("category")} />
           </div>
@@ -175,14 +175,14 @@ function SourcingRequestForm() {
           </div>
           <div className={styles.formGroup}>
             <label className={styles.label} htmlFor="expiresAt">
-              Request expires on <span className={styles.labelHint}>(required)</span>
+              Request expires on <span className={styles.labelHint}>(optional)</span>
             </label>
             <input id="expiresAt" type="date" className={styles.input} {...field("expiresAt")} />
           </div>
         </div>
         <div className={styles.formGroup}>
           <label className={styles.label} htmlFor="description">
-            Description <span className={styles.labelHint}>(required)</span>
+            Description <span className={styles.labelHint}>(optional)</span>
           </label>
           <textarea id="description" className={styles.textarea} {...field("description")} />
         </div>
@@ -193,13 +193,13 @@ function SourcingRequestForm() {
         <div className={styles.formGrid}>
           <div className={styles.formGroup}>
             <label className={styles.label} htmlFor="quantityRequired">
-              Quantity required <span className={styles.labelHint}>(required)</span>
+              Quantity required <span className={styles.labelHint}>(optional)</span>
             </label>
             <input id="quantityRequired" type="number" className={styles.input} {...field("quantityRequired")} />
           </div>
           <div className={styles.formGroup}>
             <label className={styles.label} htmlFor="quantityUnit">
-              Quantity unit <span className={styles.labelHint}>(required)</span>
+              Quantity unit <span className={styles.labelHint}>(optional)</span>
             </label>
             <input id="quantityUnit" className={styles.input} {...field("quantityUnit")} />
           </div>
@@ -252,7 +252,7 @@ function SourcingRequestForm() {
         <div className={styles.formSectionTitle}>Ideal Supplier</div>
         <div className={styles.formGroup}>
           <label className={styles.label} htmlFor="idealSupplierDescription">
-            Describe the perfect supplier for this need <span className={styles.labelHint}>(required)</span>
+            Describe the perfect supplier for this need <span className={styles.labelHint}>(optional)</span>
           </label>
           <textarea
             id="idealSupplierDescription"

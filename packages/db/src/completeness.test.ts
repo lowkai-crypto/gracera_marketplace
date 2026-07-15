@@ -137,12 +137,19 @@ describe("computeSourcingRequestCompleteness / canPublishSourcingRequest", () =>
     expect(computeSourcingRequestCompleteness(FULL_REQUEST as SourcingRequest)).toBe(65);
   });
 
-  it("rejects a request below the 50% threshold", () => {
+  it("rejects a request missing productName", () => {
     const result = canPublishSourcingRequest({} as SourcingRequest);
     expect(result.ok).toBe(false);
+    expect(result.reasons).toEqual(["Missing required fields: productName"]);
   });
 
-  it("accepts a request meeting required fields and the threshold", () => {
+  it("accepts a request with only productName filled in -- no completeness floor", () => {
+    const result = canPublishSourcingRequest({ productName: "Gochujang" } as SourcingRequest);
+    expect(result.ok).toBe(true);
+    expect(result.reasons).toEqual([]);
+  });
+
+  it("accepts a fully filled out request", () => {
     const result = canPublishSourcingRequest(FULL_REQUEST as SourcingRequest);
     expect(result.ok).toBe(true);
     expect(result.reasons).toEqual([]);

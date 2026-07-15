@@ -211,20 +211,15 @@ export function computeSourcingRequestCompleteness(request: Nullable<SourcingReq
   return Math.round(score * 100);
 }
 
-const SOURCING_REQUIRED_FIELDS: (keyof SourcingRequest)[] = [
-  "title",
-  "description",
-  "category",
-  "expiresAt",
-  "productName",
-  "quantityRequired",
-  "quantityUnit",
-  "orderFrequency",
-  "sampleRequired",
-  "idealSupplierDescription",
-];
+// docs/06 §3 originally specified the full field list below plus a 50%
+// completeness-score floor before a request could go live. Overridden by
+// explicit product decision: posting a request should have as little
+// friction as possible, so productName is the only thing that actually
+// gates creation now. computeSourcingRequestCompleteness above is still a
+// useful signal to show the buyer ("more detail = better matches"), it just
+// no longer blocks posting on its own.
+const SOURCING_REQUIRED_FIELDS: (keyof SourcingRequest)[] = ["productName"];
 
-/** docs/06 §3: requests below 50% are flagged before publishing. */
 export function canPublishSourcingRequest(request: Nullable<SourcingRequest>): {
   ok: boolean;
   reasons: string[];
@@ -232,7 +227,5 @@ export function canPublishSourcingRequest(request: Nullable<SourcingRequest>): {
   const reasons: string[] = [];
   const missing = SOURCING_REQUIRED_FIELDS.filter((f) => !isPresent(request[f]));
   if (missing.length > 0) reasons.push(`Missing required fields: ${missing.join(", ")}`);
-  const score = computeSourcingRequestCompleteness(request);
-  if (score < 50) reasons.push(`Completeness score ${score} is below the 50% publish threshold`);
   return { ok: reasons.length === 0, reasons };
 }
