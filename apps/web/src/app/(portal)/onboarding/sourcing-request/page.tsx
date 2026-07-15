@@ -35,15 +35,31 @@ function toArray(value: string): string[] {
 function SourcingRequestForm() {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const buyerProfileId = searchParams.get("buyerProfileId");
+  const paramBuyerProfileId = searchParams.get("buyerProfileId");
+  const [buyerProfileId, setBuyerProfileId] = useState<string | null>(paramBuyerProfileId);
+  const [checkingProfile, setCheckingProfile] = useState(!paramBuyerProfileId);
   const [form, setForm] = useState(INITIAL_FORM);
   const [error, setError] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
   const [result, setResult] = useState<{ id: string; completenessScore: number; status: string } | null>(null);
 
   useEffect(() => {
-    if (!getSession()) router.replace("/get-started");
-  }, [router]);
+    if (!getSession()) {
+      router.replace("/get-started");
+      return;
+    }
+    // Every buyer account already has a profile (created at registration —
+    // see apps/web/src/app/api/auth/register/route.ts), so arriving here
+    // straight from the sidebar (no ?buyerProfileId in the URL, unlike the
+    // link the profile wizard's success screen gives) shouldn't be a dead
+    // end. Only fall back to looking it up when the URL didn't already
+    // supply it.
+    if (paramBuyerProfileId) return;
+    authFetch("/api/buyer-profiles/me")
+      .then((res) => (res.ok ? res.json() : null))
+      .then((profile) => setBuyerProfileId(profile?.id ?? null))
+      .finally(() => setCheckingProfile(false));
+  }, [router, paramBuyerProfileId]);
 
   function field(name: keyof typeof form) {
     return {
@@ -116,13 +132,15 @@ function SourcingRequestForm() {
     );
   }
 
+  if (checkingProfile) return null;
+
   return (
     <form className={styles.formCard} onSubmit={handleSubmit}>
       {error && <div className={styles.formError}>{error}</div>}
       {!buyerProfileId && (
         <div className={styles.formError}>
-          No buyer profile linked — create a buyer profile first, then come
-          back here from the link it gives you.
+          Could not find your buyer profile — please refresh the page, or
+          visit Business Profile first.
         </div>
       )}
 
