@@ -15,6 +15,14 @@ import {
 // ── Enums ─────────────────────────────────────────────────────────────────
 
 export const userRoleEnum = pgEnum("user_role", ["supplier", "buyer", "both", "admin"]);
+export const adminRoleEnum = pgEnum("admin_role", [
+  "super_admin",
+  "trust_team",
+  "customer_success",
+  "finance_ops",
+  "content_mod",
+  "data_analyst",
+]);
 export const userStatusEnum = pgEnum("user_status", ["active", "suspended", "deleted"]);
 export const companySizeEnum = pgEnum("company_size", ["micro", "small", "medium", "large"]);
 export const profileStatusEnum = pgEnum("profile_status", ["draft", "active", "paused", "deleted"]);
@@ -81,6 +89,10 @@ export const users = pgTable("users", {
   emailVerified: boolean("email_verified").notNull().default(false),
   passwordHash: text("password_hash").notNull(),
   role: userRoleEnum("role").notNull(),
+  // docs/20-admin-ops-spec.md §1 — which of the six admin permission sets
+  // this account has. Only meaningful when role = "admin"; there is no
+  // admin auth/dashboard reading it yet.
+  adminRole: adminRoleEnum("admin_role"),
   status: userStatusEnum("status").notNull().default("active"),
   createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
   lastLoginAt: timestamp("last_login_at", { withTimezone: true }),
