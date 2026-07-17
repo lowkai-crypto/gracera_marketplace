@@ -138,3 +138,17 @@ class ExtractSourcingRequestTextRequest(BaseModel):
 class ExtractSourcingRequestTextResponse(BaseModel):
     fields: dict[str, ExtractedField]
     warnings: list[str] = []
+
+
+class DealMessageAssistRequest(BaseModel):
+    mode: Literal["draft", "translate"]
+    intent: str | None = None  # required for "draft"
+    text: str | None = None  # required for "translate" -- the message being translated
+    target_language: str | None = None  # optional for draft, required for translate
+    counterpart_context: dict[str, Any] = {}
+    match_summary: str = ""
+    recent_messages: list[dict[str, str]] = []  # [{"sender": "me"|"them", "body": "..."}]
+
+
+class DealMessageAssistResponse(BaseModel):
+    draft: str

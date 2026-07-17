@@ -29,6 +29,15 @@ export default function DealDetailPage() {
   const [sending, setSending] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
+  const [intentText, setIntentText] = useState("");
+  const [drafting, setDrafting] = useState(false);
+  const [draftError, setDraftError] = useState<string | null>(null);
+
+  // Translations are computed on demand and only ever kept in local state
+  // -- never sent back to the server, never persisted alongside the
+  // original message.
+  const [translations, setTranslations] = useState<Record<string, string | "loading">>({});
+
   const load = useCallback(() => {
     authFetch(`/api/deals/${params.id}`)
       .then((res) => (res.ok ? res.json() : null))
@@ -68,6 +77,41 @@ export default function DealDetailPage() {
     setBody("");
     setSending(false);
     load();
+  }
+
+  async function handleDraft() {
+    if (!intentText.trim()) return;
+    setDrafting(true);
+    setDraftError(null);
+    const res = await authFetch(`/api/deals/${params.id}/assist-message`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ mode: "draft", intent: intentText }),
+    });
+    const resBody = await res.json().catch(() => null);
+    if (!res.ok || !resBody) {
+      setDraftError(resBody?.error?.message ?? "Could not draft a message.");
+      setDrafting(false);
+      return;
+    }
+    // Drops the draft into the same composer the Send button already
+    // uses -- fully editable, never sent automatically.
+    setBody(resBody.draft);
+    setDrafting(false);
+  }
+
+  async function handleTranslate(messageId: string, text: string) {
+    setTranslations((t) => ({ ...t, [messageId]: "loading" }));
+    const res = await authFetch(`/api/deals/${params.id}/assist-message`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ mode: "translate", text }),
+    });
+    const resBody = await res.json().catch(() => null);
+    setTranslations((t) => ({
+      ...t,
+      [messageId]: res.ok && resBody ? resBody.draft : "(Could not translate this message.)",
+    }));
   }
 
   if (!session) return null;
@@ -112,9 +156,45 @@ export default function DealDetailPage() {
                     {new Date(m.createdAt).toLocaleString()}
                   </p>
                   <p>{m.body}</p>
+                  {translations[m.id] ? (
+                    <p className={styles.helpText}>
+                      {translations[m.id] === "loading" ? "Translating..." : translations[m.id]}
+                    </p>
+                  ) : (
+                    <button
+                      type="button"
+                      className={styles.helpText}
+                      style={{ background: "none", border: "none", cursor: "pointer", padding: 0 }}
+                      onClick={() => handleTranslate(m.id, m.body)}
+                    >
+                      Translate
+                    </button>
+                  )}
                 </div>
               ))}
               {error && <div className={styles.formError}>{error}</div>}
+              <div className={styles.formGroup}>
+                <label className={styles.label}>Draft with AI (optional)</label>
+                <div style={{ display: "flex", gap: "0.75rem" }}>
+                  <input
+                    className={styles.input}
+                    style={{ flex: "1 1 auto" }}
+                    placeholder="e.g. ask about a bulk discount"
+                    value={intentText}
+                    onChange={(e) => setIntentText(e.target.value)}
+                  />
+                  <button
+                    type="button"
+                    className={styles.btnSubmit}
+                    style={{ flexShrink: 0, whiteSpace: "nowrap" }}
+                    onClick={handleDraft}
+                    disabled={drafting || !intentText.trim()}
+                  >
+                    {drafting ? "Drafting..." : "Draft"}
+                  </button>
+                </div>
+                {draftError && <div className={styles.formError} style={{ marginTop: "0.5rem" }}>{draftError}</div>}
+              </div>
               <form onSubmit={send} className={styles.formGroup}>
                 <textarea
                   className={styles.input}
