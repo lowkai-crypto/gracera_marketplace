@@ -13,6 +13,7 @@ type SupplierSummary = {
   completenessScore: number;
   profileStatus: string;
   verificationLevel: string;
+  publicPageContent: { headline: string; summary: string; sections: unknown[] } | null;
 };
 
 type BuyerSummary = {
@@ -42,6 +43,22 @@ export default function OnboardingPage() {
   const [buyerProfile, setBuyerProfile] = useState<BuyerSummary | null | undefined>(undefined);
   const [sourcingRequests, setSourcingRequests] = useState<SourcingRequestSummary[]>([]);
   const [verificationResults, setVerificationResults] = useState<Record<string, VerificationResult | "loading">>({});
+  const [generatingPublicPage, setGeneratingPublicPage] = useState(false);
+  const [publicPageError, setPublicPageError] = useState<string | null>(null);
+
+  async function generatePublicPage(profileId: string) {
+    setGeneratingPublicPage(true);
+    setPublicPageError(null);
+    const res = await authFetch(`/api/supplier-profiles/${profileId}/generate-public-page`, { method: "POST" });
+    const body = await res.json().catch(() => null);
+    if (!res.ok || !body) {
+      setPublicPageError(body?.error?.message ?? "Could not generate the public page.");
+      setGeneratingPublicPage(false);
+      return;
+    }
+    setSupplierProfile((p) => (p ? { ...p, publicPageContent: body } : p));
+    setGeneratingPublicPage(false);
+  }
 
   async function requestVerification(profileType: "supplier" | "buyer", profileId: string) {
     setVerificationResults((r) => ({ ...r, [profileId]: "loading" }));
@@ -169,6 +186,31 @@ export default function OnboardingPage() {
                         Edit profile
                       </Link>
                     </div>
+                    {supplierProfile.profileStatus === "active" && (
+                      <div style={{ marginTop: "0.75rem", paddingTop: "0.75rem", borderTop: "1px solid var(--warm-100)" }}>
+                        <div style={{ display: "flex", gap: "0.75rem", alignItems: "center" }}>
+                          {supplierProfile.publicPageContent && (
+                            <Link href={`/suppliers/${supplierProfile.id}`} className={styles.helpText} target="_blank">
+                              View public page
+                            </Link>
+                          )}
+                          <button
+                            type="button"
+                            className={styles.helpText}
+                            style={{ background: "none", border: "none", cursor: "pointer", padding: 0, textDecoration: "underline" }}
+                            onClick={() => generatePublicPage(supplierProfile.id)}
+                            disabled={generatingPublicPage}
+                          >
+                            {generatingPublicPage
+                              ? "Generating..."
+                              : supplierProfile.publicPageContent
+                                ? "Regenerate public page"
+                                : "Generate public page"}
+                          </button>
+                        </div>
+                        {publicPageError && <div className={styles.formError} style={{ marginTop: "0.5rem" }}>{publicPageError}</div>}
+                      </div>
+                    )}
                     {renderVerification("supplier", supplierProfile.id, supplierProfile.verificationLevel)}
                   </div>
                 ) : (

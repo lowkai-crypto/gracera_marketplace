@@ -169,3 +169,19 @@ class VerificationTriageRequest(BaseModel):
 class VerificationTriageResponse(BaseModel):
     flags: list[VerificationFlag]
     overall_assessment: str
+
+
+class PublicPageSection(BaseModel):
+    heading: str
+    body: str
+
+
+class GeneratePublicPageRequest(BaseModel):
+    supplier_profile: dict[str, Any]
+    product_lines: list[dict[str, Any]] = []
+
+
+class GeneratePublicPageResponse(BaseModel):
+    headline: str
+    summary: str
+    sections: list[PublicPageSection]

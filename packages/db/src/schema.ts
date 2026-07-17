@@ -141,6 +141,11 @@ export const supplierProfiles = pgTable("supplier_profiles", {
   completenessScore: real("completeness_score").notNull().default(0),
   profileStatus: profileStatusEnum("profile_status").notNull().default("draft"),
 
+  // AEO/public-page content -- generated on demand (not required to
+  // publish), nullable, only ever populated for an "active" profile. See
+  // the AI verification/public-page feature plan.
+  publicPageContent: jsonb("public_page_content"),
+
   createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
   updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow(),
 });
