@@ -152,3 +152,20 @@ class DealMessageAssistRequest(BaseModel):
 
 class DealMessageAssistResponse(BaseModel):
     draft: str
+
+
+class VerificationFlag(BaseModel):
+    field: str
+    concern: str
+    severity: Literal["low", "medium", "high"]
+
+
+class VerificationTriageRequest(BaseModel):
+    # Loose dict, same reasoning as MatchCoachingRequest.viewer_profile --
+    # this is prompt context, not scored/validated data.
+    profile: dict[str, Any]
+
+
+class VerificationTriageResponse(BaseModel):
+    flags: list[VerificationFlag]
+    overall_assessment: str

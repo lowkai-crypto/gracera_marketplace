@@ -358,3 +358,26 @@ export type Message = typeof messages.$inferSelect;
 export type NewMessage = typeof messages.$inferInsert;
 export type Notification = typeof notifications.$inferSelect;
 export type NewNotification = typeof notifications.$inferInsert;
+
+// ── verification_requests ───────────────────────────────────────────────
+// docs/20-admin-ops-spec.md §3 describes a full three-tier verification
+// system (registry-API lookup -> document-upload AI pre-screen -> KYB
+// video call), none of which is built -- there is no admin auth/queue
+// anywhere in this app yet. This table is just an AI pre-screen log: two
+// nullable FKs (not one polymorphic profileId) so referential integrity
+// is real, matching how `matches` already splits supplier/buyer. No
+// `status` column on purpose -- adding "pending"/"flagged"/"cleared"
+// would imply a review lifecycle nothing currently updates.
+
+export const verificationRequests = pgTable("verification_requests", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  profileType: text("profile_type").notNull(), // "supplier" | "buyer"
+  supplierProfileId: uuid("supplier_profile_id").references(() => supplierProfiles.id),
+  buyerProfileId: uuid("buyer_profile_id").references(() => buyerProfiles.id),
+  triageFlags: jsonb("triage_flags").notNull(),
+  triageSummary: text("triage_summary").notNull(),
+  createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+});
+
+export type VerificationRequest = typeof verificationRequests.$inferSelect;
+export type NewVerificationRequest = typeof verificationRequests.$inferInsert;

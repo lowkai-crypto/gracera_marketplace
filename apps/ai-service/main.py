@@ -10,6 +10,7 @@ from routes.coaching import router as coaching_router
 from routes.deal_assist import router as deal_assist_router
 from routes.extract import router as extract_router
 from routes.match import router as match_router
+from routes.verification import router as verification_router
 
 logger = logging.getLogger(__name__)
 
@@ -35,6 +36,7 @@ app.include_router(match_router)
 app.include_router(extract_router)
 app.include_router(coaching_router)
 app.include_router(deal_assist_router)
+app.include_router(verification_router)
 
 
 @app.get("/health")

@@ -43,6 +43,13 @@
       "when": 1783817258631,
       "tag": "0005_backfill_profile_rows",
       "breakpoints": true
+    },
+    {
+      "idx": 6,
+      "version": "7",
+      "when": 1784282073447,
+      "tag": "0006_secret_stranger",
+      "breakpoints": true
     }
   ]
 }

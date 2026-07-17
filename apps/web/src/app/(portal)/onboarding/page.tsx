@@ -12,6 +12,7 @@ type SupplierSummary = {
   tagline: string | null;
   completenessScore: number;
   profileStatus: string;
+  verificationLevel: string;
 };
 
 type BuyerSummary = {
@@ -19,6 +20,12 @@ type BuyerSummary = {
   companyName: string | null;
   completenessScore: number;
   profileStatus: string;
+  verificationLevel: string;
+};
+
+type VerificationResult = {
+  flags: { field: string; concern: string; severity: "low" | "medium" | "high" }[];
+  overallAssessment: string;
 };
 
 type SourcingRequestSummary = {
@@ -34,6 +41,64 @@ export default function OnboardingPage() {
   const [supplierProfile, setSupplierProfile] = useState<SupplierSummary | null | undefined>(undefined);
   const [buyerProfile, setBuyerProfile] = useState<BuyerSummary | null | undefined>(undefined);
   const [sourcingRequests, setSourcingRequests] = useState<SourcingRequestSummary[]>([]);
+  const [verificationResults, setVerificationResults] = useState<Record<string, VerificationResult | "loading">>({});
+
+  async function requestVerification(profileType: "supplier" | "buyer", profileId: string) {
+    setVerificationResults((r) => ({ ...r, [profileId]: "loading" }));
+    const res = await authFetch("/api/verification-requests", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ profileType, profileId }),
+    });
+    const body = await res.json().catch(() => null);
+    setVerificationResults((r) => ({
+      ...r,
+      [profileId]:
+        res.ok && body
+          ? { flags: body.flags ?? [], overallAssessment: body.overallAssessment ?? "" }
+          : { flags: [], overallAssessment: "Could not run the verification pre-screen. Please try again." },
+    }));
+  }
+
+  function renderVerification(profileType: "supplier" | "buyer", profileId: string, verificationLevel: string) {
+    const result = verificationResults[profileId];
+    return (
+      <div style={{ marginTop: "0.75rem", paddingTop: "0.75rem", borderTop: "1px solid var(--warm-100)" }}>
+        <div style={{ display: "flex", gap: "0.75rem", alignItems: "center" }}>
+          <span className={styles.helpText}>Verification: {verificationLevel}</span>
+          {result !== "loading" && (
+            <button
+              type="button"
+              className={styles.helpText}
+              style={{ background: "none", border: "none", cursor: "pointer", padding: 0, textDecoration: "underline" }}
+              onClick={() => requestVerification(profileType, profileId)}
+            >
+              Request verification pre-screen
+            </button>
+          )}
+        </div>
+        {result === "loading" && <p className={styles.helpText}>Running pre-screen...</p>}
+        {result && result !== "loading" && (
+          <div className={styles.formSuccess} style={{ marginTop: "0.5rem" }}>
+            <p>{result.overallAssessment}</p>
+            {result.flags.length > 0 && (
+              <ul>
+                {result.flags.map((f, i) => (
+                  <li key={i}>
+                    <strong>{f.field}</strong> ({f.severity}): {f.concern}
+                  </li>
+                ))}
+              </ul>
+            )}
+            <p className={styles.helpText} style={{ marginTop: "0.5rem" }}>
+              Automated pre-screen only — a full trust-team review queue
+              isn&apos;t built yet, so this is informational for now.
+            </p>
+          </div>
+        )}
+      </div>
+    );
+  }
 
   // No redirect here — the (portal) layout already guarantees an
   // authenticated session before this page renders.
@@ -104,6 +169,7 @@ export default function OnboardingPage() {
                         Edit profile
                       </Link>
                     </div>
+                    {renderVerification("supplier", supplierProfile.id, supplierProfile.verificationLevel)}
                   </div>
                 ) : (
                   // Defensive fallback only — every account gets a (empty)
@@ -148,6 +214,7 @@ export default function OnboardingPage() {
                         Post another sourcing request
                       </Link>
                     </div>
+                    {renderVerification("buyer", buyerProfile.id, buyerProfile.verificationLevel)}
                     {sourcingRequests.length > 0 && (
                       <>
                         <div className={styles.formSectionTitle}>Your sourcing requests</div>
