@@ -1,6 +1,6 @@
 import json
 
-from claude_util import get_client, strip_code_fence
+from claude_util import extract_text, get_client, strip_code_fence
 from config import settings
 from models import CoachingItem, MatchCoachingRequest
 
@@ -114,7 +114,7 @@ async def coach_match(request: MatchCoachingRequest) -> list[CoachingItem]:
         messages=[{"role": "user", "content": prompt}],
     )
 
-    text = strip_code_fence(response.content[0].text)
+    text = strip_code_fence(extract_text(response))
     try:
         raw = json.loads(text)
     except json.JSONDecodeError as exc:

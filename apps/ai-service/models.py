@@ -126,3 +126,15 @@ class CoachingItem(BaseModel):
 
 class MatchCoachingResponse(BaseModel):
     items: list[CoachingItem]
+
+
+class ExtractSourcingRequestTextRequest(BaseModel):
+    text: str = Field(..., min_length=1)
+    # Grounding context from the buyer's own profile -- loose dict, same
+    # reasoning as MatchCoachingRequest.viewer_profile above.
+    buyer_context: dict[str, Any] = {}
+
+
+class ExtractSourcingRequestTextResponse(BaseModel):
+    fields: dict[str, ExtractedField]
+    warnings: list[str] = []

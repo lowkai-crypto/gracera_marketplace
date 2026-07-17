@@ -2,7 +2,7 @@ import json
 
 import anthropic
 
-from claude_util import get_client, strip_code_fence
+from claude_util import extract_text, get_client, strip_code_fence
 from config import settings
 from models import BuyerRequestInput, DimensionScore, MatchBonusInputs, SupplierProfileInput
 
@@ -76,7 +76,7 @@ async def score_match(
     except anthropic.APIError as exc:
         raise ValueError(f"Claude API request failed: {exc}") from exc
 
-    text = strip_code_fence(response.content[0].text)
+    text = strip_code_fence(extract_text(response))
     try:
         return json.loads(text)
     except json.JSONDecodeError as exc:

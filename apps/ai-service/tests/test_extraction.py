@@ -9,6 +9,7 @@ from url_safety import UnsafeUrlError
 
 class FakeContent:
     def __init__(self, text: str):
+        self.type = "text"
         self.text = text
 
 

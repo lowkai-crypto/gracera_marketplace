@@ -5,7 +5,7 @@ import httpx
 import trafilatura
 
 from browser_fetch import render_page
-from claude_util import get_client, strip_code_fence
+from claude_util import extract_text, get_client, strip_code_fence
 from config import settings
 from models import EXTRACTABLE_FIELDS, ExtractedField
 from url_safety import UnsafeUrlError, assert_safe_url
@@ -107,7 +107,7 @@ async def extract_fields_from_text(page_text: str) -> dict[str, ExtractedField]:
     except anthropic.APIError as exc:
         raise ValueError(f"Claude API request failed: {exc}") from exc
 
-    text = strip_code_fence(response.content[0].text)
+    text = strip_code_fence(extract_text(response))
     try:
         raw = json.loads(text)
     except json.JSONDecodeError as exc:

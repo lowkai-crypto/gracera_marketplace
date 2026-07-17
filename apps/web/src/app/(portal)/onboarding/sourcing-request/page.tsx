@@ -8,6 +8,20 @@ import styles from "../../../warm.module.css";
 
 const ORDER_FREQUENCIES = ["one_time", "monthly", "quarterly", "annual", "ongoing"];
 
+const EXTRACTABLE_FIELD_LABELS: Record<string, string> = {
+  title: "Request title",
+  category: "Category",
+  productName: "Product name",
+  quantityRequired: "Quantity required",
+  quantityUnit: "Quantity unit",
+  orderFrequency: "Order frequency",
+  budgetRange: "Budget range",
+  maxLeadTimeDays: "Max lead time",
+  requiredCertifications: "Required certifications",
+  idealSupplierDescription: "Ideal supplier description",
+  description: "Description",
+};
+
 const INITIAL_FORM = {
   title: "",
   category: "",
@@ -43,6 +57,12 @@ function SourcingRequestForm() {
   const [submitting, setSubmitting] = useState(false);
   const [result, setResult] = useState<{ id: string; completenessScore: number; status: string } | null>(null);
 
+  const [describeText, setDescribeText] = useState("");
+  const [extracting, setExtracting] = useState(false);
+  const [extractError, setExtractError] = useState<string | null>(null);
+  const [extractWarnings, setExtractWarnings] = useState<string[]>([]);
+  const [extractInfo, setExtractInfo] = useState<{ filledFields: string[]; needsReview: string[] } | null>(null);
+
   useEffect(() => {
     if (!getSession()) {
       router.replace("/get-started");
@@ -67,6 +87,52 @@ function SourcingRequestForm() {
       onChange: (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) =>
         setForm((f) => ({ ...f, [name]: e.target.value })),
     };
+  }
+
+  async function handleExtractText() {
+    if (!describeText.trim() || !buyerProfileId) return;
+    setExtracting(true);
+    setExtractError(null);
+    setExtractWarnings([]);
+    setExtractInfo(null);
+    try {
+      const response = await authFetch("/api/onboarding/extract-sourcing-request-text", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ text: describeText, buyerProfileId }),
+      });
+      const body = await response.json();
+      if (!response.ok) {
+        setExtractError(body.error?.message ?? "Could not extract from that description.");
+        return;
+      }
+
+      const filledFields: string[] = [];
+      const needsReview: string[] = [];
+      setForm((f) => {
+        const next = { ...f };
+        const mutable = next as unknown as Record<string, string | boolean>;
+        for (const [name, extracted] of Object.entries(body.fields ?? {}) as [
+          string,
+          { value: string | string[]; confidence: string },
+        ][]) {
+          if (!(name in next)) continue;
+          const value = Array.isArray(extracted.value) ? extracted.value.join(", ") : extracted.value;
+          mutable[name] = value;
+          filledFields.push(EXTRACTABLE_FIELD_LABELS[name] ?? name);
+          if (extracted.confidence !== "high") {
+            needsReview.push(EXTRACTABLE_FIELD_LABELS[name] ?? name);
+          }
+        }
+        return next;
+      });
+      setExtractInfo({ filledFields, needsReview });
+      setExtractWarnings(body.warnings ?? []);
+    } catch {
+      setExtractError("Could not reach the server. Please try again.");
+    } finally {
+      setExtracting(false);
+    }
   }
 
   async function handleSubmit(e: React.FormEvent) {
@@ -151,6 +217,57 @@ function SourcingRequestForm() {
           visit Business Profile first.
         </div>
       )}
+
+      <div className={styles.formSection}>
+        <div className={styles.formSectionTitle}>Describe what you&apos;re sourcing (optional)</div>
+        <p className={styles.helpText} style={{ marginBottom: "0.75rem" }}>
+          Type a sentence or two and we&apos;ll fill in the fields below.
+          Won&apos;t invent quantities or budgets you didn&apos;t mention.
+        </p>
+        <div style={{ display: "flex", gap: "0.75rem" }}>
+          <textarea
+            className={styles.textarea}
+            style={{ flex: "1 1 auto" }}
+            rows={2}
+            placeholder="e.g. Need 5000 units of eco-friendly hotel amenities, budget around $2/unit, within 6 weeks"
+            value={describeText}
+            onChange={(e) => setDescribeText(e.target.value)}
+          />
+          <button
+            type="button"
+            className={styles.btnSubmit}
+            style={{ flexShrink: 0, whiteSpace: "nowrap" }}
+            onClick={handleExtractText}
+            disabled={extracting || !describeText.trim()}
+          >
+            {extracting ? "Reading..." : "Fill in from description"}
+          </button>
+        </div>
+        {extractError && (
+          <div className={styles.formError} style={{ marginTop: "0.75rem" }}>
+            {extractError}
+          </div>
+        )}
+        {extractWarnings.length > 0 && (
+          <div className={styles.formError} style={{ marginTop: "0.75rem" }}>
+            {extractWarnings.join(" ")}
+          </div>
+        )}
+        {extractInfo && (
+          <div className={styles.formSuccess} style={{ marginTop: "0.75rem" }}>
+            {extractInfo.filledFields.length > 0 ? (
+              <>
+                Filled in: {extractInfo.filledFields.join(", ")}.
+                {extractInfo.needsReview.length > 0 && (
+                  <> Please double-check: {extractInfo.needsReview.join(", ")}.</>
+                )}
+              </>
+            ) : (
+              <>Couldn&apos;t confidently identify any fields from that description.</>
+            )}
+          </div>
+        )}
+      </div>
 
       <div className={styles.formSection}>
         <div className={styles.formSectionTitle}>What are you sourcing?</div>

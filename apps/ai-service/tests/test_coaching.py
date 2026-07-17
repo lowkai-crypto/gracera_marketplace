@@ -9,6 +9,7 @@ from models import DimensionScore, MatchCoachingRequest
 
 class FakeContent:
     def __init__(self, text: str):
+        self.type = "text"
         self.text = text
 
 
