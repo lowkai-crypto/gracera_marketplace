@@ -1,4 +1,4 @@
-from typing import Literal
+from typing import Any, Literal
 
 from pydantic import BaseModel, Field
 
@@ -105,3 +105,24 @@ class ExtractWebsiteResponse(BaseModel):
     source_url: str
     fields: dict[str, ExtractedField]
     warnings: list[str] = []
+
+
+class MatchCoachingRequest(BaseModel):
+    dimensions: dict[str, DimensionScore]
+    summary: str
+    viewer_side: Literal["supplier", "buyer"]
+    # Loose on purpose: this is prompt context (what the viewer's own
+    # profile already says), not scored/validated input like the matching
+    # request above -- it never gets echoed back or written anywhere.
+    viewer_profile: dict[str, Any]
+
+
+class CoachingItem(BaseModel):
+    dimension: str
+    action_type: Literal["edit_profile", "ask_counterpart", "informational"]
+    suggested_text: str
+    target_field: str | None = None
+
+
+class MatchCoachingResponse(BaseModel):
+    items: list[CoachingItem]

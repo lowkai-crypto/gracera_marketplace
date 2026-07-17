@@ -177,6 +177,15 @@ export default function SupplierOnboardingPage() {
       router.replace("/get-started");
       return;
     }
+    // Deep-link support for the match-coaching feature ("add
+    // certifications" -> jumps straight to the right step) — read via
+    // window.location directly rather than useSearchParams(), so this
+    // large page doesn't need a new Suspense boundary just for one param.
+    const stepParam = new URLSearchParams(window.location.search).get("step");
+    const stepIndex = STEPS.findIndex((s) => s.key === stepParam);
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    if (stepIndex >= 0) setCurrentStep(stepIndex);
+
     authFetch("/api/supplier-profiles/me")
       .then(async (res) => {
         if (res.ok) return res.json();

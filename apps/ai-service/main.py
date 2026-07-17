@@ -6,6 +6,7 @@ from fastapi.responses import JSONResponse
 
 from browser_fetch import get_browser, shutdown_browser
 from config import settings
+from routes.coaching import router as coaching_router
 from routes.extract import router as extract_router
 from routes.match import router as match_router
 
@@ -31,6 +32,7 @@ async def lifespan(app: FastAPI):
 app = FastAPI(title="Gracera AI Service", version="0.1.0", lifespan=lifespan)
 app.include_router(match_router)
 app.include_router(extract_router)
+app.include_router(coaching_router)
 
 
 @app.get("/health")

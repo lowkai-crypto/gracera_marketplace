@@ -45,12 +45,79 @@ const REJECTION_REASONS = [
   { value: "other", label: "Other" },
 ];
 
+const WEAK_THRESHOLD = 70;
+
+type CoachingItem = {
+  dimension: string;
+  actionType: "edit_profile" | "ask_counterpart" | "informational";
+  suggestedText: string;
+  targetField: string | null;
+};
+
+// Which wizard step a given field lives on, per profile type — used to
+// build the "add this to your profile" deep link
+// (/onboarding/{supplier|buyer}?step=<key>). Keep in sync with the STEPS
+// arrays in onboarding/supplier/page.tsx and onboarding/buyer/page.tsx.
+const SUPPLIER_FIELD_TO_STEP: Record<string, string> = {
+  companyName: "basics",
+  displayName: "basics",
+  country: "basics",
+  headquartersCity: "basics",
+  description: "about",
+  yearEstablished: "about",
+  companySize: "about",
+  businessRegNumber: "about",
+  tagline: "about",
+  supplierType: "category",
+  categories: "category",
+  productName: "product",
+  productUnit: "product",
+  productMoq: "product",
+  productMoqUnit: "product",
+  productLeadTimeDays: "product",
+  productDescription: "product",
+  targetGeographies: "market",
+  languagesSpoken: "market",
+  targetCustomerTypes: "market",
+  preferredDealTypes: "market",
+  idealCustomerDescription: "market",
+  annualRevenueRange: "additional",
+  productionCapacityMonthly: "additional",
+  certifications: "additional",
+  notableCustomers: "additional",
+  qualityControlProcess: "additional",
+  referencesAvailable: "additional",
+  primaryContactName: "contact",
+  primaryContactRole: "contact",
+  primaryContactEmail: "contact",
+  primaryContactPhone: "contact",
+};
+
+const BUYER_FIELD_TO_STEP: Record<string, string> = {
+  companyName: "basics",
+  displayName: "basics",
+  country: "basics",
+  headquartersCity: "basics",
+  companySize: "about",
+  industry: "about",
+  businessRegNumber: "about",
+  annualPurchasingVolume: "about",
+  buyerType: "preferences",
+  preferredSupplierCountries: "preferences",
+  languagesSpoken: "preferences",
+  primaryContactName: "contact",
+  primaryContactRole: "contact",
+  primaryContactEmail: "contact",
+  primaryContactPhone: "contact",
+};
+
 function MatchList({ profileType, profileId }: { profileType: MatchParty; profileId: string }) {
   const [matches, setMatches] = useState<MatchItem[] | null>(null);
   const [expandedId, setExpandedId] = useState<string | null>(null);
   const [rejectingId, setRejectingId] = useState<string | null>(null);
   const [reason, setReason] = useState(REJECTION_REASONS[0].value);
   const [error, setError] = useState<string | null>(null);
+  const [coaching, setCoaching] = useState<Record<string, CoachingItem[] | "loading">>({});
 
   const load = useCallback(() => {
     authFetch(`/api/matches?profile_type=${profileType}&profile_id=${profileId}`)
@@ -61,6 +128,13 @@ function MatchList({ profileType, profileId }: { profileType: MatchParty; profil
   useEffect(() => {
     load();
   }, [load]);
+
+  async function loadCoaching(matchId: string) {
+    setCoaching((c) => ({ ...c, [matchId]: "loading" }));
+    const res = await authFetch(`/api/matches/${matchId}/coach`, { method: "POST" });
+    const body = res.ok ? await res.json() : { items: [] };
+    setCoaching((c) => ({ ...c, [matchId]: body.items ?? [] }));
+  }
 
   async function accept(id: string) {
     setError(null);
@@ -120,13 +194,57 @@ function MatchList({ profileType, profileId }: { profileType: MatchParty; profil
             {expandedId === m.id ? "Hide details" : "Why this match?"}
           </button>
           {expandedId === m.id && (
-            <ul>
-              {Object.entries(m.dimensions).map(([key, d]) => (
-                <li key={key} className={styles.helpText}>
-                  <strong>{key.replace(/_/g, " ")}:</strong> {d.score} — {d.rationale}
-                </li>
-              ))}
-            </ul>
+            <>
+              <ul>
+                {Object.entries(m.dimensions).map(([key, d]) => (
+                  <li key={key} className={styles.helpText}>
+                    <strong>{key.replace(/_/g, " ")}:</strong> {d.score} — {d.rationale}
+                  </li>
+                ))}
+              </ul>
+              {Object.values(m.dimensions).some((d) => d.score < WEAK_THRESHOLD) && (
+                <div className={styles.formSection}>
+                  {!coaching[m.id] ? (
+                    <button
+                      type="button"
+                      className={styles.helpText}
+                      style={{ background: "none", border: "none", cursor: "pointer", padding: 0 }}
+                      onClick={() => loadCoaching(m.id)}
+                    >
+                      How can I improve this match?
+                    </button>
+                  ) : coaching[m.id] === "loading" ? (
+                    <p className={styles.helpText}>Thinking...</p>
+                  ) : (
+                    (coaching[m.id] as CoachingItem[]).map((item, i) => {
+                      const fieldToStep = profileType === "supplier" ? SUPPLIER_FIELD_TO_STEP : BUYER_FIELD_TO_STEP;
+                      const step = item.targetField ? fieldToStep[item.targetField] : undefined;
+                      return (
+                        <div key={i} className={styles.formGroup}>
+                          <p className={styles.helpText}>{item.suggestedText}</p>
+                          {item.actionType === "edit_profile" && step && (
+                            <Link href={`/onboarding/${profileType}?step=${step}`} className={styles.btnTealWarm}>
+                              Update profile
+                            </Link>
+                          )}
+                          {item.actionType === "ask_counterpart" &&
+                            (m.dealId ? (
+                              <Link
+                                href={`/deals/${m.dealId}?draftMessage=${encodeURIComponent(item.suggestedText)}`}
+                                className={styles.btnTealWarm}
+                              >
+                                Draft this into a message
+                              </Link>
+                            ) : (
+                              <p className={styles.helpText}>(Once you connect, you can ask about this.)</p>
+                            ))}
+                        </div>
+                      );
+                    })
+                  )}
+                </div>
+              )}
+            </>
           )}
           {m[myStatusKey] === "pending" && rejectingId !== m.id && (
             <div className={styles.submitRow}>

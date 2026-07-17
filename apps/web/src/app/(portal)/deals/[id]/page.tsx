@@ -40,6 +40,13 @@ export default function DealDetailPage() {
   useEffect(() => {
     if (!session) return;
     load();
+    // Match-coaching can suggest a specific message to send here
+    // (?draftMessage=...) — pre-fills the composer, still fully editable,
+    // never auto-sent. Read via window.location rather than
+    // useSearchParams() to avoid a new Suspense boundary on this page.
+    const draft = new URLSearchParams(window.location.search).get("draftMessage");
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    if (draft) setBody((current) => current || draft);
   }, [session, load]);
 
   async function send(e: React.FormEvent) {
