@@ -29,6 +29,34 @@ jobs:
             ai-service:
               - 'apps/ai-service/**'
 
+  # Gates deploy-web: typecheck/lint/test apps/web + packages/db, and
+  # --frozen-lockfile catches a lockfile generated with the wrong pnpm
+  # version before Coolify's Docker build (which pins pnpm@8, matched here)
+  # ever finds out the hard way.
+  verify-web:
+    needs: changes
+    runs-on: ubuntu-latest
+    if: needs.changes.outputs.web == 'true'
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - name: Install pnpm
+        run: npm install -g pnpm@8
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+      - name: Typecheck web
+        run: pnpm --filter web exec tsc --noEmit
+      - name: Typecheck db
+        run: pnpm --filter @gracera/db exec tsc --noEmit
+      - name: Lint web
+        run: pnpm --filter web lint
+      - name: Test web
+        run: pnpm --filter web test
+      - name: Test db
+        run: pnpm --filter @gracera/db test
+
   deploy-designs:
     needs: changes
     runs-on: ubuntu-latest
@@ -36,17 +64,21 @@ jobs:
     steps:
       - name: Deploy gracera-designs
         run: |
-          curl -fsSL -X POST "https://coolify.skystarcloud.com/api/v1/applications/mff3hw9yg8pzx10dimxpgn29/restart" \
+          curl -fsSL -X POST "https://coolify.skystarcloud.com/api/v1/deploy?uuid=mff3hw9yg8pzx10dimxpgn29" \
             -H "Authorization: Bearer ${{ secrets.COOLIFY_API_KEY }}"
 
+  # Migrations need no separate CI step -- apps/web/src/instrumentation.ts
+  # already runs packages/db's runMigrations() once per container boot, so
+  # a real deploy (not the /restart this job used to call) picks up any new
+  # migration bundled into the image automatically.
   deploy-web:
-    needs: changes
+    needs: [changes, verify-web]
     runs-on: ubuntu-latest
     if: needs.changes.outputs.web == 'true'
     steps:
       - name: Deploy gracera-web
         run: |
-          curl -fsSL -X POST "https://coolify.skystarcloud.com/api/v1/applications/t11s5jxfxqzq1vbtv1qllvmd/restart" \
+          curl -fsSL -X POST "https://coolify.skystarcloud.com/api/v1/deploy?uuid=t11s5jxfxqzq1vbtv1qllvmd" \
             -H "Authorization: Bearer ${{ secrets.COOLIFY_API_KEY }}"
 
   deploy-ai-service:
@@ -56,5 +88,5 @@ jobs:
     steps:
       - name: Deploy gracera-ai-service
         run: |
-          curl -fsSL -X POST "https://coolify.skystarcloud.com/api/v1/applications/vq6mn522jtzg2f1800ay6364/restart" \
+          curl -fsSL -X POST "https://coolify.skystarcloud.com/api/v1/deploy?uuid=vq6mn522jtzg2f1800ay6364" \
             -H "Authorization: Bearer ${{ secrets.COOLIFY_API_KEY }}"
