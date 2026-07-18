@@ -1,16 +1,29 @@
 import bcrypt from "bcryptjs";
 import { jwtVerify, SignJWT } from "jose";
 
+import { eq, getDb, users } from "@/lib/db";
+
 // docs/12-security-and-trust.md: bcrypt min cost 12; 15-min JWT access token,
 // rotating refresh tokens.
 const BCRYPT_COST = 12;
 const ACCESS_TOKEN_TTL = "15m";
 const REFRESH_TOKEN_TTL = "30d";
+const ADMIN_GATE_COOKIE_TTL = "7d";
+
+export const ADMIN_GATE_COOKIE_NAME = "gracera_admin_gate";
 
 export class AuthError extends Error {
   constructor(message: string) {
     super(message);
     this.name = "AuthError";
+  }
+}
+
+/** Authenticated, but not allowed to do this (docs/20 admin-role gating). */
+export class ForbiddenError extends Error {
+  constructor(message: string) {
+    super(message);
+    this.name = "ForbiddenError";
   }
 }
 
@@ -89,4 +102,80 @@ export function requireInternalSecret(request: Request): void {
   if (request.headers.get("x-internal-secret") !== expected) {
     throw new AuthError("Missing or invalid internal secret");
   }
+}
+
+export const ADMIN_ROLES = [
+  "super_admin",
+  "trust_team",
+  "customer_success",
+  "finance_ops",
+  "content_mod",
+  "data_analyst",
+] as const;
+
+export type AdminRole = (typeof ADMIN_ROLES)[number];
+
+/**
+ * Signs the `gracera_admin_gate` cookie set at login for admin accounts
+ * (docs/28: `/admin` should be "protected by role-based middleware"). This
+ * is deliberately NOT the Bearer access token -- it carries only `{ sub,
+ * role }` and is never read by any API route, only by `proxy.ts`'s
+ * optimistic redirect check. It cannot be used to call anything; the real
+ * authorization check is `requireAdminRole` below, run fresh against the DB
+ * on every `/api/admin/**` request.
+ */
+export async function signAdminGateCookie(payload: TokenPayload): Promise<string> {
+  return new SignJWT({ role: payload.role })
+    .setProtectedHeader({ alg: "HS256" })
+    .setSubject(payload.sub)
+    .setIssuedAt()
+    .setExpirationTime(ADMIN_GATE_COOKIE_TTL)
+    .sign(secret("JWT_ACCESS_SECRET"));
+}
+
+export async function verifyAdminGateCookie(token: string): Promise<TokenPayload> {
+  const { payload } = await jwtVerify(token, secret("JWT_ACCESS_SECRET"));
+  return { sub: payload.sub as string, role: payload.role as string };
+}
+
+/**
+ * The real admin authorization check, run fresh against the DB on every
+ * request (never trusts the JWT's `role` claim alone, so a revoked admin
+ * loses access immediately rather than waiting out the 15-min access token).
+ *
+ * - No `roles` option: just proves "this is a logged-in admin account" --
+ *   used only by `/api/admin/me` and the MFA enroll/verify endpoints, so a
+ *   brand-new staff account (`adminRole = null`, MFA not yet enrolled) can
+ *   still reach Settings to enroll (docs/28's "enroll own MFA first, then
+ *   super_admin grants roles to already-enrolled users" sequencing).
+ * - `roles` provided: additionally requires `mfaEnabled` and that
+ *   `adminRole` is one of the given roles.
+ */
+export async function requireAdminRole(
+  request: Request,
+  options?: { roles?: AdminRole[] },
+): Promise<{ sub: string; email: string; adminRole: AdminRole | null; mfaEnabled: boolean }> {
+  const auth = await requireAuth(request);
+
+  const db = getDb();
+  const [user] = await db.select().from(users).where(eq(users.id, auth.sub)).limit(1);
+  if (!user || user.role !== "admin" || user.status !== "active") {
+    throw new ForbiddenError("Not an active admin account");
+  }
+
+  if (options?.roles) {
+    if (!user.mfaEnabled) {
+      throw new ForbiddenError("MFA must be enrolled before using this");
+    }
+    if (!user.adminRole || !options.roles.includes(user.adminRole as AdminRole)) {
+      throw new ForbiddenError("This admin role cannot access this resource");
+    }
+  }
+
+  return {
+    sub: user.id,
+    email: user.email,
+    adminRole: (user.adminRole as AdminRole | null) ?? null,
+    mfaEnabled: user.mfaEnabled,
+  };
 }

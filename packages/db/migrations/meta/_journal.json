@@ -64,6 +64,13 @@
       "when": 1784327918200,
       "tag": "0008_admin_role",
       "breakpoints": true
+    },
+    {
+      "idx": 9,
+      "version": "7",
+      "when": 1784334886629,
+      "tag": "0009_admin_mfa_audit_log",
+      "breakpoints": true
     }
   ]
 }

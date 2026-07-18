@@ -1,7 +1,14 @@
+import { cookies } from "next/headers";
 import { NextResponse } from "next/server";
 import { z } from "zod";
 
-import { signAccessToken, signRefreshToken, verifyPassword } from "@/lib/auth";
+import {
+  ADMIN_GATE_COOKIE_NAME,
+  signAccessToken,
+  signAdminGateCookie,
+  signRefreshToken,
+  verifyPassword,
+} from "@/lib/auth";
 import { errorResponse, validationErrorResponse } from "@/lib/api-error";
 import { eq, getDb, users } from "@/lib/db";
 
@@ -27,6 +34,22 @@ export async function POST(request: Request) {
     signAccessToken({ sub: user.id, role: user.role }),
     signRefreshToken({ sub: user.id, role: user.role }),
   ]);
+
+  // docs/28: /admin is gated by proxy.ts reading this cookie. It's not the
+  // Bearer access token above -- it can't call any API, it only lets the
+  // optimistic redirect check prove "this browser recently signed in as an
+  // admin" without a DB round trip on every navigation.
+  if (user.role === "admin") {
+    const adminGateToken = await signAdminGateCookie({ sub: user.id, role: user.role });
+    const cookieStore = await cookies();
+    cookieStore.set(ADMIN_GATE_COOKIE_NAME, adminGateToken, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === "production",
+      sameSite: "lax",
+      path: "/admin",
+      maxAge: 60 * 60 * 24 * 7,
+    });
+  }
 
   return NextResponse.json({
     user_id: user.id,

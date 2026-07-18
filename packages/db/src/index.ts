@@ -8,4 +8,4 @@ export { runMigrations } from "./migrate";
 // Re-exported so consumers never import drizzle-orm directly — pnpm can
 // otherwise resolve a second physical copy with an incompatible peer-dep
 // hash, breaking type identity (SQL<unknown> from copy A != copy B).
-export { and, eq, inArray, or } from "drizzle-orm";
+export { and, desc, eq, gte, inArray, or, sql } from "drizzle-orm";

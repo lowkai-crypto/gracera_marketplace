@@ -489,51 +489,66 @@ surfaced by the same Match Override plan:
 - `users.suspension_type` / `suspension_reason` — backs Account Suspension ([20](20-admin-ops-spec.md) §7.2).
 
 #### Staff Accounts
-- **Status:** not built.
-- **Data model:** new `admin_role_assignments` table (`user_id` FK,
-  `admin_role` enum, `created_at`; `PRIMARY KEY (user_id, admin_role)` —
-  one staff member can hold more than one internal role). Deliberately
-  **not** modeled on `roles`/`user_roles` ([09](09-data-model.md) §2):
-  those are self-service via Role & Feature Management below, and
-  granting internal admin capability needs to stay a separate, more
-  locked-down action so that system can't be used to escalate into the
-  admin dashboard. The first `super_admin` is bootstrapped via a
-  one-time migration/seed, not through the UI (avoids a chicken-and-egg
-  lockout). Granting the first `admin_role_assignments` row to a user
-  also requires `users.mfa_enabled = true` first
-  ([09](09-data-model.md) §2) — TOTP MFA is mandatory for admin
-  accounts per [20](20-admin-ops-spec.md) §1, not an opt-in setting.
-- **Backend:** `POST/DELETE /api/admin/staff/{userId}/roles` —
-  `super_admin` only, and rejected if the target user hasn't completed
-  MFA enrollment; `POST /api/users/me/mfa/enroll` (self-service TOTP
-  setup, needed before anyone can be granted a role here).
-- **Frontend:** `/admin/staff`; MFA enrollment itself happens on the
-  Admin Settings page below, not here (an admin enrolls their own MFA;
+- **Status:** built (Phase 1 admin portal pass) — with one deliberate
+  divergence from this doc's original design, below.
+- **Data model:** shipped as `users.adminRole` (single nullable enum
+  column, migration `0008_admin_role.sql`), **not** the
+  `admin_role_assignments` join table this section originally specced.
+  Sequencing: `0008` shipped before this doc's Staff Accounts section had
+  been written; when the gap was noticed, the choice was to keep the
+  single-column model rather than reverse an already-applied production
+  migration. Practical effect: one staff member holds at most one
+  internal role at a time, not several. If a real need for multi-role
+  staff shows up, revisit the `admin_role_assignments` table then rather
+  than speculatively building it now. Everything else in this section's
+  original design still holds: granting internal admin capability stays
+  a separate, more locked-down action from `roles`/`user_roles`
+  ([09](09-data-model.md) §2) so that system can't be used to escalate
+  into the admin dashboard; the first `super_admin` is bootstrapped via
+  a one-time script (`packages/db/src/scripts/seed-super-admin.ts`), not
+  through the UI; and granting a role still requires
+  `users.mfa_enabled = true` first — TOTP MFA is mandatory for admin
+  accounts per [20](20-admin-ops-spec.md) §1, enforced both at grant time
+  and on every subsequent authorization check, not just a one-time gate.
+- **Backend:** `GET/POST /api/admin/staff` (`super_admin` only) —
+  `POST` takes a discriminated `action` (`create` a new internal account,
+  `assign` an adminRole, `revoke` one), rejecting `assign` if the target
+  hasn't completed MFA enrollment; `POST /api/admin/mfa/enroll` +
+  `POST /api/admin/mfa/verify` (self-service TOTP setup, needed before
+  anyone can be granted a role here).
+- **Frontend:** `/admin/staff`; MFA enrollment itself happens on
+  `/admin/settings`, not here (an admin enrolls their own MFA;
   `super_admin` only grants the role).
 - **Depends on:** nothing — but every other item in this section
   depends on this existing first.
 - **Phase:** not milestoned in [13](13-roadmap.md); this whole section
-  postdates that doc. Build first regardless.
+  postdates that doc.
 
 #### Dashboard (Platform Health)
-- **Status:** not built.
-- **Data model:** none new for the numbers themselves — aggregates over
-  `users` and `matches` (once it exists); AI service latency and error
-  rate need an APM/logging pipeline, not a Postgres table (infra gap,
-  out of scope for a schema change).
+- **Status:** built, partially — active users (24h) and total match count
+  only; AI service latency/error rate are returned as `null` with an
+  explanatory `note` field rather than faked, since they need an
+  APM/logging pipeline this app doesn't have (infra gap, out of scope for
+  a schema change).
+- **Data model:** none new — aggregates over `users` and `matches`.
 - **Backend:** `GET /api/admin/dashboard/health`.
 - **Frontend:** `/admin` overview page.
 - **Depends on:** Staff Accounts (authorization).
 - **Phase:** 1 (rides with M1.1's "Admin impersonation").
 
 #### Verification Queue
-- **Status:** not built.
-- **Data model:** none new — reads `supplier_profiles`/`buyer_profiles`
-  where `verification_level = basic` and `certifications` where
-  `verified = false`. KYB queue ([20](20-admin-ops-spec.md) §3.3) is
-  Phase 4+, deferred with it.
+- **Status:** built, in reduced form — surfaces `verification_requests`
+  AI triage rows for profiles still at `verification_level = basic`; the
+  one real action is bumping that profile straight to `verified` (there's
+  deliberately no separate queue-state column on `verification_requests`
+  — see that table's comment in `schema.ts` — so this isn't a full
+  pending/flagged/cleared lifecycle, just triage visibility plus the one
+  state transition that already means something).
+- **Data model:** none new — reads `supplier_profiles`/`buyer_profiles`.
+  `certifications`-based review and the KYB queue
+  ([20](20-admin-ops-spec.md) §3.3) remain deferred with Certifications.
 - **Backend:** `GET /api/admin/verification-queue`,
-  `POST /api/admin/verification-queue/{id}/approve|reject`.
+  `PATCH /api/admin/verification-queue/{id}/verify`.
 - **Frontend:** `/admin/verification`.
 - **Depends on:** Staff Accounts, Certifications (Supplier-only, above).
 - **Phase:** 1 (M1.1, business registration verification) → 2 (M2.1,
@@ -594,7 +609,18 @@ surfaced by the same Match Override plan:
 - **Phase:** 1 (M1.1 explicitly names "Admin impersonation").
 
 #### Content Moderation
-- **Status:** not built.
+- **Status:** not built, except for one narrower slice: sourcing request
+  moderation (the `pending_moderation` status this section's own summary
+  row above already names) shipped as its own read/approve/reject queue —
+  `GET /api/admin/moderation/sourcing-requests`,
+  `POST /api/admin/moderation/sourcing-requests/{id}/approve|reject`,
+  `/admin/moderation`, `content_mod`-gated. It needed no new tables
+  (`sourcing_requests.status` already had `pending_moderation` live, set
+  by the existing prohibited-goods scan) beyond adding a `rejected` value
+  to `sourcing_request_status` — reusing `closed` for an admin rejection
+  would have conflated it with a buyer voluntarily closing their own
+  request. The flag queue and broadcast-campaign approval below remain
+  unbuilt.
 - **Data model:** `flags` ([09](09-data-model.md) §2), including
   `entity_type = review` — reviews (Shared, above) are user-generated
   text and need to be flaggable like any other content; broadcast
@@ -643,14 +669,19 @@ surfaced by the same Match Override plan:
   RBAC generalization postdates that doc.
 
 #### Audit Log
-- **Status:** not built. Schema is fully speced inline in
-  [20](20-admin-ops-spec.md) §12 (treated as its authoritative source,
-  not duplicated into [09](09-data-model.md)) but not yet in `schema.ts`.
+- **Status:** built. `audit_log` exactly as speced in
+  [20](20-admin-ops-spec.md) §12, added in migration
+  `0009_admin_mfa_audit_log.sql`.
 - **Data model:** `audit_log` exactly as speced in
   [20](20-admin-ops-spec.md) §12.
-- **Backend:** every admin mutation above writes here as it's built —
-  wire the logging hook into each item at build time, don't bolt it on
-  after; `GET /api/admin/audit-log?entity_type=&actor_id=` for browsing.
+- **Backend:** every admin mutation shipped in this pass (MFA enroll,
+  Staff Accounts create/assign/revoke, Verification Queue mark-verified,
+  Sourcing Request Moderation approve/reject) writes here via the shared
+  `writeAuditLog()` helper (`apps/web/src/lib/audit.ts`) — the intent of
+  "wire the logging hook into each item at build time" held; every future
+  admin mutation should call the same helper rather than bolting logging
+  on after. `GET /api/admin/audit-log?entityType=&actorId=` for browsing
+  (paginated, most recent first, no cursor yet — fine at today's volume).
 - **Frontend:** `/admin/audit-log`.
 - **Depends on:** Staff Accounts. Works from day one with nothing to
   show; its value scales with how many other admin actions exist to log.
@@ -658,21 +689,24 @@ surfaced by the same Match Override plan:
   first admin mutation to exist.
 
 #### Settings
-- **Status:** not built. Every other item in this section is a queue
-  or a management panel gated by `admin_role_assignments` — this is
-  the one self-service item, parallel to Supplier/Buyer's Settings.
-- **Data model:** `users.mfa_enabled` / `mfa_secret_encrypted`
-  ([09](09-data-model.md) §2); `notification_preferences` (Shared,
-  above) extended with per-queue alert types (e.g. "dispute SLA about
-  to breach," "wire transfer queue backlog") for staff accounts.
-- **Backend:** `POST /api/users/me/mfa/enroll` /
-  `POST /api/users/me/mfa/verify` (TOTP setup, shared with any future
-  non-admin MFA use); `PATCH /api/users/me` for password and
-  notification prefs (same endpoint Supplier/Buyer Settings uses).
+- **Status:** built, MFA enrollment only — password change and
+  per-queue SLA-alert notification prefs remain unbuilt (no
+  `notification_preferences` table yet).
+- **Data model:** `users.mfa_enabled` / `mfa_secret_encrypted` shipped in
+  migration `0009_admin_mfa_audit_log.sql`, encrypted at rest with
+  AES-256-GCM (`apps/web/src/lib/mfa.ts`, keyed by a new
+  `MFA_ENCRYPTION_KEY` env var — see [19](19-tech-stack-dev-setup.md)).
+  `notification_preferences` (Shared, above) with per-queue alert types
+  is still unbuilt.
+- **Backend:** `POST /api/admin/mfa/enroll` / `POST /api/admin/mfa/verify`
+  (TOTP setup — under `/api/admin/`, not `/api/users/me/`, since this pass
+  scoped MFA to admin accounts only; extending it to non-admin use later
+  is a straightforward move of the same helpers, not a rewrite). Password
+  change and notification prefs (`PATCH /api/users/me`) not implemented.
 - **Frontend:** `/admin/settings` — MFA enrollment (blocking: an
-  `admin_role_assignments` row cannot be granted until this is
-  complete, per Staff Accounts above), password change, SLA-alert
-  toggles.
+  `adminRole` cannot be granted to a staff account until this is
+  complete, per Staff Accounts above). No password-change or SLA-alert UI
+  yet.
 - **Depends on:** nothing to view the page, but every other Admin item
   is gated on this existing first, transitively through Staff Accounts.
 - **Phase:** 1 — MFA enrollment must exist before Staff Accounts can

@@ -68,7 +68,12 @@ export default function PortalLayout({ children }: { children: React.ReactNode }
   const pathname = usePathname();
   const session = useSession();
 
-  const defaultContext: Context = session?.role === "both" ? "supplier" : (session?.role ?? "supplier");
+  // "both"/"admin"/no-session all fall back to "supplier" here -- "both"
+  // resolves for real once the effect below reads the actual localStorage
+  // preference, and "admin" never lingers since that same effect redirects
+  // admin sessions to /admin before this fallback value is ever shown.
+  const defaultContext: Context =
+    session?.role === "supplier" || session?.role === "buyer" ? session.role : "supplier";
   const [activeContext, setActiveContext] = useState<Context>(defaultContext);
 
   useEffect(() => {
@@ -83,6 +88,12 @@ export default function PortalLayout({ children }: { children: React.ReactNode }
     const current = getSession();
     if (!current) {
       router.replace("/get-started");
+      return;
+    }
+    // Admin accounts have their own portal at /admin -- this shell (and its
+    // supplier/buyer Context type) doesn't apply to them at all.
+    if (current.role === "admin") {
+      router.replace("/admin");
       return;
     }
     // Single-role accounts: `defaultContext` (used to seed activeContext's

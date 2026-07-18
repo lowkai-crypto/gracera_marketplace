@@ -1059,6 +1059,111 @@
   min-width: 0;
 }
 
+/* ADMIN — internal /admin dashboard (docs/20, docs/28) */
+.adminContent {
+  padding: 2rem 2.5rem;
+  max-width: 64rem;
+}
+.adminHeading {
+  font-size: 1.375rem;
+  font-weight: 700;
+  color: var(--ink);
+  margin: 0 0 0.375rem;
+}
+.adminSub {
+  color: var(--muted);
+  font-size: 0.9375rem;
+  margin: 0 0 1.5rem;
+}
+.adminCard {
+  background: var(--surface);
+  border: 1px solid var(--warm-200);
+  border-radius: var(--r-lg);
+  padding: 1.5rem;
+  margin-bottom: 1.5rem;
+}
+.adminTable {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.875rem;
+}
+.adminTable th {
+  text-align: left;
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+  color: var(--muted);
+  padding: 0.5rem 0.75rem;
+  border-bottom: 1px solid var(--warm-200);
+}
+.adminTable td {
+  padding: 0.625rem 0.75rem;
+  border-bottom: 1px solid var(--warm-100);
+  color: var(--ink2);
+  vertical-align: top;
+}
+.adminEmpty {
+  color: var(--muted);
+  font-size: 0.875rem;
+  padding: 1rem 0;
+}
+.adminBadge {
+  display: inline-block;
+  font-size: 0.6875rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+  color: var(--muted);
+  background: var(--warm-100);
+  padding: 0.125rem 0.5rem;
+  border-radius: 100px;
+}
+.adminBtn {
+  font-size: 0.8125rem;
+  font-weight: 600;
+  color: var(--ink);
+  background: var(--warm-100);
+  border: none;
+  border-radius: var(--r);
+  padding: 0.4375rem 0.875rem;
+  cursor: pointer;
+}
+.adminBtn:hover {
+  background: var(--warm-200);
+}
+.adminBtn:disabled {
+  opacity: 0.5;
+  cursor: default;
+}
+.adminBtnDanger {
+  color: #b91c1c;
+}
+.adminActions {
+  display: flex;
+  gap: 0.5rem;
+}
+.adminStatRow {
+  display: flex;
+  gap: 2rem;
+  margin-bottom: 1.5rem;
+}
+.adminStat {
+  background: var(--surface);
+  border: 1px solid var(--warm-200);
+  border-radius: var(--r-lg);
+  padding: 1rem 1.5rem;
+}
+.adminStatValue {
+  font-size: 1.75rem;
+  font-weight: 700;
+  color: var(--ink);
+}
+.adminStatLabel {
+  font-size: 0.8125rem;
+  color: var(--muted);
+}
+
 /* WIZARD — multi-step profile forms, e.g. onboarding/supplier */
 
 .wizardProgress {

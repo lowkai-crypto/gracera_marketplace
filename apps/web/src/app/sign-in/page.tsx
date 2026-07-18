@@ -36,7 +36,7 @@ export default function SignInPage() {
         accessToken: body.access_token,
         refreshToken: body.refresh_token,
       });
-      router.push("/onboarding");
+      router.push(body.role === "admin" ? "/admin" : "/onboarding");
     } catch {
       setError("Could not reach the server. Please try again.");
     } finally {

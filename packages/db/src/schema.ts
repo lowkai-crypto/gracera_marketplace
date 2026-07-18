@@ -55,6 +55,7 @@ export const sourcingRequestStatusEnum = pgEnum("sourcing_request_status", [
   "closed",
   "fulfilled",
   "pending_moderation",
+  "rejected",
 ]);
 export const orderFrequencyEnum = pgEnum("order_frequency", [
   "one_time",
@@ -78,6 +79,7 @@ export const dealStageEnum = pgEnum("deal_stage", [
   "closed",
   "abandoned",
 ]);
+export const auditActorTypeEnum = pgEnum("audit_actor_type", ["admin", "system", "user"]);
 
 // ── users ─────────────────────────────────────────────────────────────────
 // docs/09-data-model.md — trimmed: no auth_provider/OAuth column yet (v0 is
@@ -93,6 +95,11 @@ export const users = pgTable("users", {
   // this account has. Only meaningful when role = "admin"; there is no
   // admin auth/dashboard reading it yet.
   adminRole: adminRoleEnum("admin_role"),
+  // docs/20 §1: TOTP MFA is mandatory (not opt-in) for admin accounts.
+  // mfaSecretEncrypted is AES-256-GCM ciphertext (apps/web/src/lib/mfa.ts) --
+  // the raw TOTP secret is never stored at rest.
+  mfaEnabled: boolean("mfa_enabled").notNull().default(false),
+  mfaSecretEncrypted: text("mfa_secret_encrypted"),
   status: userStatusEnum("status").notNull().default("active"),
   createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
   lastLoginAt: timestamp("last_login_at", { withTimezone: true }),
@@ -398,3 +405,26 @@ export const verificationRequests = pgTable("verification_requests", {
 
 export type VerificationRequest = typeof verificationRequests.$inferSelect;
 export type NewVerificationRequest = typeof verificationRequests.$inferInsert;
+
+// ── audit_log ────────────────────────────────────────────────────────────
+// docs/20-admin-ops-spec.md §12 is the authoritative schema source (same
+// precedent as verification_requests above). Append-only -- nothing in the
+// app ever updates or deletes a row. `actorId`/`entityId` are intentionally
+// not FKs -- polymorphic across whatever entity/actor type the action
+// concerns, matching notifications.entityId above.
+
+export const auditLog = pgTable("audit_log", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  actorType: auditActorTypeEnum("actor_type").notNull(),
+  actorId: uuid("actor_id").notNull(),
+  action: varchar("action", { length: 100 }).notNull(),
+  entityType: varchar("entity_type", { length: 40 }).notNull(),
+  entityId: uuid("entity_id").notNull(),
+  before: jsonb("before"),
+  after: jsonb("after"),
+  reason: text("reason"),
+  createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+});
+
+export type AuditLog = typeof auditLog.$inferSelect;
+export type NewAuditLog = typeof auditLog.$inferInsert;

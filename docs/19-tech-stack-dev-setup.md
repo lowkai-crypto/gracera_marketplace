@@ -193,6 +193,7 @@ JWT_ACCESS_SECRET=dev-access-secret-change-in-prod
 JWT_REFRESH_SECRET=dev-refresh-secret-change-in-prod
 NEXTAUTH_SECRET=dev-nextauth-secret
 NEXTAUTH_URL=http://localhost:3000
+MFA_ENCRYPTION_KEY=<base64, must decode to exactly 32 bytes>  # openssl rand -base64 32 -- encrypts admin TOTP secrets at rest (docs/20 §1)
 
 # ── OAuth ─────────────────────────────────────────────────────────
 GOOGLE_CLIENT_ID=your-google-client-id

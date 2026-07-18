@@ -5,7 +5,7 @@ const STORAGE_KEY = "gracera.session";
 export type Session = {
   userId: string;
   email: string;
-  role: "supplier" | "buyer" | "both";
+  role: "supplier" | "buyer" | "both" | "admin";
   accessToken: string;
   refreshToken: string;
 };
