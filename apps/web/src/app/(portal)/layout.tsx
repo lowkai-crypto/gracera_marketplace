@@ -3,9 +3,32 @@
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
+import {
+  Briefcase,
+  Building2,
+  ChartLine,
+  Compass,
+  Contact as ContactIcon,
+  CreditCard,
+  Eye,
+  Handshake,
+  LayoutDashboard,
+  Megaphone,
+  MessageSquare,
+  PackageSearch,
+  Settings as SettingsIcon,
+  ShieldCheck,
+  Sparkles,
+  Star,
+  Truck,
+  Users,
+  Wallet,
+  type LucideIcon,
+} from "lucide-react";
 
 import { clearSession, getSession, useSession } from "@/lib/auth-client";
 import AccountMenu from "@/components/AccountMenu";
+import Logo from "@/components/Logo";
 import styles from "../warm.module.css";
 
 type NavItem = {
@@ -15,45 +38,51 @@ type NavItem = {
   // light up together whenever either is active, which reads as two
   // items being "selected" at once rather than "these are the same page."
   neverActive?: boolean;
+  icon: LucideIcon;
+  color: string;
 };
 
 // docs/28-portal-navigation.md Supplier context table, in that doc's order.
+// Icon/color choices are shared across portals for concepts that appear in
+// more than one (Dashboard, Matches, Deals, Messages, AI-Brain, Insights,
+// Reviews, Contacts, Billing, Settings) so switching contexts/portals feels
+// like the same mental model, not a re-skin.
 const SUPPLIER_NAV: NavItem[] = [
-  { label: "Dashboard", href: "/onboarding" },
-  { label: "Business Profile", href: "/onboarding/supplier" },
-  { label: "Matches", href: "/matches" },
-  { label: "Deals", href: "/deals" },
-  { label: "Messages", href: "/deals", neverActive: true }, // same destination — messaging lives inside a deal, not its own page
-  { label: "AI-Brain" },
-  { label: "Insights" },
-  { label: "Certifications" },
-  { label: "Visibility (AEO)" },
-  { label: "Broadcasts" },
-  { label: "Finance" },
-  { label: "Reviews" },
-  { label: "Contacts" },
-  { label: "Billing" },
-  { label: "Settings" },
+  { label: "Dashboard", href: "/onboarding", icon: LayoutDashboard, color: "#22c55e" },
+  { label: "Business Profile", href: "/onboarding/supplier", icon: Building2, color: "#6366f1" },
+  { label: "Matches", href: "/matches", icon: Handshake, color: "#f97316" },
+  { label: "Deals", href: "/deals", icon: Briefcase, color: "#f59e0b" },
+  { label: "Messages", href: "/deals", neverActive: true, icon: MessageSquare, color: "#0ea5e9" }, // same destination — messaging lives inside a deal, not its own page
+  { label: "AI-Brain", icon: Sparkles, color: "#8b5cf6" },
+  { label: "Insights", icon: ChartLine, color: "#10b981" },
+  { label: "Certifications", icon: ShieldCheck, color: "#06b6d4" },
+  { label: "Visibility (AEO)", icon: Eye, color: "#d946ef" },
+  { label: "Broadcasts", icon: Megaphone, color: "#f43f5e" },
+  { label: "Finance", icon: Wallet, color: "#84cc16" },
+  { label: "Reviews", icon: Star, color: "#eab308" },
+  { label: "Contacts", icon: ContactIcon, color: "#64748b" },
+  { label: "Billing", icon: CreditCard, color: "#14b8a6" },
+  { label: "Settings", icon: SettingsIcon, color: "#6b7280" },
 ];
 
 // docs/28-portal-navigation.md Buyer context table, in that doc's order.
 const BUYER_NAV: NavItem[] = [
-  { label: "Dashboard", href: "/onboarding" },
-  { label: "Business Profile", href: "/onboarding/buyer" },
-  { label: "Sourcing Requests", href: "/onboarding/sourcing-request" }, // create form — no list page exists yet
-  { label: "Matches", href: "/matches" },
-  { label: "Deals", href: "/deals" },
-  { label: "Messages", href: "/deals", neverActive: true },
-  { label: "Group Buys" },
-  { label: "AI-Brain" },
-  { label: "Price Compass" },
-  { label: "Insights" },
-  { label: "Logistics" },
-  { label: "Payment & Trust" },
-  { label: "Reviews" },
-  { label: "Contacts" },
-  { label: "Billing" },
-  { label: "Settings" },
+  { label: "Dashboard", href: "/onboarding", icon: LayoutDashboard, color: "#22c55e" },
+  { label: "Business Profile", href: "/onboarding/buyer", icon: Building2, color: "#6366f1" },
+  { label: "Sourcing Requests", href: "/onboarding/sourcing-request", icon: PackageSearch, color: "#ec4899" }, // create form — no list page exists yet
+  { label: "Matches", href: "/matches", icon: Handshake, color: "#f97316" },
+  { label: "Deals", href: "/deals", icon: Briefcase, color: "#f59e0b" },
+  { label: "Messages", href: "/deals", neverActive: true, icon: MessageSquare, color: "#0ea5e9" },
+  { label: "Group Buys", icon: Users, color: "#059669" },
+  { label: "AI-Brain", icon: Sparkles, color: "#8b5cf6" },
+  { label: "Price Compass", icon: Compass, color: "#06b6d4" },
+  { label: "Insights", icon: ChartLine, color: "#10b981" },
+  { label: "Logistics", icon: Truck, color: "#b45309" },
+  { label: "Payment & Trust", icon: ShieldCheck, color: "#65a30d" },
+  { label: "Reviews", icon: Star, color: "#eab308" },
+  { label: "Contacts", icon: ContactIcon, color: "#64748b" },
+  { label: "Billing", icon: CreditCard, color: "#14b8a6" },
+  { label: "Settings", icon: SettingsIcon, color: "#6b7280" },
 ];
 
 const ACTIVE_CONTEXT_KEY = "gracera.activeContext";
@@ -67,6 +96,14 @@ export default function PortalLayout({ children }: { children: React.ReactNode }
   const router = useRouter();
   const pathname = usePathname();
   const session = useSession();
+  const [logoKey, setLogoKey] = useState<string | null>(null);
+
+  useEffect(() => {
+    fetch("/api/platform-settings")
+      .then((res) => res.json())
+      .then((body) => setLogoKey(body.logoKey))
+      .catch(() => {});
+  }, []);
 
   // "both"/"admin"/no-session all fall back to "supplier" here -- "both"
   // resolves for real once the effect below reads the actual localStorage
@@ -125,9 +162,7 @@ export default function PortalLayout({ children }: { children: React.ReactNode }
   return (
     <div className={styles.page}>
       <div className={styles.portalTopbar}>
-        <Link href="/onboarding" className={styles.portalWordmark}>
-          Gracera
-        </Link>
+        <Logo logoKey={logoKey} href="/onboarding" />
         <div className={styles.portalTopbarRight}>
           {session.role === "both" && (
             <div className={styles.portalSwitcher}>
@@ -158,22 +193,27 @@ export default function PortalLayout({ children }: { children: React.ReactNode }
       </div>
       <div className={styles.portalBody}>
         <nav className={styles.portalSidebar}>
-          {navItems.map((item) =>
-            item.href ? (
+          {navItems.map((item) => {
+            const Icon = item.icon;
+            return item.href ? (
               <Link
                 key={item.label}
                 href={item.href}
                 className={`${styles.portalNavLink} ${!item.neverActive && isActive(pathname, item.href) ? activeLinkClass : ""}`}
               >
+                <Icon size={18} color={item.color} className={styles.portalNavIcon} />
                 {item.label}
               </Link>
             ) : (
               <div key={item.label} className={styles.portalNavLinkSoon}>
-                <span>{item.label}</span>
+                <span className={styles.portalNavSoonLabel}>
+                  <Icon size={18} color={item.color} className={styles.portalNavIcon} />
+                  {item.label}
+                </span>
                 <span className={styles.portalNavBadgeSoon}>Soon</span>
               </div>
-            ),
-          )}
+            );
+          })}
         </nav>
         <main className={styles.portalMain}>{children}</main>
       </div>

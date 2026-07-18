@@ -71,6 +71,13 @@
       "when": 1784334886629,
       "tag": "0009_admin_mfa_audit_log",
       "breakpoints": true
+    },
+    {
+      "idx": 10,
+      "version": "7",
+      "when": 1784353756881,
+      "tag": "0010_glossy_nomad",
+      "breakpoints": true
     }
   ]
 }

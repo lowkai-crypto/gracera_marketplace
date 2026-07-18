@@ -2,24 +2,19 @@ import Link from "next/link";
 
 import HeroNetworkCanvas from "@/components/HeroNetworkCanvas";
 import MatchScoreCard from "@/components/MatchScoreCard";
+import Logo from "@/components/Logo";
+import { getDb } from "@/lib/db";
+import { getOrCreatePlatformSettings } from "@/lib/platform-settings";
 import styles from "./warm.module.css";
 
-export default function Home() {
+export default async function Home() {
+  const settings = await getOrCreatePlatformSettings(getDb());
+
   return (
     <div className={styles.page}>
       <nav className={styles.nav}>
         <div className={styles.navI}>
-          <Link href="/" className={styles.logo}>
-            <span className={styles.lm}>
-              <svg viewBox="0 0 16 16" fill="none" width={16} height={16}>
-                <circle cx="5" cy="5" r="2.5" fill="white" opacity=".9" />
-                <circle cx="11" cy="5" r="2.5" fill="white" opacity=".55" />
-                <circle cx="5" cy="11" r="2.5" fill="white" opacity=".55" />
-                <circle cx="11" cy="11" r="2.5" fill="white" opacity=".25" />
-              </svg>
-            </span>
-            gracera<span className={styles.logoDot}>.</span>ai
-          </Link>
+          <Logo logoKey={settings.logoKey} />
           <ul className={styles.navLinks}>
             <li>
               <a href="#how-it-works">How it works</a>

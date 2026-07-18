@@ -428,3 +428,32 @@ export const auditLog = pgTable("audit_log", {
 
 export type AuditLog = typeof auditLog.$inferSelect;
 export type NewAuditLog = typeof auditLog.$inferInsert;
+
+// ── platform_settings ───────────────────────────────────────────────────
+// Organization-wide branding/legal config (logo, company address, privacy
+// policy / terms of service copy) -- not speced in any doc, genuinely new.
+// Single row, enforced by application logic (read-or-create-default in the
+// admin API route) rather than a DB constraint -- only one route ever
+// writes here, so that's sufficient. `logoKey` references an entry in
+// apps/web/src/lib/logo-candidates.tsx by its stable key; null means "use
+// the original default mark," not "no logo."
+
+export const platformSettings = pgTable("platform_settings", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  logoKey: varchar("logo_key", { length: 50 }),
+  companyLegalName: varchar("company_legal_name", { length: 255 }),
+  supportEmail: varchar("support_email", { length: 255 }),
+  addressLine1: varchar("address_line1", { length: 255 }),
+  addressLine2: varchar("address_line2", { length: 255 }),
+  city: varchar("city", { length: 255 }),
+  region: varchar("region", { length: 255 }),
+  postalCode: varchar("postal_code", { length: 20 }),
+  country: char("country", { length: 2 }),
+  privacyPolicyContent: text("privacy_policy_content"),
+  termsOfServiceContent: text("terms_of_service_content"),
+  updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow(),
+  updatedById: uuid("updated_by_id").references(() => users.id),
+});
+
+export type PlatformSettings = typeof platformSettings.$inferSelect;
+export type NewPlatformSettings = typeof platformSettings.$inferInsert;
