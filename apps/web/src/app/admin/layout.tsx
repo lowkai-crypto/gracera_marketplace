@@ -6,6 +6,8 @@ import { useEffect, useState } from "react";
 import {
   Banknote,
   ChartColumn,
+  ChevronDown,
+  ChevronRight,
   Flag,
   KeyRound,
   LayoutDashboard,
@@ -80,6 +82,13 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
   const [me, setMe] = useState<Me | null>(null);
   const [checked, setChecked] = useState(false);
   const [logoKey, setLogoKey] = useState<string | null>(null);
+  // Auto-expanded when already inside Settings (e.g. a hard refresh or
+  // direct link to /admin/settings/branding shouldn't hide the very page
+  // you're on); collapsed by default otherwise. The only way to navigate
+  // into /admin/settings/* is via the sub-links this expansion reveals, so
+  // there's no client-side-navigation case where this needs to re-sync
+  // after mount -- the lazy initializer alone covers it.
+  const [settingsExpanded, setSettingsExpanded] = useState(() => pathname.startsWith("/admin/settings"));
 
   useEffect(() => {
     fetch("/api/platform-settings")
@@ -154,25 +163,35 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
             );
           })}
           <div className={styles.portalNavGroup}>
-            <div className={styles.portalNavGroupLabel}>
-              <SettingsIcon size={18} color="#6b7280" className={styles.portalNavIcon} />
-              Settings
-            </div>
-            <Link
-              href="/admin/settings/account"
-              className={`${styles.portalNavSubLink} ${pathname.startsWith("/admin/settings/account") ? styles.portalNavLinkActive : ""}`}
+            <button
+              type="button"
+              className={styles.portalNavGroupLabel}
+              onClick={() => setSettingsExpanded((prev) => !prev)}
+              aria-expanded={settingsExpanded}
             >
-              <KeyRound size={16} color="#0ea5e9" className={styles.portalNavIcon} />
-              Account
-            </Link>
-            {me.adminRole === "super_admin" && (
-              <Link
-                href="/admin/settings/branding"
-                className={`${styles.portalNavSubLink} ${pathname.startsWith("/admin/settings/branding") ? styles.portalNavLinkActive : ""}`}
-              >
-                <Palette size={16} color="#ec4899" className={styles.portalNavIcon} />
-                Branding
-              </Link>
+              <SettingsIcon size={18} color="#6b7280" className={styles.portalNavIcon} />
+              <span className={styles.portalNavGroupLabelText}>Settings</span>
+              {settingsExpanded ? <ChevronDown size={15} /> : <ChevronRight size={15} />}
+            </button>
+            {settingsExpanded && (
+              <>
+                <Link
+                  href="/admin/settings/account"
+                  className={`${styles.portalNavSubLink} ${pathname.startsWith("/admin/settings/account") ? styles.portalNavLinkActive : ""}`}
+                >
+                  <KeyRound size={16} color="#0ea5e9" className={styles.portalNavIcon} />
+                  Account
+                </Link>
+                {me.adminRole === "super_admin" && (
+                  <Link
+                    href="/admin/settings/branding"
+                    className={`${styles.portalNavSubLink} ${pathname.startsWith("/admin/settings/branding") ? styles.portalNavLinkActive : ""}`}
+                  >
+                    <Palette size={16} color="#ec4899" className={styles.portalNavIcon} />
+                    Branding
+                  </Link>
+                )}
+              </>
             )}
           </div>
         </nav>
