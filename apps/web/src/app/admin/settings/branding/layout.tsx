@@ -4,13 +4,13 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { Cookie, Palette, Building2, FileText, ScrollText, Share2, Search } from "lucide-react";
 
-import styles from "../../warm.module.css";
+import styles from "../../../warm.module.css";
 
 const TABS = [
-  { label: "Logo", href: "/admin/platform-settings/logo", icon: Palette },
-  { label: "Company Info", href: "/admin/platform-settings/company", icon: Building2 },
-  { label: "Privacy Policy", href: "/admin/platform-settings/privacy-policy", icon: FileText },
-  { label: "Terms of Service", href: "/admin/platform-settings/terms-of-service", icon: ScrollText },
+  { label: "Logo", href: "/admin/settings/branding/logo", icon: Palette },
+  { label: "Company Info", href: "/admin/settings/branding/company", icon: Building2 },
+  { label: "Privacy Policy", href: "/admin/settings/branding/privacy-policy", icon: FileText },
+  { label: "Terms of Service", href: "/admin/settings/branding/terms-of-service", icon: ScrollText },
 ];
 
 // Suggested follow-ons, not built in this pass -- shown so the IA is
@@ -21,15 +21,17 @@ const SOON_TABS = [
   { label: "SEO Defaults", icon: Search },
 ];
 
-export default function PlatformSettingsLayout({ children }: { children: React.ReactNode }) {
+// Second-level tab bar, nested under Settings' own Account/Branding tabs
+// (admin/settings/layout.tsx) -- no adminContent/H1 here, that's the outer
+// layout's job, this just adds one more tab row underneath it.
+export default function BrandingLayout({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
 
   return (
-    <div className={styles.adminContent}>
-      <h1 className={styles.adminHeading}>Platform Settings</h1>
+    <>
       <p className={styles.adminSub}>
-        super_admin only. Organization-wide branding and legal content -- shown site-wide, not
-        specific to any one staff account.
+        Organization-wide branding and legal content -- shown site-wide, not specific to any one
+        staff account.
       </p>
       <nav className={styles.platformSettingsTabs}>
         {TABS.map((tab) => {
@@ -56,6 +58,6 @@ export default function PlatformSettingsLayout({ children }: { children: React.R
         })}
       </nav>
       {children}
-    </div>
+    </>
   );
 }

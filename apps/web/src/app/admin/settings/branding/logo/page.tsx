@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 
 import { authFetch } from "@/lib/auth-client";
 import { LOGO_CANDIDATES } from "@/lib/logo-candidates";
-import styles from "../../../warm.module.css";
+import styles from "../../../../warm.module.css";
 
 const DEFAULT_MARK = (
   <>

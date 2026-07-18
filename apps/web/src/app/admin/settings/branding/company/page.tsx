@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 
 import { authFetch } from "@/lib/auth-client";
-import styles from "../../../warm.module.css";
+import styles from "../../../../warm.module.css";
 
 type CompanyForm = {
   companyLegalName: string;

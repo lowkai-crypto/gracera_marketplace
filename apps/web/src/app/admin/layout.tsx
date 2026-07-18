@@ -9,7 +9,6 @@ import {
   Flag,
   KeyRound,
   LayoutDashboard,
-  Palette,
   ScrollText,
   Settings as SettingsIcon,
   Shuffle,
@@ -43,18 +42,12 @@ type NavItem = {
   color: string;
 };
 
-// docs/28-portal-navigation.md Admin context table, in that doc's order,
-// plus Platform Settings (org-wide branding/legal config -- new, not in
-// docs/28's original table).
+// docs/28-portal-navigation.md Admin context table, in that doc's order.
+// Org-wide branding/legal config (new, not in docs/28's original table)
+// lives at /admin/settings/branding -- a sub-tab under Settings, not its
+// own top-level item, so it isn't listed here.
 const ADMIN_NAV: NavItem[] = [
   { label: "Dashboard", href: "/admin", audience: ["super_admin"], icon: LayoutDashboard, color: "#22c55e" },
-  {
-    label: "Platform Settings",
-    href: "/admin/platform-settings",
-    audience: ["super_admin"],
-    icon: Palette,
-    color: "#ec4899",
-  },
   {
     label: "Verification Queue",
     href: "/admin/verification",
@@ -161,7 +154,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
           })}
           <Link
             href="/admin/settings"
-            className={`${styles.portalNavLink} ${pathname === "/admin/settings" ? styles.portalNavLinkActive : ""}`}
+            className={`${styles.portalNavLink} ${pathname.startsWith("/admin/settings") ? styles.portalNavLinkActive : ""}`}
           >
             <SettingsIcon size={18} color="#6b7280" className={styles.portalNavIcon} />
             Settings

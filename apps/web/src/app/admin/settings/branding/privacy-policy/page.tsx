@@ -3,9 +3,9 @@
 import { useEffect, useState } from "react";
 
 import { authFetch } from "@/lib/auth-client";
-import styles from "../../../warm.module.css";
+import styles from "../../../../warm.module.css";
 
-export default function TermsOfServiceSettingsPage() {
+export default function PrivacyPolicySettingsPage() {
   const [content, setContent] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [saved, setSaved] = useState(false);
@@ -14,8 +14,8 @@ export default function TermsOfServiceSettingsPage() {
   useEffect(() => {
     authFetch("/api/admin/platform-settings")
       .then((res) => res.json())
-      .then((body) => setContent(body.termsOfServiceContent ?? ""))
-      .catch(() => setError("Could not load the terms of service."));
+      .then((body) => setContent(body.privacyPolicyContent ?? ""))
+      .catch(() => setError("Could not load the privacy policy."));
   }, []);
 
   async function save(e: React.FormEvent) {
@@ -26,11 +26,11 @@ export default function TermsOfServiceSettingsPage() {
       const res = await authFetch("/api/admin/platform-settings", {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ termsOfServiceContent: content || null }),
+        body: JSON.stringify({ privacyPolicyContent: content || null }),
       });
       if (!res.ok) {
         const body = await res.json();
-        setError(body.error?.message ?? "Could not save the terms of service.");
+        setError(body.error?.message ?? "Could not save the privacy policy.");
         return;
       }
       setSaved(true);
@@ -43,9 +43,9 @@ export default function TermsOfServiceSettingsPage() {
 
   return (
     <div className={styles.adminCard}>
-      <h2 className={styles.formSectionTitle}>Terms of Service</h2>
+      <h2 className={styles.formSectionTitle}>Privacy Policy</h2>
       <p className={styles.adminSub}>
-        Plain text (line breaks are preserved). Published live at <code>/terms</code> as soon as
+        Plain text (line breaks are preserved). Published live at <code>/privacy</code> as soon as
         you save. Leave empty to show the &ldquo;being drafted&rdquo; placeholder instead.
       </p>
       {error && <div className={styles.formError}>{error}</div>}
