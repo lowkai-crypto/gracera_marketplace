@@ -9,6 +9,7 @@ import {
   Flag,
   KeyRound,
   LayoutDashboard,
+  Palette,
   ScrollText,
   Settings as SettingsIcon,
   Shuffle,
@@ -152,13 +153,28 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
               </div>
             );
           })}
-          <Link
-            href="/admin/settings"
-            className={`${styles.portalNavLink} ${pathname.startsWith("/admin/settings") ? styles.portalNavLinkActive : ""}`}
-          >
-            <SettingsIcon size={18} color="#6b7280" className={styles.portalNavIcon} />
-            Settings
-          </Link>
+          <div className={styles.portalNavGroup}>
+            <div className={styles.portalNavGroupLabel}>
+              <SettingsIcon size={18} color="#6b7280" className={styles.portalNavIcon} />
+              Settings
+            </div>
+            <Link
+              href="/admin/settings/account"
+              className={`${styles.portalNavSubLink} ${pathname.startsWith("/admin/settings/account") ? styles.portalNavLinkActive : ""}`}
+            >
+              <KeyRound size={16} color="#0ea5e9" className={styles.portalNavIcon} />
+              Account
+            </Link>
+            {me.adminRole === "super_admin" && (
+              <Link
+                href="/admin/settings/branding"
+                className={`${styles.portalNavSubLink} ${pathname.startsWith("/admin/settings/branding") ? styles.portalNavLinkActive : ""}`}
+              >
+                <Palette size={16} color="#ec4899" className={styles.portalNavIcon} />
+                Branding
+              </Link>
+            )}
+          </div>
         </nav>
         <main className={styles.portalMain}>{children}</main>
       </div>
