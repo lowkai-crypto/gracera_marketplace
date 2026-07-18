@@ -206,11 +206,8 @@ export default function PortalLayout({ children }: { children: React.ReactNode }
               </Link>
             ) : (
               <div key={item.label} className={styles.portalNavLinkSoon}>
-                <span className={styles.portalNavSoonLabel}>
-                  <Icon size={18} color={item.color} className={styles.portalNavIcon} />
-                  {item.label}
-                </span>
-                <span className={styles.portalNavBadgeSoon}>Soon</span>
+                <Icon size={18} color={item.color} className={styles.portalNavIcon} />
+                {item.label}
               </div>
             );
           })}

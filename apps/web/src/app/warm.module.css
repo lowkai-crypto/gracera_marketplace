@@ -1032,11 +1032,6 @@
 .portalNavIcon {
   flex-shrink: 0;
 }
-.portalNavSoonLabel {
-  display: flex;
-  align-items: center;
-  gap: 0.625rem;
-}
 .portalNavGroup {
   margin-top: 0.25rem;
 }
@@ -1092,23 +1087,12 @@
 .portalNavLinkSoon {
   display: flex;
   align-items: center;
-  justify-content: space-between;
-  gap: 0.5rem;
+  gap: 0.625rem;
   font-size: 0.875rem;
   font-weight: 500;
   color: var(--light);
   padding: 0.5rem 0.75rem;
   margin-bottom: 0.125rem;
-}
-.portalNavBadgeSoon {
-  font-size: 0.6875rem;
-  font-weight: 700;
-  text-transform: uppercase;
-  letter-spacing: 0.03em;
-  color: var(--muted);
-  background: var(--warm-100);
-  padding: 0.125rem 0.5rem;
-  border-radius: 100px;
 }
 .portalMain {
   flex: 1;

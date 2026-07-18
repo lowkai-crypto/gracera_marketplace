@@ -13,8 +13,8 @@ const TABS = [
   { label: "Terms of Service", href: "/admin/settings/branding/terms-of-service", icon: ScrollText },
 ];
 
-// Suggested follow-ons, not built in this pass -- shown so the IA is
-// visible, same "Soon" convention as the main sidebar.
+// Suggested follow-ons, not built in this pass -- shown greyed out (no
+// href, no label badge) so the IA is visible without claiming it works.
 const SOON_TABS = [
   { label: "Cookie Policy", icon: Cookie },
   { label: "Social Links", icon: Share2 },
