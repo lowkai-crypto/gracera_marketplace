@@ -7,6 +7,14 @@ import { getDb } from "@/lib/db";
 import { getOrCreatePlatformSettings } from "@/lib/platform-settings";
 import styles from "./warm.module.css";
 
+// Reads platform_settings on every request rather than being statically
+// prerendered -- an admin-picked logo must show up immediately, not only
+// after the next rebuild. This also keeps `next build` from ever touching
+// the DB at build time, which would otherwise race against migrations
+// (they only run via instrumentation.ts at container boot, after the build
+// already succeeded).
+export const dynamic = "force-dynamic";
+
 export default async function Home() {
   const settings = await getOrCreatePlatformSettings(getDb());
 

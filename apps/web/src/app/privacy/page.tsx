@@ -4,6 +4,10 @@ import { getDb } from "@/lib/db";
 import { getOrCreatePlatformSettings } from "@/lib/platform-settings";
 import styles from "../warm.module.css";
 
+// See page.tsx's comment on force-dynamic -- same reasoning: admin edits
+// must show up immediately, and this must never run at `next build` time.
+export const dynamic = "force-dynamic";
+
 export default async function PrivacyPage() {
   const settings = await getOrCreatePlatformSettings(getDb());
   const content = settings.privacyPolicyContent;
